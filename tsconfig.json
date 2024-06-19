@@ -3,6 +3,6 @@
     "inlineSourceMap": true,
     "module": "CommonJS",
     "outDir": "dist",
-    "target": "ES6"
+    "target": "ES2022"
   }
 }
