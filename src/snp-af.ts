@@ -103,6 +103,17 @@ async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
     currentTrack.item.name + " (" + trackAudioFeatures.tempo + ")";
 }
 
+async function updatePlaylistWidget(elemPlaylist: Element) {
+  const elemsTracks = elemPlaylist.querySelectorAll(
+    'a[data-testid="internal-track-link"]',
+  );
+
+  elemsTracks.forEach((elem) => {
+    const trackId = elem.getAttribute("href").replace("/track/", "");
+    console.log(elem.textContent + ": " + trackId);
+  });
+}
+
 async function main() {
   const elemNowPlayingWidget = await waitForElem(
     '[data-testid="now-playing-widget"]',
@@ -112,6 +123,20 @@ async function main() {
 
   onMutation(elemNowPlayingWidget, async function (_mutation) {
     await updateNowPlayingWidget(elemNowPlayingWidget);
+  });
+
+  const elemPlaylistWidget = await waitForElem(
+    '[data-testid="playlist-tracklist"]',
+  );
+
+  await updatePlaylistWidget(elemPlaylistWidget);
+
+  const elemPlaylistContainer = elemPlaylistWidget.querySelector(
+    'a[data-testid="internal-track-link"]',
+  ).parentElement;
+
+  onMutation(elemPlaylistContainer, async function (_mutation) {
+    await updatePlaylistWidget(elemPlaylistWidget);
   });
 }
 
