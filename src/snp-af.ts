@@ -103,8 +103,8 @@ async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
     currentTrack.item.name + " (" + trackAudioFeatures.tempo + ")";
 }
 
-async function updatePlaylistWidget(elemPlaylist: Element) {
-  const elemsTracks = elemPlaylist.querySelectorAll(
+async function updatePlaylistWidget(elemPlaylistWidget: Element) {
+  const elemsTracks = elemPlaylistWidget.querySelectorAll(
     'a[data-testid="internal-track-link"]',
   );
 
@@ -114,7 +114,15 @@ async function updatePlaylistWidget(elemPlaylist: Element) {
   });
 }
 
+function getPlaylistContainer(elemPlaylistWidget: Element) {
+  return elemPlaylistWidget.querySelector(
+    '[role="presentation"]:nth-child(2) > [role="presentation"]:nth-child(2)',
+  );
+}
+
 async function main() {
+  // Now Playing Widget
+
   const elemNowPlayingWidget = await waitForElem(
     '[data-testid="now-playing-widget"]',
   );
@@ -125,19 +133,20 @@ async function main() {
     await updateNowPlayingWidget(elemNowPlayingWidget);
   });
 
+  // Playlist Widget
+
   const elemPlaylistWidget = await waitForElem(
     '[data-testid="playlist-tracklist"]',
   );
 
   await updatePlaylistWidget(elemPlaylistWidget);
 
-  const elemPlaylistContainer = elemPlaylistWidget.querySelector(
-    'a[data-testid="internal-track-link"]',
-  ).parentElement;
-
-  onMutation(elemPlaylistContainer, async function (_mutation) {
-    await updatePlaylistWidget(elemPlaylistWidget);
-  });
+  onMutation(
+    getPlaylistContainer(elemPlaylistWidget),
+    async function (_mutation) {
+      await updatePlaylistWidget(elemPlaylistWidget);
+    },
+  );
 }
 
 (async function () {
