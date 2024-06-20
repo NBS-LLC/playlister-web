@@ -120,12 +120,29 @@ function _getPlaylistContainer(elemPlaylistWidget: Element) {
   );
 }
 
-// async function getPlaylistItems(accessToken: string, playlistId: string) {
-//   const playlistItemsResponse = await fetch(
-//     "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks",
-//     { headers: { Authorization: "Bearer " + accessToken } },
-//   );
-// }
+async function fetchNextPage(url: string, requestInit: RequestInit) {
+  const response = await fetch(url, requestInit);
+  const data = await response.json();
+  return { currentPageData: data.items, nextPageUrl: data.next };
+}
+
+async function fetchAllData(baseUrl, requestInit: RequestInit, allData = []) {
+  let nextPageUrl = baseUrl;
+  while (nextPageUrl) {
+    const { currentPageData, nextPageUrl: newNextPageUrl } =
+      await fetchNextPage(nextPageUrl, requestInit);
+    allData = allData.concat(currentPageData);
+    nextPageUrl = newNextPageUrl;
+  }
+  return allData;
+}
+
+async function getPlaylistItems(accessToken: string, playlistId: string) {
+  return await fetchAllData(
+    "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks",
+    { headers: { Authorization: "Bearer " + accessToken } },
+  );
+}
 
 async function getPlaylistId() {
   const elemPlaylistPage = await waitForElem('[data-testid="playlist-page"]');
@@ -161,7 +178,13 @@ async function main() {
    * 4) Update track name by looking up audio features using href's track id
    */
 
-  console.log(await getPlaylistId());
+  const accessToken = await getAccessToken();
+  const playlistItems = await getPlaylistItems(
+    accessToken,
+    await getPlaylistId(),
+  );
+
+  console.log(playlistItems);
 
   await updatePlaylistWidget(elemPlaylistWidget);
 
