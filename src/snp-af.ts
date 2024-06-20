@@ -114,10 +114,24 @@ async function updatePlaylistWidget(elemPlaylistWidget: Element) {
   });
 }
 
-function getPlaylistContainer(elemPlaylistWidget: Element) {
+function _getPlaylistContainer(elemPlaylistWidget: Element) {
   return elemPlaylistWidget.querySelector(
     '[role="presentation"]:nth-child(2) > [role="presentation"]:nth-child(2)',
   );
+}
+
+// async function getPlaylistItems(accessToken: string, playlistId: string) {
+//   const playlistItemsResponse = await fetch(
+//     "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks",
+//     { headers: { Authorization: "Bearer " + accessToken } },
+//   );
+// }
+
+async function getPlaylistId() {
+  const elemPlaylistPage = await waitForElem('[data-testid="playlist-page"]');
+  return elemPlaylistPage
+    .getAttribute("data-test-uri")
+    .replace("spotify:playlist:", "");
 }
 
 async function main() {
@@ -147,14 +161,16 @@ async function main() {
    * 4) Update track name by looking up audio features using href's track id
    */
 
+  console.log(await getPlaylistId());
+
   await updatePlaylistWidget(elemPlaylistWidget);
 
-  onMutation(
-    getPlaylistContainer(elemPlaylistWidget),
-    async function (_mutation) {
-      await updatePlaylistWidget(elemPlaylistWidget);
-    },
-  );
+  // onMutation(
+  //   getPlaylistContainer(elemPlaylistWidget),
+  //   async function (_mutation) {
+  //     await updatePlaylistWidget(elemPlaylistWidget);
+  //   },
+  // );
 }
 
 (async function () {
