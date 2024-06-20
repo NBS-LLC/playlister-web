@@ -103,9 +103,14 @@ async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
     currentTrack.item.name + " (" + trackAudioFeatures.tempo + ")";
 }
 
+type TrackAudioFeatures = {
+  name: string;
+  tempo: number;
+};
+
 async function updatePlaylistWidget(
   elemPlaylistWidget: Element,
-  _playlistAudioFeatures: Map<string, object>,
+  playlistAudioFeatures: Map<string, TrackAudioFeatures>,
 ) {
   const elemsTracks = elemPlaylistWidget.querySelectorAll(
     'a[data-testid="internal-track-link"]',
@@ -113,11 +118,15 @@ async function updatePlaylistWidget(
 
   elemsTracks.forEach((elem) => {
     const trackId = elem.getAttribute("href").replace("/track/", "");
-    console.log(elem.textContent + ": " + trackId);
+
+    if (playlistAudioFeatures.has(trackId)) {
+      const audioFeatures = playlistAudioFeatures.get(trackId);
+      elem.textContent = audioFeatures.name + " (" + audioFeatures.tempo + ")";
+    }
   });
 }
 
-function _getPlaylistContainer(elemPlaylistWidget: Element) {
+function getPlaylistContainer(elemPlaylistWidget: Element) {
   return elemPlaylistWidget.querySelector(
     '[role="presentation"]:nth-child(2) > [role="presentation"]:nth-child(2)',
   );
@@ -173,38 +182,28 @@ async function main() {
     '[data-testid="playlist-tracklist"]',
   );
 
-  /**
-   * TODO:
-   * 1) Get the current playlist, [data-testid="playlist-page"].getAttribute('data-test-uri')
-   * 2) Store audio features in hashmap based on track id
-   * 3) Supply hashmap to update function
-   * 4) Update track name by looking up audio features using href's track id
-   */
-
   const accessToken = await getAccessToken();
   const playlistItems = await getPlaylistItems(
     accessToken,
     await getPlaylistId(),
   );
 
-  const playlistAudioFeatures = new Map<string, object>();
-  playlistItems.forEach(async (item) => {
+  const playlistAudioFeatures = new Map<string, TrackAudioFeatures>();
+  for (const item of playlistItems) {
     playlistAudioFeatures.set(item.track.id, {
       name: item.track.name,
       ...(await getTrackAudioFeatures(accessToken, item.track.id)),
     });
-  });
-
-  console.log(playlistAudioFeatures);
+  }
 
   await updatePlaylistWidget(elemPlaylistWidget, playlistAudioFeatures);
 
-  // onMutation(
-  //   getPlaylistContainer(elemPlaylistWidget),
-  //   async function (_mutation) {
-  //     await updatePlaylistWidget(elemPlaylistWidget);
-  //   },
-  // );
+  onMutation(
+    getPlaylistContainer(elemPlaylistWidget),
+    async function (_mutation) {
+      await updatePlaylistWidget(elemPlaylistWidget, playlistAudioFeatures);
+    },
+  );
 }
 
 (async function () {
