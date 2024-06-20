@@ -139,6 +139,14 @@ async function main() {
     '[data-testid="playlist-tracklist"]',
   );
 
+  /**
+   * TODO:
+   * 1) Get the current playlist, [data-testid="playlist-page"].getAttribute('data-test-uri')
+   * 2) Store audio features in hashmap based on track id
+   * 3) Supply hashmap to update function
+   * 4) Update track name by looking up audio features using href's track id
+   */
+
   await updatePlaylistWidget(elemPlaylistWidget);
 
   onMutation(
