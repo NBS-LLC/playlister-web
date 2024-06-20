@@ -103,7 +103,10 @@ async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
     currentTrack.item.name + " (" + trackAudioFeatures.tempo + ")";
 }
 
-async function updatePlaylistWidget(elemPlaylistWidget: Element) {
+async function updatePlaylistWidget(
+  elemPlaylistWidget: Element,
+  _playlistAudioFeatures: Map<string, object>,
+) {
   const elemsTracks = elemPlaylistWidget.querySelectorAll(
     'a[data-testid="internal-track-link"]',
   );
@@ -184,17 +187,17 @@ async function main() {
     await getPlaylistId(),
   );
 
-  const playlistAudioFeatures = {};
+  const playlistAudioFeatures = new Map<string, object>();
   playlistItems.forEach(async (item) => {
-    playlistAudioFeatures[item.track.id] = await getTrackAudioFeatures(
-      accessToken,
-      item.track.id,
-    );
+    playlistAudioFeatures.set(item.track.id, {
+      name: item.track.name,
+      ...(await getTrackAudioFeatures(accessToken, item.track.id)),
+    });
   });
 
   console.log(playlistAudioFeatures);
 
-  await updatePlaylistWidget(elemPlaylistWidget);
+  await updatePlaylistWidget(elemPlaylistWidget, playlistAudioFeatures);
 
   // onMutation(
   //   getPlaylistContainer(elemPlaylistWidget),
