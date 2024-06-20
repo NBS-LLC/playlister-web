@@ -188,6 +188,8 @@ async function main() {
     await getPlaylistId(),
   );
 
+  // TODO: Use https://developer.spotify.com/documentation/web-api/reference/get-several-audio-features
+
   const playlistAudioFeatures = new Map<string, TrackAudioFeatures>();
   for (const item of playlistItems) {
     playlistAudioFeatures.set(item.track.id, {
