@@ -184,7 +184,15 @@ async function main() {
     await getPlaylistId(),
   );
 
-  console.log(playlistItems);
+  const playlistAudioFeatures = {};
+  playlistItems.forEach(async (item) => {
+    playlistAudioFeatures[item.track.id] = await getTrackAudioFeatures(
+      accessToken,
+      item.track.id,
+    );
+  });
+
+  console.log(playlistAudioFeatures);
 
   await updatePlaylistWidget(elemPlaylistWidget);
 
