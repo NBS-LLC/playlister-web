@@ -4,7 +4,7 @@
   "description": "The Web Version of Playlister",
   "private": true,
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf out/ dist/",
     "format": "prettier . --check",
     "lint": "eslint .",
     "compile": "tsc",

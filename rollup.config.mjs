@@ -1,5 +1,5 @@
 export default {
-  input: "dist/index.js",
+  input: "out/index.js",
   output: {
     file: "dist/playlister.user.js",
     format: "cjs",

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "ES2022",
-    "outDir": "dist",
+    "outDir": "out",
     "target": "ES2022"
   }
 }
