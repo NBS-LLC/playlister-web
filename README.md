@@ -14,9 +14,3 @@ The Web Version of Playlister
 > npm install
 > npm build
 ```
-
-## Run
-
-```bash
-> npm start
-```
