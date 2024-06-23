@@ -41,7 +41,7 @@ export function onMutation(
 /**
  * Assumes the user is logged into Spotify (uses auth from cookies).
  */
-async function getAccessToken() {
+export async function getAccessToken() {
   const tokenResponse = await fetch(
     "https://open.spotify.com/get_access_token?reason=transport&productType=web_player",
   );
@@ -137,14 +137,22 @@ async function fetchAllData(baseUrl, requestInit: RequestInit, allData = []) {
   return allData;
 }
 
-async function _getPlaylistItems(accessToken: string, playlistId: string) {
-  return await fetchAllData(
+export async function getPlaylistItems(
+  accessToken: string,
+  playlistId: string,
+) {
+  const startTime = performance.now();
+  const result = await fetchAllData(
     "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks",
     { headers: { Authorization: "Bearer " + accessToken } },
   );
+  const endTime = performance.now();
+
+  console.log(`${getPlaylistItems.name} took ${endTime - startTime}ms`);
+  return result;
 }
 
-async function _getPlaylistId() {
+export async function getPlaylistId() {
   const elemPlaylistPage = await waitForElem('[data-testid="playlist-page"]');
   return elemPlaylistPage
     .getAttribute("data-test-uri")
