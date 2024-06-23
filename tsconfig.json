@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
-    "inlineSourceMap": true,
-    "module": "CommonJS",
-    "outDir": "dist",
-    "target": "ES6"
+    "module": "ES2022",
+    "outDir": "out",
+    "target": "ES2022"
   }
 }

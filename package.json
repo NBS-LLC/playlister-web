@@ -4,30 +4,25 @@
   "description": "The Web Version of Playlister",
   "private": true,
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf out/ dist/",
     "format": "prettier . --check",
     "lint": "eslint .",
     "compile": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm-run-all clean format lint compile --print-label",
-    "watch": "tsc --watch",
-    "serve": "nodemon dist/app.js",
-    "start": "npm-run-all build --parallel watch serve --print-label"
+    "dist": "rollup --config",
+    "build": "npm-run-all clean format lint compile dist --print-label",
+    "watch": "tsc --watch"
   },
   "author": "Nick Derevjanik",
   "license": "GPL-3.0-only",
   "devDependencies": {
     "@eslint/js": "^8.56.0",
-    "@types/express": "^4.17.21",
     "eslint": "^8.56.0",
-    "nodemon": "^3.1.2",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.3.0",
     "rimraf": "^5.0.7",
+    "rollup": "^4.18.0",
+    "typescript": "^5.4.5",
     "typescript-eslint": "^7.11.0"
-  },
-  "dependencies": {
-    "express": "^4.19.2",
-    "typescript": "^5.4.5"
   }
 }
