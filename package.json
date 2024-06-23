@@ -7,9 +7,9 @@
     "clean": "rimraf dist",
     "format": "prettier . --check",
     "lint": "eslint .",
-    "compile": "tsc --noEmit",
+    "compile": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dist": "webpack",
+    "dist": "",
     "build": "npm-run-all clean format lint compile dist --print-label",
     "watch": "tsc --watch"
   },
@@ -21,10 +21,7 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^3.3.0",
     "rimraf": "^5.0.7",
-    "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
-    "typescript-eslint": "^7.11.0",
-    "webpack": "^5.92.1",
-    "webpack-cli": "^5.1.4"
+    "typescript-eslint": "^7.11.0"
   }
 }
