@@ -1,6 +1,6 @@
 # Playlister Web
 
-The Web Version of Playlister
+A Userscript Version of Playlister
 
 ## Prerequisites
 
@@ -14,3 +14,7 @@ The Web Version of Playlister
 > npm install
 > npm build
 ```
+
+## Usage
+
+After building, copy `dist/playlister.user.js` into a userscript [manager](https://www.tampermonkey.net/).
