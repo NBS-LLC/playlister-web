@@ -10,7 +10,7 @@
 // @grant        none
 // ==/UserScript==
 
-function waitForElem(selector: string): Promise<Element> {
+export function waitForElem(selector: string): Promise<Element> {
   return new Promise((resolve) => {
     if (document.querySelector(selector)) {
       return resolve(document.querySelector(selector));
@@ -32,7 +32,7 @@ function waitForElem(selector: string): Promise<Element> {
 
 type MutationHandler = { (mutation: MutationRecord): Promise<void> };
 
-function onMutation(
+export function onMutation(
   targetElement: Element,
   callback: MutationHandler,
   config = {
@@ -79,7 +79,7 @@ async function getTrackAudioFeatures(accessToken: string, trackId: string) {
   return await trackAudioFeaturesResponse.json();
 }
 
-async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
+export async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
   const accessToken = await getAccessToken();
   const currentTrack = await getCurrentTrack(accessToken);
   const trackAudioFeatures = await getTrackAudioFeatures(
@@ -163,7 +163,7 @@ async function _getPlaylistId() {
     .replace("spotify:playlist:", "");
 }
 
-async function main() {
+async function _main() {
   // Now Playing Widget
 
   const elemNowPlayingWidget = await waitForElem(
@@ -209,7 +209,3 @@ async function main() {
   );
   */
 }
-
-(async function () {
-  await main();
-})();
