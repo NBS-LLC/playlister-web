@@ -108,7 +108,7 @@ type TrackAudioFeatures = {
   tempo: number;
 };
 
-async function updatePlaylistWidget(
+async function _updatePlaylistWidget(
   elemPlaylistWidget: Element,
   playlistAudioFeatures: Map<string, TrackAudioFeatures>,
 ) {
@@ -126,7 +126,7 @@ async function updatePlaylistWidget(
   });
 }
 
-function getPlaylistContainer(elemPlaylistWidget: Element) {
+function _getPlaylistContainer(elemPlaylistWidget: Element) {
   return elemPlaylistWidget.querySelector(
     '[role="presentation"]:nth-child(2) > [role="presentation"]:nth-child(2)',
   );
@@ -149,14 +149,14 @@ async function fetchAllData(baseUrl, requestInit: RequestInit, allData = []) {
   return allData;
 }
 
-async function getPlaylistItems(accessToken: string, playlistId: string) {
+async function _getPlaylistItems(accessToken: string, playlistId: string) {
   return await fetchAllData(
     "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks",
     { headers: { Authorization: "Bearer " + accessToken } },
   );
 }
 
-async function getPlaylistId() {
+async function _getPlaylistId() {
   const elemPlaylistPage = await waitForElem('[data-testid="playlist-page"]');
   return elemPlaylistPage
     .getAttribute("data-test-uri")
@@ -178,6 +178,7 @@ async function main() {
 
   // Playlist Widget
 
+  /*
   const elemPlaylistWidget = await waitForElem(
     '[data-testid="playlist-tracklist"]',
   );
@@ -206,6 +207,7 @@ async function main() {
       await updatePlaylistWidget(elemPlaylistWidget, playlistAudioFeatures);
     },
   );
+  */
 }
 
 (async function () {
