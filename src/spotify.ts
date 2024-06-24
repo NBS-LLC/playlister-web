@@ -1,12 +1,21 @@
+import { chunk } from "./array";
 import { fetchAllData } from "./http";
+
+type Track = {
+  id: string;
+  name: string;
+};
 
 type PlaylistItems = [
   item: {
-    track: {
-      id: string;
-    };
+    track: Track;
   },
 ];
+
+type AudioFeature = {
+  id: string;
+  tempo: number;
+};
 
 /**
  * Assumes the user is logged into Spotify (uses auth from cookies).
@@ -53,4 +62,24 @@ export async function getPlaylistItems(
 
   console.log(`${getPlaylistItems.name} took ${endTime - startTime}ms`);
   return result;
+}
+
+export async function getSeveralAudioFeatures(
+  accessToken: string,
+  tracks: Track[],
+) {
+  let severalAudioFeatures: AudioFeature[] = [];
+  const chunkedTracks = chunk(tracks, 100);
+  for (const chunk of chunkedTracks) {
+    const trackIds = chunk.map((track) => track.id);
+    const result = await fetch(
+      `https://api.spotify.com/v1/audio-features?ids=${trackIds.join(",")}`,
+      { headers: { Authorization: "Bearer " + accessToken } },
+    );
+    severalAudioFeatures = severalAudioFeatures.concat(
+      (await result.json()).audio_features,
+    );
+  }
+
+  return severalAudioFeatures;
 }

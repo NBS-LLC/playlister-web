@@ -1,11 +1,14 @@
-import { chunk } from "./src/array";
 import {
   getPlaylistId,
   onMutation,
   updateNowPlayingWidget,
   waitForElem,
 } from "./src/snp-af";
-import { getAccessToken, getPlaylistItems } from "./src/spotify";
+import {
+  getAccessToken,
+  getPlaylistItems,
+  getSeveralAudioFeatures,
+} from "./src/spotify";
 
 async function main() {
   // Now Playing Widget
@@ -25,10 +28,23 @@ async function main() {
   const accessToken = await getAccessToken();
   const currentPlaylistId = await getPlaylistId();
   const playlistItems = await getPlaylistItems(accessToken, currentPlaylistId);
-  const trackIds = playlistItems.map((item) => item.track.id);
-  const chunkedTrackIds = chunk(trackIds, 100);
+  const tracks = playlistItems.map((item) => item.track);
+  const severalAudioFeatures = await getSeveralAudioFeatures(
+    accessToken,
+    tracks,
+  );
 
-  console.log(chunkedTrackIds);
+  /**
+   * TODO:
+   * 1. √ Get all track ids
+   * 2. √ Split track ids into groups of 100
+   * 3. √ Get several audio features by groups of 100
+   * 4. √ Concat all audio features into a single array
+   * 5. Combine tracks with audio features (id, name, tempo)
+   * 6. Update the playlist widget
+   */
+
+  console.log(severalAudioFeatures);
 }
 
 (async function () {
