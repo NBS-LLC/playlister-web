@@ -1,3 +1,4 @@
+import { chunk } from "./src/array";
 import {
   getPlaylistId,
   onMutation,
@@ -24,7 +25,10 @@ async function main() {
   const accessToken = await getAccessToken();
   const currentPlaylistId = await getPlaylistId();
   const playlistItems = await getPlaylistItems(accessToken, currentPlaylistId);
-  console.log(playlistItems.map((item) => item.track.id));
+  const trackIds = playlistItems.map((item) => item.track.id);
+  const chunkedTrackIds = chunk(trackIds, 100);
+
+  console.log(chunkedTrackIds);
 }
 
 (async function () {
