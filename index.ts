@@ -1,11 +1,10 @@
 import {
-  getAccessToken,
   getPlaylistId,
-  getPlaylistItems,
   onMutation,
   updateNowPlayingWidget,
   waitForElem,
 } from "./src/snp-af";
+import { getAccessToken, getPlaylistItems } from "./src/spotify";
 
 async function main() {
   // Now Playing Widget
@@ -25,7 +24,7 @@ async function main() {
   const accessToken = await getAccessToken();
   const currentPlaylistId = await getPlaylistId();
   const playlistItems = await getPlaylistItems(accessToken, currentPlaylistId);
-  console.log(playlistItems);
+  console.log(playlistItems.map((item) => item.track.id));
 }
 
 (async function () {
