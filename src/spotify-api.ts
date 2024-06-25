@@ -4,6 +4,7 @@ import { fetchAllData } from "./http";
 export type Track = {
   id: string;
   name: string;
+  artists: [{ name: string }];
 };
 
 export type PlaylistItem = {
@@ -26,13 +27,13 @@ export async function getAccessToken() {
   return (await tokenResponse.json()).accessToken as string;
 }
 
-export async function getCurrentTrack(accessToken: string) {
+export async function getCurrentlyPlayingTrack(accessToken: string) {
   const currentTrackResponse = await fetch(
     "https://api.spotify.com/v1/me/player/currently-playing",
     { headers: { Authorization: "Bearer " + accessToken } },
   );
 
-  return await currentTrackResponse.json();
+  return (await currentTrackResponse.json()).item as Track;
 }
 
 export async function getTrackAudioFeatures(

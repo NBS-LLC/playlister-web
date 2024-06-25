@@ -5,7 +5,7 @@ import {
   PlaylistItem,
   Track,
   getAccessToken,
-  getCurrentTrack,
+  getCurrentlyPlayingTrack,
   getTrackAudioFeatures,
 } from "./spotify-api";
 
@@ -18,16 +18,16 @@ type TracksWithAudioFeatures = Map<string, PlaylistItemWithAudioFeatures>;
 
 export async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
   const accessToken = await getAccessToken();
-  const currentTrack = await getCurrentTrack(accessToken);
+  const currentTrack = await getCurrentlyPlayingTrack(accessToken);
   const trackAudioFeatures = await getTrackAudioFeatures(
     accessToken,
-    currentTrack.item.id,
+    currentTrack.id,
   );
 
   console.log(
-    currentTrack.item.name +
+    currentTrack.name +
       " by " +
-      currentTrack.item.artists[0].name +
+      currentTrack.artists[0].name +
       ": " +
       trackAudioFeatures.tempo,
   );
@@ -37,7 +37,7 @@ export async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
   );
 
   elemCurrentTrackName.textContent =
-    currentTrack.item.name + " (" + trackAudioFeatures.tempo + ")";
+    currentTrack.name + " (" + trackAudioFeatures.tempo + ")";
 }
 
 export async function updatePlaylistWidget(
