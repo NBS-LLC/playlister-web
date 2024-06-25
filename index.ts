@@ -1,17 +1,18 @@
-import {
-  combinePlaylistItemsWithAudioFeatures,
-  getPlaylistContainer,
-  getPlaylistId,
-  onMutation,
-  updateNowPlayingWidget,
-  updatePlaylistWidget,
-  waitForElem,
-} from "./src/snp-af";
+import { onMutation, waitForElem } from "./src/html";
+
 import {
   getAccessToken,
   getPlaylistItems,
   getSeveralAudioFeatures,
-} from "./src/spotify";
+} from "./src/spotify-api";
+
+import {
+  combinePlaylistItemsWithAudioFeatures,
+  getPlaylistContainer,
+  getPlaylistId,
+  updateNowPlayingWidget,
+  updatePlaylistWidget,
+} from "./src/spotify-web";
 
 async function main() {
   // Now Playing Widget
