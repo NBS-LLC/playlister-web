@@ -6,11 +6,9 @@ export type Track = {
   name: string;
 };
 
-export type PlaylistItems = [
-  item: {
-    track: Track;
-  },
-];
+export type PlaylistItem = {
+  track: Track;
+};
 
 export type AudioFeature = {
   id: string;
@@ -52,12 +50,12 @@ export async function getTrackAudioFeatures(
 export async function getPlaylistItems(
   accessToken: string,
   playlistId: string,
-): Promise<PlaylistItems> {
+) {
   const startTime = performance.now();
   const result = (await fetchAllData(
     "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks",
     { headers: { Authorization: "Bearer " + accessToken } },
-  )) as PlaylistItems;
+  )) as PlaylistItem[];
   const endTime = performance.now();
 
   console.log(`${getPlaylistItems.name} took ${endTime - startTime}ms`);

@@ -2,7 +2,7 @@ import { waitForElem } from "./html";
 
 import {
   AudioFeature,
-  PlaylistItems,
+  PlaylistItem,
   Track,
   getAccessToken,
   getCurrentTrack,
@@ -74,11 +74,12 @@ export async function getPlaylistId() {
     .getAttribute("data-test-uri")
     .replace("spotify:playlist:", "");
 }
+
 export function combinePlaylistItemsWithAudioFeatures(
-  playlistItems: PlaylistItems,
+  playlistItems: PlaylistItem[],
   audioFeatures: AudioFeature[],
-): TracksWithAudioFeatures {
-  const trackMap = new Map<string, PlaylistItemWithAudioFeatures>();
+) {
+  const trackMap: TracksWithAudioFeatures = new Map();
 
   playlistItems.forEach((item) => {
     trackMap.set(item.track.id, {
