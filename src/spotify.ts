@@ -1,18 +1,18 @@
 import { chunk } from "./array";
 import { fetchAllData } from "./http";
 
-type Track = {
+export type Track = {
   id: string;
   name: string;
 };
 
-type PlaylistItems = [
+export type PlaylistItems = [
   item: {
     track: Track;
   },
 ];
 
-type AudioFeature = {
+export type AudioFeature = {
   id: string;
   tempo: number;
 };

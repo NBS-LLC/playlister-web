@@ -1,4 +1,7 @@
 import {
+  AudioFeature,
+  PlaylistItems,
+  Track,
   getAccessToken,
   getCurrentTrack,
   getTrackAudioFeatures,
@@ -72,6 +75,29 @@ type TrackAudioFeatures = {
   name: string;
   tempo: number;
 };
+
+type PlaylistItemWithAudioFeatures = {
+  track: Track;
+  audioFeatures: AudioFeature;
+};
+
+export function combinePlaylistItemsWithAudioFeatures(
+  playlistItems: PlaylistItems,
+  audioFeatures: AudioFeature[],
+) {
+  const trackMap = new Map<string, PlaylistItemWithAudioFeatures>();
+
+  playlistItems.forEach((item) => {
+    trackMap.set(item.track.id, {
+      track: item.track,
+      audioFeatures: audioFeatures.find(
+        (feature) => feature.id === item.track.id,
+      ),
+    });
+  });
+
+  return trackMap;
+}
 
 async function _updatePlaylistWidget(
   elemPlaylistWidget: Element,
