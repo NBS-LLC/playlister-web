@@ -1,8 +1,10 @@
 import {
   combinePlaylistItemsWithAudioFeatures,
+  getPlaylistContainer,
   getPlaylistId,
   onMutation,
   updateNowPlayingWidget,
+  updatePlaylistWidget,
   waitForElem,
 } from "./src/snp-af";
 import {
@@ -26,28 +28,29 @@ async function main() {
 
   // Playlist Widget
 
+  const elemPlaylistWidget = await waitForElem(
+    '[data-testid="playlist-tracklist"]',
+  );
+
   const accessToken = await getAccessToken();
   const currentPlaylistId = await getPlaylistId();
   const playlistItems = await getPlaylistItems(accessToken, currentPlaylistId);
   const tracks = playlistItems.map((item) => item.track);
   const audioFeatures = await getSeveralAudioFeatures(accessToken, tracks);
 
-  /**
-   * TODO:
-   * 1. √ Get all track ids
-   * 2. √ Split track ids into groups of 100
-   * 3. √ Get several audio features by groups of 100
-   * 4. √ Concat all audio features into a single array
-   * 5. √ Combine tracks with audio features (id, name, tempo)
-   * 6. Update the playlist widget
-   */
-
   const tracksWithAudioFeatures = combinePlaylistItemsWithAudioFeatures(
     playlistItems,
     audioFeatures,
   );
 
-  console.log(tracksWithAudioFeatures);
+  await updatePlaylistWidget(elemPlaylistWidget, tracksWithAudioFeatures);
+
+  onMutation(
+    getPlaylistContainer(elemPlaylistWidget),
+    async function (_mutation) {
+      await updatePlaylistWidget(elemPlaylistWidget, tracksWithAudioFeatures);
+    },
+  );
 }
 
 (async function () {

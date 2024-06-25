@@ -71,20 +71,17 @@ export async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
     currentTrack.item.name + " (" + trackAudioFeatures.tempo + ")";
 }
 
-type TrackAudioFeatures = {
-  name: string;
-  tempo: number;
-};
-
 type PlaylistItemWithAudioFeatures = {
   track: Track;
   audioFeatures: AudioFeature;
 };
 
+type TracksWithAudioFeatures = Map<string, PlaylistItemWithAudioFeatures>;
+
 export function combinePlaylistItemsWithAudioFeatures(
   playlistItems: PlaylistItems,
   audioFeatures: AudioFeature[],
-) {
+): TracksWithAudioFeatures {
   const trackMap = new Map<string, PlaylistItemWithAudioFeatures>();
 
   playlistItems.forEach((item) => {
@@ -99,9 +96,9 @@ export function combinePlaylistItemsWithAudioFeatures(
   return trackMap;
 }
 
-async function _updatePlaylistWidget(
+export async function updatePlaylistWidget(
   elemPlaylistWidget: Element,
-  playlistAudioFeatures: Map<string, TrackAudioFeatures>,
+  tracksWithAudioFeatures: TracksWithAudioFeatures,
 ) {
   const elemsTracks = elemPlaylistWidget.querySelectorAll(
     'a[data-testid="internal-track-link"]',
@@ -110,14 +107,18 @@ async function _updatePlaylistWidget(
   elemsTracks.forEach((elem) => {
     const trackId = elem.getAttribute("href").replace("/track/", "");
 
-    if (playlistAudioFeatures.has(trackId)) {
-      const audioFeatures = playlistAudioFeatures.get(trackId);
-      elem.textContent = audioFeatures.name + " (" + audioFeatures.tempo + ")";
+    if (tracksWithAudioFeatures.has(trackId)) {
+      const audioFeatures = tracksWithAudioFeatures.get(trackId);
+      elem.textContent =
+        audioFeatures.track.name +
+        " (" +
+        audioFeatures.audioFeatures.tempo +
+        ")";
     }
   });
 }
 
-function _getPlaylistContainer(elemPlaylistWidget: Element) {
+export function getPlaylistContainer(elemPlaylistWidget: Element) {
   return elemPlaylistWidget.querySelector(
     '[role="presentation"]:nth-child(2) > [role="presentation"]:nth-child(2)',
   );
