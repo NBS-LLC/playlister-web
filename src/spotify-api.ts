@@ -45,7 +45,7 @@ export async function getTrackAudioFeatures(
     { headers: { Authorization: "Bearer " + accessToken } },
   );
 
-  return await trackAudioFeaturesResponse.json();
+  return (await trackAudioFeaturesResponse.json()) as AudioFeature;
 }
 
 export async function getPlaylistItems(
