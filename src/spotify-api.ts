@@ -5,7 +5,7 @@ import { measurePerformance } from "./perf";
 export type Track = {
   id: string;
   name: string;
-  artists: [{ name: string }];
+  artists: { name: string }[];
 };
 
 export type PlaylistItem = {
