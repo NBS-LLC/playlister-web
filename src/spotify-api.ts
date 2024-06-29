@@ -64,20 +64,26 @@ export async function getPlaylistItems(
   return result.returnValue;
 }
 
+async function _getChunkOfAudioFeatures(accessToken: string, tracks: Track[]) {
+  const trackIds = tracks.map((track) => track.id);
+  const result = await fetch(
+    `https://api.spotify.com/v1/audio-features?ids=${trackIds.join(",")}`,
+    { headers: { Authorization: "Bearer " + accessToken } },
+  );
+
+  return (await result.json()).audio_features as AudioFeature[];
+}
+
 export async function getSeveralAudioFeatures(
   accessToken: string,
   tracks: Track[],
 ) {
+  const spotifyApiTrackLimit = 100;
   let severalAudioFeatures: AudioFeature[] = [];
-  const chunkedTracks = chunk(tracks, 100);
+  const chunkedTracks = chunk(tracks, spotifyApiTrackLimit);
   for (const chunk of chunkedTracks) {
-    const trackIds = chunk.map((track) => track.id);
-    const result = await fetch(
-      `https://api.spotify.com/v1/audio-features?ids=${trackIds.join(",")}`,
-      { headers: { Authorization: "Bearer " + accessToken } },
-    );
     severalAudioFeatures = severalAudioFeatures.concat(
-      (await result.json()).audio_features,
+      await _getChunkOfAudioFeatures(accessToken, chunk),
     );
   }
 
