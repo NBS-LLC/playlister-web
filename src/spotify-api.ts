@@ -79,13 +79,13 @@ export async function getSeveralAudioFeatures(
   tracks: Track[],
 ) {
   const spotifyApiTrackMax = 100; // https://g.co/gemini/share/3d6aefc1b030
-  let severalAudioFeatures: AudioFeature[] = [];
   const chunkedTracks = chunk(tracks, spotifyApiTrackMax);
-  for (const chunk of chunkedTracks) {
-    severalAudioFeatures = severalAudioFeatures.concat(
-      await _getChunkOfAudioFeatures(accessToken, chunk),
-    );
-  }
 
-  return severalAudioFeatures;
+  const audioFeatureChunks = await Promise.all(
+    chunkedTracks.map(
+      async (chunk) => await _getChunkOfAudioFeatures(accessToken, chunk),
+    ),
+  );
+
+  return audioFeatureChunks.flat();
 }
