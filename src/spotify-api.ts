@@ -78,9 +78,9 @@ export async function getSeveralAudioFeatures(
   accessToken: string,
   tracks: Track[],
 ) {
-  const spotifyApiTrackLimit = 100;
+  const spotifyApiTrackMax = 100; // https://tinyurl.com/4bhxtnsa
   let severalAudioFeatures: AudioFeature[] = [];
-  const chunkedTracks = chunk(tracks, spotifyApiTrackLimit);
+  const chunkedTracks = chunk(tracks, spotifyApiTrackMax);
   for (const chunk of chunkedTracks) {
     severalAudioFeatures = severalAudioFeatures.concat(
       await _getChunkOfAudioFeatures(accessToken, chunk),
