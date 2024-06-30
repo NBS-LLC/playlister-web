@@ -24,9 +24,8 @@ export function onMutation(
   targetElement: Element,
   callback: MutationHandler,
   config = {
-    childList: true,
     attributes: true,
-    characterData: true,
+    childList: true,
   },
 ) {
   const observer = new MutationObserver((mutations) => {
