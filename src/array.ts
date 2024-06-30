@@ -1,3 +1,10 @@
+/**
+ * Divides an array into smaller arrays of a specified size.
+ *
+ * @param {T[]} array - The array to be chunked.
+ * @param {number} chunkSize - The size of each chunk.
+ * @return {T[][]} An array of arrays, where each inner array contains `chunkSize` elements.
+ */
 export function chunk<T>(array: T[], chunkSize: number): T[][] {
   const chunkedArray: T[][] = [];
   for (let i = 0; i < array.length; i += chunkSize) {
