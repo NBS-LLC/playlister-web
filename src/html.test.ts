@@ -21,10 +21,19 @@ describe(waitForElem.name, () => {
     expect(result).toEqual(element);
   });
 
-  it("should wait to resolve when the element is found", () => {
-    const element = document.createElement("div");
-    element.id = "unit-test";
+  it("should wait to resolve until the element is found", () => {
+    document.body.innerHTML = "<div id='content'></div>";
 
-    // const resultPromise = waitForElem("#unit-test");
+    const resultPromise = waitForElem("#unit-test").then((result) => {
+      expect(result.id).toEqual("unit-test");
+    });
+
+    setTimeout(() => {
+      const element = document.createElement("div");
+      element.id = "unit-test";
+      document.body.appendChild(element);
+    }, 100);
+
+    return resultPromise;
   });
 });
