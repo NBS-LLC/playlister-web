@@ -4,11 +4,11 @@
   "description": "The Web Version of Playlister",
   "private": true,
   "scripts": {
-    "clean": "rimraf out/ dist/",
+    "clean": "rimraf coverage/ dist/ out/",
     "format": "prettier . --check",
     "lint": "eslint .",
     "compile": "tsc",
-    "test": "jest --verbose",
+    "test": "jest --coverage --verbose",
     "dist": "rollup --config",
     "build": "npm-run-all clean format lint compile test dist --print-label",
     "watch": "tsc --watch"
