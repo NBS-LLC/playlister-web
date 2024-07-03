@@ -4,11 +4,15 @@ async function fetchNextPage(url: string, requestInit: RequestInit) {
   return { currentPageData: data.items, nextPageUrl: data.next };
 }
 
-export async function fetchAllData(
-  baseUrl: string,
-  requestInit: RequestInit,
-  allData = [],
-) {
+/**
+ * Fetches all data from a paginated API.
+ *
+ * @param baseUrl - The base URL of the API.
+ * @param requestInit - The request initialization options.
+ * @return A promise that resolves to an array of all the fetched data.
+ */
+export async function fetchAllData(baseUrl: string, requestInit: RequestInit) {
+  let allData = [];
   let nextPageUrl = baseUrl;
   while (nextPageUrl) {
     const { currentPageData, nextPageUrl: newNextPageUrl } =
