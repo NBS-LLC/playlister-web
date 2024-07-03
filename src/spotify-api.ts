@@ -14,6 +14,8 @@ export type PlaylistItem = {
 
 export type AudioFeature = {
   id: string;
+  key: number;
+  mode: number;
   tempo: number;
 };
 
