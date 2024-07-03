@@ -36,8 +36,10 @@ export async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
     'a[data-testid="context-item-link"]',
   );
 
-  elemCurrentTrackName.textContent =
-    currentTrack.name + " (" + trackAudioFeatures.tempo + ")";
+  if (elemCurrentTrackName) {
+    elemCurrentTrackName.textContent =
+      currentTrack.name + " (" + trackAudioFeatures.tempo + ")";
+  }
 }
 
 export async function updatePlaylistWidget(
@@ -49,10 +51,10 @@ export async function updatePlaylistWidget(
   );
 
   elemsTracks.forEach((elem) => {
-    const trackId = elem.getAttribute("href").replace("/track/", "");
+    const trackId = elem.getAttribute("href")!.replace("/track/", "");
 
     if (tracksWithAudioFeatures.has(trackId)) {
-      const audioFeatures = tracksWithAudioFeatures.get(trackId);
+      const audioFeatures = tracksWithAudioFeatures.get(trackId)!;
       elem.textContent =
         audioFeatures.track.name +
         " (" +
@@ -70,8 +72,13 @@ export function getPlaylistContainer(elemPlaylistWidget: Element) {
 
 export async function getPlaylistId() {
   const elemPlaylistPage = await waitForElem('[data-testid="playlist-page"]');
+
+  if (!elemPlaylistPage.hasAttribute("data-test-uri")) {
+    throw new Error("unable to locate playlist id");
+  }
+
   return elemPlaylistPage
-    .getAttribute("data-test-uri")
+    .getAttribute("data-test-uri")!
     .replace("spotify:playlist:", "");
 }
 
@@ -86,7 +93,7 @@ export function combinePlaylistItemsWithAudioFeatures(
       track: item.track,
       audioFeatures: audioFeatures.find(
         (feature) => feature.id === item.track.id,
-      ),
+      )!,
     });
   });
 
