@@ -7,6 +7,9 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    ignores: ["dist/**", "out/**"],
+  },
+  {
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "error",
