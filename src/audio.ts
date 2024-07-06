@@ -34,11 +34,11 @@ function getKey(pitchClass: number, mode: number) {
 }
 
 export function getKeyName(pitchClass: number, mode: number) {
-  return getKey(pitchClass, mode).name;
+  return getKey(pitchClass, mode)?.name || "?";
 }
 
 export function getCamelotName(pitchClass: number, mode: number) {
-  const camelotPosition = getKey(pitchClass, mode).camelotPosition;
+  const camelotPosition = getKey(pitchClass, mode)?.camelotPosition || "?";
   const camelotMode = mode === 0 ? "A" : "B";
   return `${camelotPosition}${camelotMode}`;
 }
