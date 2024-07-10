@@ -27,18 +27,23 @@ const notes = [
   { name: "Bm", pitchClass: 11, mode: 0, camelotPosition: 10 },
 ];
 
-function getKey(pitchClass: number, mode: number) {
+const camelotModes = ["A", "B"];
+
+function getNote(pitchClass: number, mode: number) {
   return notes.find(
     (item) => item.pitchClass === pitchClass && item.mode === mode,
   );
 }
 
 export function getKeyName(pitchClass: number, mode: number) {
-  return getKey(pitchClass, mode)?.name || "?";
+  return getNote(pitchClass, mode)?.name || "?";
 }
 
 export function getCamelotName(pitchClass: number, mode: number) {
-  const camelotPosition = getKey(pitchClass, mode)?.camelotPosition || "?";
-  const camelotMode = mode === 0 ? "A" : "B";
-  return `${camelotPosition}${camelotMode}`;
+  const camelotPosition = getNote(pitchClass, mode)?.camelotPosition;
+  if (!camelotPosition) {
+    return "?";
+  }
+
+  return `${camelotPosition}${camelotModes[mode]}`;
 }
