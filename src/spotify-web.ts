@@ -26,7 +26,7 @@ export async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
   );
 
   console.log(
-    "%s by %s: %d (%s | %s)",
+    "%s by %s: %f (%s | %s)",
     currentTrack.name,
     currentTrack.artists[0].name,
     trackAudioFeatures.tempo,
