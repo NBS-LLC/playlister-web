@@ -53,7 +53,7 @@ export function getKeyName(pitchClass: number, mode: number) {
  * @param mode - The major, minor mode of the key.
  * @return The Camelot Wheel value, or "?" if not found.
  */
-export function getCamelotName(pitchClass: number, mode: number) {
+export function getCamelotValue(pitchClass: number, mode: number) {
   const camelotPosition = getNote(pitchClass, mode)?.camelotPosition;
   if (!camelotPosition) {
     return "?";

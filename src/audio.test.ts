@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
-import { getCamelotName, getKeyName } from "./audio";
+import { getCamelotValue, getKeyName } from "./audio";
 
-describe("getKeyName", () => {
+describe(getKeyName.name, () => {
   it("should return the key name for a valid pitch class and mode", () => {
     expect(getKeyName(0, 1)).toEqual("C");
     expect(getKeyName(5, 1)).toEqual("F");
@@ -14,15 +14,15 @@ describe("getKeyName", () => {
   });
 });
 
-describe("getCamelotName", () => {
-  it("should return the correct camelot name for a valid pitch class and mode", () => {
-    expect(getCamelotName(0, 1)).toEqual("8B");
-    expect(getCamelotName(5, 1)).toEqual("7B");
-    expect(getCamelotName(11, 0)).toEqual("10A");
+describe(getCamelotValue.name, () => {
+  it("should return the correct camelot value for a valid pitch class and mode", () => {
+    expect(getCamelotValue(0, 1)).toEqual("8B");
+    expect(getCamelotValue(5, 1)).toEqual("7B");
+    expect(getCamelotValue(11, 0)).toEqual("10A");
   });
 
   it("should return '?' for an invalid pitch class or mode", () => {
-    expect(getCamelotName(12, 0)).toEqual("?");
-    expect(getCamelotName(0, 2)).toEqual("?");
+    expect(getCamelotValue(12, 0)).toEqual("?");
+    expect(getCamelotValue(0, 2)).toEqual("?");
   });
 });
