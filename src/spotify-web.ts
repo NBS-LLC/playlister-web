@@ -1,3 +1,4 @@
+import { getCamelotValue, getKeyName } from "./audio";
 import { waitForElem } from "./html";
 
 import {
@@ -25,11 +26,12 @@ export async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
   );
 
   console.log(
-    currentTrack.name +
-      " by " +
-      currentTrack.artists[0].name +
-      ": " +
-      trackAudioFeatures.tempo,
+    "%s by %s: %f (%s | %s)",
+    currentTrack.name,
+    currentTrack.artists[0].name,
+    trackAudioFeatures.tempo,
+    getKeyName(trackAudioFeatures.key, trackAudioFeatures.mode),
+    getCamelotValue(trackAudioFeatures.key, trackAudioFeatures.mode),
   );
 
   const elemCurrentTrackName = elemNowPlayingWidget.querySelector(

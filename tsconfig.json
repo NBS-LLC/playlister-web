@@ -5,6 +5,5 @@
     "moduleResolution": "Bundler",
     "outDir": "out",
     "target": "ES2022"
-  },
-  "exclude": ["src/**/*.test.ts"]
+  }
 }
