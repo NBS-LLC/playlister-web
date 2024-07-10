@@ -1,5 +1,9 @@
+import { readFile } from "fs/promises";
+
 export default {
   collectCoverageFrom: ["src/**/*.ts"],
   preset: "ts-jest",
-  testPathIgnorePatterns: ["coverage/", "dist/", "node_modules/", "out/"],
+  testPathIgnorePatterns: (await readFile(".gitignore", "utf8"))
+    .trim()
+    .split("\n"),
 };
