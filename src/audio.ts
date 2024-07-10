@@ -35,10 +35,24 @@ function getNote(pitchClass: number, mode: number) {
   );
 }
 
+/**
+ * Retrieves the name of the key associated with the given pitch class and mode.
+ *
+ * @param pitchClass - The pitch class of the key.
+ * @param mode - The major, minor mode of the key.
+ * @return The name of the key, or "?" if the key is not found.
+ */
 export function getKeyName(pitchClass: number, mode: number) {
   return getNote(pitchClass, mode)?.name || "?";
 }
 
+/**
+ * Retrieves the Camelot Wheel value associated with the given pitch class and mode.
+ *
+ * @param pitchClass - The pitch class of the key.
+ * @param mode - The major, minor mode of the key.
+ * @return The Camelot Wheel value, or "?" if not found.
+ */
 export function getCamelotName(pitchClass: number, mode: number) {
   const camelotPosition = getNote(pitchClass, mode)?.camelotPosition;
   if (!camelotPosition) {
