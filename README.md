@@ -12,7 +12,7 @@ A Userscript Version of Playlister
 ```bash
 > nvm use # or: asdf install
 > npm install
-> npm build
+> npm run build
 ```
 
 ## Usage

@@ -8,9 +8,10 @@
     "format": "prettier . --check",
     "lint": "eslint .",
     "compile": "tsc",
-    "test": "jest --coverage --verbose",
+    "jest": "jest --coverage --verbose",
+    "test": "npm-run-all clean format lint compile jest",
     "dist": "rollup --config",
-    "build": "npm-run-all clean format lint compile test dist --print-label",
+    "build": "npm-run-all test dist",
     "watch": "tsc --watch"
   },
   "author": "Nick Derevjanik",
