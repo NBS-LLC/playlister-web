@@ -10,12 +10,34 @@ import {
   getTrackAudioFeatures,
 } from "./spotify-api";
 
-type PlaylistItemWithAudioFeatures = {
+export type PlaylistItemWithAudioFeatures = {
   track: Track;
   audioFeatures: AudioFeature;
 };
 
 type TracksWithAudioFeatures = Map<string, PlaylistItemWithAudioFeatures>;
+
+/**
+ * Formats the track details including title, key name, and camelot value.
+ *
+ * @param track - The playlist item with audio features to format.
+ * @return The formatted track details as a string.
+ */
+export function formatTrackDetails(track: PlaylistItemWithAudioFeatures) {
+  const trackTitle = `${track.track.name} by ${track.track.artists[0].name}`;
+
+  const trackKeyName = getKeyName(
+    track.audioFeatures.key,
+    track.audioFeatures.mode,
+  );
+
+  const trackCamelotValue = getCamelotValue(
+    track.audioFeatures.key,
+    track.audioFeatures.mode,
+  );
+
+  return `${trackTitle} (${track.audioFeatures.tempo} ${trackKeyName} ${trackCamelotValue})`;
+}
 
 export async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
   const accessToken = await getAccessToken();
@@ -26,12 +48,10 @@ export async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
   );
 
   console.log(
-    "%s by %s: %f (%s | %s)",
-    currentTrack.name,
-    currentTrack.artists[0].name,
-    trackAudioFeatures.tempo,
-    getKeyName(trackAudioFeatures.key, trackAudioFeatures.mode),
-    getCamelotValue(trackAudioFeatures.key, trackAudioFeatures.mode),
+    formatTrackDetails({
+      track: currentTrack,
+      audioFeatures: trackAudioFeatures,
+    }),
   );
 
   const elemCurrentTrackName = elemNowPlayingWidget.querySelector(
