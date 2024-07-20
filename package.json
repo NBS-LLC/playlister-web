@@ -1,7 +1,9 @@
 {
   "name": "playlister-web",
-  "version": "1.0.0",
   "description": "The Web Version of Playlister",
+  "author": "Nick Derevjanik",
+  "license": "GPL-3.0-only",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "clean": "rimraf coverage/ dist/ out/",
@@ -15,8 +17,6 @@
     "build": "npm-run-all test dist version",
     "watch": "tsc --watch"
   },
-  "author": "Nick Derevjanik",
-  "license": "GPL-3.0-only",
   "devDependencies": {
     "@eslint/js": "^8.56.0",
     "@jest/globals": "^29.7.0",
