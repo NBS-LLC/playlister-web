@@ -11,7 +11,8 @@
     "jest": "jest --coverage --verbose",
     "test": "npm-run-all clean format lint compile jest",
     "dist": "rollup --config",
-    "build": "npm-run-all test dist",
+    "version": "sed -i \"s/{version}/${BUILD_NUMBER:-Development}/g\" dist/playlister.user.js",
+    "build": "npm-run-all test dist version",
     "watch": "tsc --watch"
   },
   "author": "Nick Derevjanik",
