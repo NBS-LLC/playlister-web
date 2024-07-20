@@ -11,7 +11,7 @@
     "jest": "jest --coverage --verbose",
     "test": "npm-run-all clean format lint compile jest",
     "dist": "rollup --config",
-    "version": "sed -i \"s/{version}/${BUILD_NUMBER:-Development}/g\" dist/playlister.user.js",
+    "version": "sed -i \"s/{version}/${SEMVER:-Development}/g\" dist/playlister.user.js",
     "build": "npm-run-all test dist version",
     "watch": "tsc --watch"
   },
