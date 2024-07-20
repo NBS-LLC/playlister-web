@@ -1,7 +1,9 @@
 // ==UserScript==
 // @name         Playlister
 // @namespace    https://github.com/NBS-LLC/playlister-web
-// @version      2024-06-19
+// @version      {version}
+// @updateURL    https://github.com/NBS-LLC/playlister-web/releases/latest/download/playlister.user.js
+// @downloadURL  https://github.com/NBS-LLC/playlister-web/releases/latest/download/playlister.user.js
 // @description  Displays audio features for the "Now Playing" Spotify track
 // @author       Nick Derevjanik
 // @match        https://open.spotify.com/*

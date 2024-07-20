@@ -1,0 +1,25 @@
+name: release
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Version
+        run: echo "SEMVER=0.0.${{ github.run_attempt }}" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: npm run build
+
+      - name: Release
+        run: gh release create v$SEMVER --generate-notes 'dist/playlister.user.js'
