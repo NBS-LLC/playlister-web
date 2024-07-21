@@ -34,6 +34,16 @@ export function formatTrackDetails(track: PlaylistItemWithAudioFeatures) {
   return `${trackTitle} (${track.audioFeatures.tempo} ${trackKeyName} ${trackCamelotValue})`;
 }
 
+/**
+ * Provides a simple format for displaying track name and basic details.
+ *
+ * @param track - The track with audio features to format.
+ * @return The formatted track details.
+ */
+export function formatTrack(track: TrackWithAudioFeatures) {
+  return `${track.track.name} (${track.audioFeatures.tempo})`;
+}
+
 export function updateNowPlayingWidget(
   elemNowPlayingWidget: Element,
   track: TrackWithAudioFeatures,
@@ -45,7 +55,7 @@ export function updateNowPlayingWidget(
   );
 
   if (elemCurrentTrackName) {
-    elemCurrentTrackName.textContent = `${track.track.name} (${track.audioFeatures.tempo})`;
+    elemCurrentTrackName.textContent = formatTrack(track);
   }
 }
 
