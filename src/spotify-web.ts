@@ -49,7 +49,7 @@ export function updateNowPlayingWidget(
   }
 }
 
-export async function updatePlaylistWidget(
+export function updatePlaylistWidget(
   elemPlaylistWidget: Element,
   tracksWithAudioFeatures: TracksWithAudioFeatures,
 ) {

@@ -58,12 +58,12 @@ async function main() {
     audioFeatures,
   );
 
-  await updatePlaylistWidget(elemPlaylistWidget, tracksWithAudioFeatures);
+  updatePlaylistWidget(elemPlaylistWidget, tracksWithAudioFeatures);
 
   onMutation(
     getPlaylistContainer(elemPlaylistWidget),
     async function (_mutation) {
-      await updatePlaylistWidget(elemPlaylistWidget, tracksWithAudioFeatures);
+      updatePlaylistWidget(elemPlaylistWidget, tracksWithAudioFeatures);
     },
   );
 }
