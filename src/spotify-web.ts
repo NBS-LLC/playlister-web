@@ -1,19 +1,14 @@
 import { getCamelotValue, getKeyName } from "./audio";
 import { waitForElem } from "./html";
 
-import {
-  AudioFeature,
-  PlaylistItem,
-  Track,
-  getAccessToken,
-  getCurrentlyPlayingTrack,
-  getTrackAudioFeatures,
-} from "./spotify-api";
+import { AudioFeature, PlaylistItem, Track } from "./spotify-api";
 
 export type PlaylistItemWithAudioFeatures = {
   track: Track;
   audioFeatures: AudioFeature;
 };
+
+export type TrackWithAudioFeatures = PlaylistItemWithAudioFeatures;
 
 type TracksWithAudioFeatures = Map<string, PlaylistItemWithAudioFeatures>;
 
@@ -39,28 +34,18 @@ export function formatTrackDetails(track: PlaylistItemWithAudioFeatures) {
   return `${trackTitle} (${track.audioFeatures.tempo} ${trackKeyName} ${trackCamelotValue})`;
 }
 
-export async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
-  const accessToken = await getAccessToken();
-  const currentTrack = await getCurrentlyPlayingTrack(accessToken);
-  const trackAudioFeatures = await getTrackAudioFeatures(
-    accessToken,
-    currentTrack.id,
-  );
-
-  console.log(
-    formatTrackDetails({
-      track: currentTrack,
-      audioFeatures: trackAudioFeatures,
-    }),
-  );
+export function updateNowPlayingWidget(
+  elemNowPlayingWidget: Element,
+  track: TrackWithAudioFeatures,
+) {
+  console.log(formatTrackDetails(track));
 
   const elemCurrentTrackName = elemNowPlayingWidget.querySelector(
     'a[data-testid="context-item-link"]',
   );
 
   if (elemCurrentTrackName) {
-    elemCurrentTrackName.textContent =
-      currentTrack.name + " (" + trackAudioFeatures.tempo + ")";
+    elemCurrentTrackName.textContent = `${track.track.name} (${track.audioFeatures.tempo})`;
   }
 }
 

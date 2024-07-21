@@ -2,8 +2,10 @@ import { onMutation, waitForElem } from "./src/html";
 
 import {
   getAccessToken,
+  getCurrentlyPlayingTrack,
   getPlaylistItems,
   getSeveralAudioFeatures,
+  getTrackAudioFeatures,
 } from "./src/spotify-api";
 
 import {
@@ -21,10 +23,23 @@ async function main() {
     '[data-testid="now-playing-widget"]',
   );
 
-  await updateNowPlayingWidget(elemNowPlayingWidget);
+  const accessToken = await getAccessToken();
+  const currentTrack = await getCurrentlyPlayingTrack(accessToken);
+  const trackAudioFeatures = await getTrackAudioFeatures(
+    accessToken,
+    currentTrack.id,
+  );
+
+  updateNowPlayingWidget(elemNowPlayingWidget, {
+    track: currentTrack,
+    audioFeatures: trackAudioFeatures,
+  });
 
   onMutation(elemNowPlayingWidget, async function (_mutation) {
-    await updateNowPlayingWidget(elemNowPlayingWidget);
+    updateNowPlayingWidget(elemNowPlayingWidget, {
+      track: currentTrack,
+      audioFeatures: trackAudioFeatures,
+    });
   });
 
   // Playlist Widget
@@ -33,7 +48,6 @@ async function main() {
     '[data-testid="playlist-tracklist"]',
   );
 
-  const accessToken = await getAccessToken();
   const currentPlaylistId = await getPlaylistId();
   const playlistItems = await getPlaylistItems(accessToken, currentPlaylistId);
   const tracks = playlistItems.map((item) => item.track);
