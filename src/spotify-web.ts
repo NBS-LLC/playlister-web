@@ -71,12 +71,8 @@ export function updatePlaylistWidget(
     const trackId = elem.getAttribute("href")!.replace("/track/", "");
 
     if (tracksWithAudioFeatures.has(trackId)) {
-      const audioFeatures = tracksWithAudioFeatures.get(trackId)!;
-      elem.textContent =
-        audioFeatures.track.name +
-        " (" +
-        audioFeatures.audioFeatures.tempo +
-        ")";
+      const track = tracksWithAudioFeatures.get(trackId)!;
+      elem.textContent = formatTrack(track);
     }
   });
 }
