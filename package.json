@@ -15,6 +15,7 @@
     "dist": "rollup --config",
     "version": "sed -i \"s/{version}/${SEMVER:-Development}/g\" dist/playlister.user.js",
     "build": "npm-run-all test dist version",
+    "build:local": "npm-run-all test dist",
     "watch": "tsc --watch"
   },
   "devDependencies": {
