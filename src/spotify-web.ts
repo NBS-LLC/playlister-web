@@ -77,11 +77,10 @@ export async function updatePlaylistWidget(
 
     if (tracksWithAudioFeatures.has(trackId)) {
       const audioFeatures = tracksWithAudioFeatures.get(trackId)!;
-      elem.textContent =
-        audioFeatures.track.name +
-        " (" +
-        audioFeatures.audioFeatures.tempo +
-        ")";
+      elem.textContent = formatTrackDetails({
+        track: audioFeatures.track,
+        audioFeatures: audioFeatures.audioFeatures,
+      });
     }
   });
 }
