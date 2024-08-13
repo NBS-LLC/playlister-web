@@ -41,7 +41,15 @@ export function formatTrackDetails(track: PlaylistItemWithAudioFeatures) {
 
 export async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
   const accessToken = await getAccessToken();
-  const currentTrack = await getCurrentlyPlayingTrack(accessToken);
+
+  let currentTrack: Track;
+  try {
+    currentTrack = await getCurrentlyPlayingTrack(accessToken);
+  } catch {
+    console.info("Unable to retrieve the currently playing track.");
+    return;
+  }
+
   const trackAudioFeatures = await getTrackAudioFeatures(
     accessToken,
     currentTrack.id,
