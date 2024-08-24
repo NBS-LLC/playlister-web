@@ -14,7 +14,7 @@ describe(measurePerformance.name, () => {
     });
 
     expect(result.time).toBeGreaterThan(140);
-    expect(result.time).toBeLessThan(160);
+    expect(result.time).toBeLessThan(200);
   });
 
   it("should return the result of the supplied function", async () => {

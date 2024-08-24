@@ -2,29 +2,60 @@ import { onMutation, waitForElem } from "./src/html";
 
 import {
   getAccessToken,
+  getCurrentlyPlayingTrack,
   getPlaylistItems,
   getSeveralAudioFeatures,
+  getTrackAudioFeatures,
 } from "./src/spotify-api";
 
 import {
   combinePlaylistItemsWithAudioFeatures,
   getPlaylistContainer,
   getPlaylistId,
+  TrackWithAudioFeatures,
   updateNowPlayingWidget,
   updatePlaylistWidget,
 } from "./src/spotify-web";
 
+async function getCurrentlyPlayingTrackDetails(
+  accessToken: string,
+): Promise<TrackWithAudioFeatures> {
+  const currentTrack = await getCurrentlyPlayingTrack(accessToken);
+  const trackAudioFeatures = await getTrackAudioFeatures(
+    accessToken,
+    currentTrack.id,
+  );
+
+  return {
+    track: currentTrack,
+    audioFeatures: trackAudioFeatures,
+  };
+}
+
 async function main() {
+  const accessToken = await getAccessToken();
+
   // Now Playing Widget
 
   const elemNowPlayingWidget = await waitForElem(
     '[data-testid="now-playing-widget"]',
   );
 
-  await updateNowPlayingWidget(elemNowPlayingWidget);
+  try {
+    updateNowPlayingWidget(
+      elemNowPlayingWidget,
+      await getCurrentlyPlayingTrackDetails(accessToken),
+    );
+  } catch (error) {
+    console.warn("Unable to update the now playing widget.");
+    console.warn(error);
+  }
 
   onMutation(elemNowPlayingWidget, async function (_mutation) {
-    await updateNowPlayingWidget(elemNowPlayingWidget);
+    updateNowPlayingWidget(
+      elemNowPlayingWidget,
+      await getCurrentlyPlayingTrackDetails(accessToken),
+    );
   });
 
   // Playlist Widget
@@ -33,7 +64,6 @@ async function main() {
     '[data-testid="playlist-tracklist"]',
   );
 
-  const accessToken = await getAccessToken();
   const currentPlaylistId = await getPlaylistId();
   const playlistItems = await getPlaylistItems(accessToken, currentPlaylistId);
   const tracks = playlistItems.map((item) => item.track);
@@ -44,12 +74,12 @@ async function main() {
     audioFeatures,
   );
 
-  await updatePlaylistWidget(elemPlaylistWidget, tracksWithAudioFeatures);
+  updatePlaylistWidget(elemPlaylistWidget, tracksWithAudioFeatures);
 
   onMutation(
     getPlaylistContainer(elemPlaylistWidget),
     async function (_mutation) {
-      await updatePlaylistWidget(elemPlaylistWidget, tracksWithAudioFeatures);
+      updatePlaylistWidget(elemPlaylistWidget, tracksWithAudioFeatures);
     },
   );
 }

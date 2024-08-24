@@ -1,19 +1,14 @@
 import { getCamelotValue, getKeyName } from "./audio";
 import { waitForElem } from "./html";
 
-import {
-  AudioFeature,
-  PlaylistItem,
-  Track,
-  getAccessToken,
-  getCurrentlyPlayingTrack,
-  getTrackAudioFeatures,
-} from "./spotify-api";
+import { AudioFeature, PlaylistItem, Track } from "./spotify-api";
 
 export type PlaylistItemWithAudioFeatures = {
   track: Track;
   audioFeatures: AudioFeature;
 };
+
+export type TrackWithAudioFeatures = PlaylistItemWithAudioFeatures;
 
 type TracksWithAudioFeatures = Map<string, PlaylistItemWithAudioFeatures>;
 
@@ -39,40 +34,32 @@ export function formatTrackDetails(track: PlaylistItemWithAudioFeatures) {
   return `${trackTitle} (${track.audioFeatures.tempo} ${trackKeyName} ${trackCamelotValue})`;
 }
 
-export async function updateNowPlayingWidget(elemNowPlayingWidget: Element) {
-  const accessToken = await getAccessToken();
+/**
+ * Provides a simple format for displaying track name and basic details.
+ *
+ * @param track - The track with audio features to format.
+ * @return The formatted track details.
+ */
+export function formatTrack(track: TrackWithAudioFeatures) {
+  return `${track.track.name} (${track.audioFeatures.tempo})`;
+}
 
-  let currentTrack: Track;
-  try {
-    currentTrack = await getCurrentlyPlayingTrack(accessToken);
-  } catch {
-    console.info("Unable to retrieve the currently playing track.");
-    return;
-  }
-
-  const trackAudioFeatures = await getTrackAudioFeatures(
-    accessToken,
-    currentTrack.id,
-  );
-
-  console.log(
-    formatTrackDetails({
-      track: currentTrack,
-      audioFeatures: trackAudioFeatures,
-    }),
-  );
+export function updateNowPlayingWidget(
+  elemNowPlayingWidget: Element,
+  track: TrackWithAudioFeatures,
+) {
+  console.log(formatTrackDetails(track));
 
   const elemCurrentTrackName = elemNowPlayingWidget.querySelector(
     'a[data-testid="context-item-link"]',
   );
 
   if (elemCurrentTrackName) {
-    elemCurrentTrackName.textContent =
-      currentTrack.name + " (" + trackAudioFeatures.tempo + ")";
+    elemCurrentTrackName.textContent = formatTrack(track);
   }
 }
 
-export async function updatePlaylistWidget(
+export function updatePlaylistWidget(
   elemPlaylistWidget: Element,
   tracksWithAudioFeatures: TracksWithAudioFeatures,
 ) {
