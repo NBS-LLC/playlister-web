@@ -12,34 +12,45 @@ import {
   combinePlaylistItemsWithAudioFeatures,
   getPlaylistContainer,
   getPlaylistId,
+  TrackWithAudioFeatures,
   updateNowPlayingWidget,
   updatePlaylistWidget,
 } from "./src/spotify-web";
 
-async function main() {
-  // Now Playing Widget
-
-  const elemNowPlayingWidget = await waitForElem(
-    '[data-testid="now-playing-widget"]',
-  );
-
-  const accessToken = await getAccessToken();
+async function getCurrentlyPlayingTrackDetails(
+  accessToken: string,
+): Promise<TrackWithAudioFeatures> {
   const currentTrack = await getCurrentlyPlayingTrack(accessToken);
   const trackAudioFeatures = await getTrackAudioFeatures(
     accessToken,
     currentTrack.id,
   );
 
-  updateNowPlayingWidget(elemNowPlayingWidget, {
+  return {
     track: currentTrack,
     audioFeatures: trackAudioFeatures,
-  });
+  };
+}
+
+async function main() {
+  const accessToken = await getAccessToken();
+
+  // Now Playing Widget
+
+  const elemNowPlayingWidget = await waitForElem(
+    '[data-testid="now-playing-widget"]',
+  );
+
+  updateNowPlayingWidget(
+    elemNowPlayingWidget,
+    await getCurrentlyPlayingTrackDetails(accessToken),
+  );
 
   onMutation(elemNowPlayingWidget, async function (_mutation) {
-    updateNowPlayingWidget(elemNowPlayingWidget, {
-      track: currentTrack,
-      audioFeatures: trackAudioFeatures,
-    });
+    updateNowPlayingWidget(
+      elemNowPlayingWidget,
+      await getCurrentlyPlayingTrackDetails(accessToken),
+    );
   });
 
   // Playlist Widget
