@@ -41,10 +41,15 @@ async function main() {
     '[data-testid="now-playing-widget"]',
   );
 
-  updateNowPlayingWidget(
-    elemNowPlayingWidget,
-    await getCurrentlyPlayingTrackDetails(accessToken),
-  );
+  try {
+    updateNowPlayingWidget(
+      elemNowPlayingWidget,
+      await getCurrentlyPlayingTrackDetails(accessToken),
+    );
+  } catch (error) {
+    console.warn("Unable to update the now playing widget.");
+    console.warn(error);
+  }
 
   onMutation(elemNowPlayingWidget, async function (_mutation) {
     updateNowPlayingWidget(

@@ -36,7 +36,11 @@ export async function getCurrentlyPlayingTrack(accessToken: string) {
     { headers: { Authorization: "Bearer " + accessToken } },
   );
 
-  return (await currentTrackResponse.json()).item as Track;
+  try {
+    return (await currentTrackResponse.json()).item as Track;
+  } catch (error) {
+    throw new Error("Unable to get currently playing track.", { cause: error });
+  }
 }
 
 export async function getTrackAudioFeatures(
