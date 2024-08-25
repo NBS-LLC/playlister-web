@@ -6,8 +6,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build:userscript": "npm run --workspace=src/apps/userscript build",
+    "clean": "rimraf coverage/ dist/",
+    "clean:userscript": "rimraf dist/userscript",
     "test:userscript": "jest --selectProjects=shared-lib",
+    "build:userscript": "npm run --workspace=src/apps/userscript build",
+    "dist:userscript": "mkdir -p dist/userscript && cp -r src/apps/userscript/dist/* dist/userscript",
+    "package:userscript": "npm-run-all clean:userscript test:userscript build:userscript dist:userscript",
     "watch:userscript": "npm run --workspace=src/apps/userscript watch"
   },
   "devDependencies": {
