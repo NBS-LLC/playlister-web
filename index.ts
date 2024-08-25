@@ -1,4 +1,4 @@
-import { onMutation, waitForElem } from "./src/html";
+import { onMutation, waitForElem } from "./src/lib/html";
 
 import {
   getAccessToken,
@@ -6,7 +6,7 @@ import {
   getPlaylistItems,
   getSeveralAudioFeatures,
   getTrackAudioFeatures,
-} from "./src/spotify-api";
+} from "./src/lib/spotify-api";
 
 import {
   combinePlaylistItemsWithAudioFeatures,
@@ -15,7 +15,7 @@ import {
   TrackWithAudioFeatures,
   updateNowPlayingWidget,
   updatePlaylistWidget,
-} from "./src/spotify-web";
+} from "./src/lib/spotify-web";
 
 async function getCurrentlyPlayingTrackDetails(
   accessToken: string,
