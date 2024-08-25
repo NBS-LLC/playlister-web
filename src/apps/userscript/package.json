@@ -1,0 +1,18 @@
+{
+  "name": "playlister-web-userscript",
+  "description": "The Userscript Version of Playlister",
+  "author": "Nick Derevjanik",
+  "license": "GPL-3.0-only",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "clean": "rimraf coverage/ dist/ out/",
+    "format": "prettier . --check",
+    "lint": "eslint .",
+    "compile": "tsc",
+    "dist": "rollup --config",
+    "version": "perl -pi -e s,\\{version\\},${SEMVER:-Development},g dist/playlister.user.js",
+    "build": "npm-run-all clean format lint compile dist version",
+    "watch": "tsc --watch"
+  }
+}
