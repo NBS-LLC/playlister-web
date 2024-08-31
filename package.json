@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "clean": "rimraf dist/",
-    "test:lib": "npm run --workspace=src/lib test",
+    "build:lib": "npm run --workspace=src/lib build",
     "clean:userscript": "rimraf dist/userscript",
     "test:userscript": "npm run --workspace=src/apps/userscript test",
     "build:userscript": "npm run --workspace=src/apps/userscript build",

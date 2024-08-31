@@ -10,7 +10,7 @@
     "format": "prettier . --check",
     "lint": "eslint .",
     "compile": "tsc",
-    "jest": "jest",
-    "test": "npm-run-all clean format lint compile jest"
+    "test": "jest",
+    "build": "npm-run-all clean format lint compile test"
   }
 }
