@@ -12,9 +12,9 @@ A Userscript Version of Playlister
 ```bash
 > nvm use # or: asdf install
 > npm install
-> npm run build
+> npm run package:userscript
 ```
 
 ## Usage
 
-After building, copy `dist/playlister.user.js` into a userscript [manager](https://www.tampermonkey.net/).
+After building, copy `dist/userscript/playlister.user.js` into a userscript [manager](https://www.tampermonkey.net/).
