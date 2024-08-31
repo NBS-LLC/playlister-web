@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - src/app/userscript/**
+      - src/apps/userscript/**
 
 jobs:
   test:
