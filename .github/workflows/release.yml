@@ -34,6 +34,6 @@ jobs:
         run: npm run package:userscript
 
       - name: Release
-        run: gh release create v$SEMVER --generate-notes dist/
+        run: gh release create v${{ env.SEMVER }} --generate-notes dist/
         env:
           GH_TOKEN: ${{ github.token }}
