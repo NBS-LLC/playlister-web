@@ -9,7 +9,7 @@ on:
       - .github/workflows/build-userscript.yml
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
