@@ -9,9 +9,10 @@
     "clean": "rimraf coverage/ dist/ out/",
     "format": "prettier . --check",
     "lint": "eslint .",
+    "test": "echo 'warn: no tests defined' && exit 0",
     "compile": "tsc",
     "dist": "rollup --config",
     "version": "perl -pi -e s,\\{version\\},${SEMVER:-Development},g dist/playlister.user.js",
-    "build": "npm-run-all clean format lint compile dist version"
+    "build": "npm-run-all clean format lint test compile dist version"
   }
 }
