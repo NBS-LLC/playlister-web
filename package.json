@@ -7,8 +7,9 @@
   "private": true,
   "scripts": {
     "clean": "rimraf coverage/ dist/",
+    "test:shared-lib": "jest --selectProjects=shared-lib",
     "clean:userscript": "rimraf dist/userscript",
-    "test:userscript": "jest --selectProjects=shared-lib",
+    "test:userscript": "npm run test:shared-lib",
     "build:userscript": "npm run --workspace=src/apps/userscript build",
     "dist:userscript": "mkdir -p dist/userscript && cp -r src/apps/userscript/dist/* dist/userscript",
     "package:userscript": "npm-run-all clean:userscript test:userscript build:userscript dist:userscript"
