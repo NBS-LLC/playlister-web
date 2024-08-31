@@ -2,12 +2,12 @@ import { readFile } from "fs/promises";
 
 export default {
   collectCoverage: true,
-  collectCoverageFrom: ["<rootDir>/src/**/*.ts"],
   projects: [
     {
-      preset: "ts-jest",
+      collectCoverageFrom: ["<rootDir>/src/lib/**/*.ts"],
       displayName: "shared-lib",
       testMatch: ["<rootDir>/src/lib/**/*.test.ts"],
+      preset: "ts-jest",
     },
   ],
   testPathIgnorePatterns: (await readFile(".gitignore", "utf8"))
