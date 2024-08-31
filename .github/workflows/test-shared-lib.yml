@@ -6,8 +6,7 @@ on:
       - main
     paths:
       - src/lib/**
-    paths-ignore:
-      - src/apps/**
+      - .github/workflows/test-shared-lib.yml
 
 jobs:
   test:

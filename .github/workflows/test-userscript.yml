@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - src/apps/userscript/**
+      - .github/workflows/test-userscript.yml
 
 jobs:
   test:
