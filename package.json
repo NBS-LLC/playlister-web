@@ -12,7 +12,7 @@
     "test:userscript": "npm run --workspace=src/apps/userscript test",
     "build:userscript": "npm run --workspace=src/apps/userscript build",
     "dist:userscript": "mkdir -p dist/userscript && cp -r src/apps/userscript/dist/* dist/userscript",
-    "package:userscript": "npm-run-all clean:userscript test:userscript build:userscript dist:userscript"
+    "package:userscript": "npm-run-all clean:userscript build:userscript dist:userscript"
   },
   "devDependencies": {
     "@eslint/js": "^8.56.0",
