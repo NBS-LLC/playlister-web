@@ -6,7 +6,8 @@ on:
       - main
     paths:
       - src/lib/**
-      - '!src/apps/userscript/**'
+    paths-ignore:
+      - src/apps/**
 
 jobs:
   test:
