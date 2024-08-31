@@ -1,5 +1,8 @@
 name: release
 
+env:
+  SEMVER: 0.0.${{ github.run_number }}
+
 on:
   workflow_dispatch:
 
@@ -27,13 +30,10 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Version
-        run: echo "SEMVER=0.0.${{ github.run_number }}" >> "$GITHUB_ENV"
-
-      - name: Build
-        run: npm run build
+      - name: Build Userscript
+        run: npm run package:userscript
 
       - name: Release
-        run: gh release create v$SEMVER --generate-notes 'dist/playlister.user.js'
+        run: gh release create v${{ env.SEMVER }} --generate-notes dist/
         env:
           GH_TOKEN: ${{ github.token }}

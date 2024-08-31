@@ -6,16 +6,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "clean": "rimraf coverage/ dist/ out/",
-    "format": "prettier . --check",
-    "lint": "eslint .",
-    "compile": "tsc",
-    "jest": "jest --coverage --verbose",
-    "test": "npm-run-all clean format lint compile jest",
-    "dist": "rollup --config",
-    "version": "perl -pi -e s,\\{version\\},${SEMVER:-Development},g dist/playlister.user.js",
-    "build": "npm-run-all test dist version",
-    "watch": "tsc --watch"
+    "clean": "rimraf dist/",
+    "build:lib": "npm run --workspace=src/lib build",
+    "clean:userscript": "rimraf dist/userscript",
+    "build:userscript": "npm run --workspace=src/apps/userscript build",
+    "dist:userscript": "mkdir -p dist/userscript && cp -r src/apps/userscript/dist/* dist/userscript",
+    "package:userscript": "npm-run-all clean:userscript build:userscript dist:userscript"
   },
   "devDependencies": {
     "@eslint/js": "^8.56.0",
@@ -32,5 +28,9 @@
     "ts-jest": "^29.1.5",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.11.0"
-  }
+  },
+  "workspaces": [
+    "src/lib",
+    "src/apps/userscript"
+  ]
 }

@@ -1,12 +1,15 @@
-name: test
+name: build-lib
 
 on:
   pull_request:
     branches:
       - main
+    paths:
+      - src/lib/**
+      - .github/workflows/build-lib.yml
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,5 +25,5 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Test
-        run: npm run test
+      - name: Build
+        run: npm run build:lib

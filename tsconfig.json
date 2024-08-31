@@ -3,7 +3,6 @@
     "esModuleInterop": true,
     "module": "ES2022",
     "moduleResolution": "Bundler",
-    "outDir": "out",
     "target": "ES2022"
   }
 }
