@@ -12,7 +12,6 @@
     "compile": "tsc",
     "dist": "rollup --config",
     "version": "perl -pi -e s,\\{version\\},${SEMVER:-Development},g dist/playlister.user.js",
-    "build": "npm-run-all clean format lint compile dist version",
-    "watch": "tsc --watch"
+    "build": "npm-run-all clean format lint compile dist version"
   }
 }
