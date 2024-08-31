@@ -25,5 +25,5 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Test
+      - name: Build
         run: npm run build:userscript
