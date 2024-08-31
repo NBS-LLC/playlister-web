@@ -1,4 +1,4 @@
-name: test-shared-lib
+name: test-lib
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - src/lib/**
-      - .github/workflows/test-shared-lib.yml
+      - .github/workflows/test-lib.yml
 
 jobs:
   test:
@@ -26,4 +26,4 @@ jobs:
         run: npm ci
 
       - name: Test
-        run: npm run test:shared-lib
+        run: npm run test:lib

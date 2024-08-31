@@ -1,0 +1,16 @@
+{
+  "name": "playlister-web-lib",
+  "description": "The Playlister Web Library",
+  "author": "Nick Derevjanik",
+  "license": "GPL-3.0-only",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "clean": "rimraf coverage/",
+    "format": "prettier . --check",
+    "lint": "eslint .",
+    "compile": "tsc",
+    "jest": "jest",
+    "test": "npm-run-all clean format lint compile jest"
+  }
+}
