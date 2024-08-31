@@ -6,13 +6,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "clean": "rimraf coverage/ dist/ out/",
+    "clean": "rimraf dist/ out/",
     "format": "prettier . --check",
     "lint": "eslint .",
-    "test": "echo 'warn: no tests defined' && exit 0",
     "compile": "tsc",
+    "jest": "echo 'warn: no tests defined' && exit 0",
+    "test": "npm-run-all clean format lint compile jest",
     "dist": "rollup --config",
     "version": "perl -pi -e s,\\{version\\},${SEMVER:-Development},g dist/playlister.user.js",
-    "build": "npm-run-all clean format lint test compile dist version"
+    "build": "npm-run-all test dist version"
   }
 }
