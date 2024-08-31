@@ -9,7 +9,6 @@
     "clean": "rimraf dist/",
     "build:lib": "npm run --workspace=src/lib build",
     "clean:userscript": "rimraf dist/userscript",
-    "test:userscript": "npm run --workspace=src/apps/userscript test",
     "build:userscript": "npm run --workspace=src/apps/userscript build",
     "dist:userscript": "mkdir -p dist/userscript && cp -r src/apps/userscript/dist/* dist/userscript",
     "package:userscript": "npm-run-all clean:userscript build:userscript dist:userscript"

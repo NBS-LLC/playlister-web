@@ -1,4 +1,4 @@
-name: test-userscript
+name: build-userscript
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - src/apps/userscript/**
-      - .github/workflows/test-userscript.yml
+      - .github/workflows/build-userscript.yml
 
 jobs:
   test:
@@ -26,4 +26,4 @@ jobs:
         run: npm ci
 
       - name: Test
-        run: npm run test:userscript
+        run: npm run build:userscript

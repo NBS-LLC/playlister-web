@@ -10,10 +10,9 @@
     "format": "prettier . --check",
     "lint": "eslint .",
     "compile": "tsc",
-    "jest": "echo 'warn: no tests defined' && exit 0",
-    "test": "npm-run-all clean format lint compile jest",
+    "test": "echo 'warn: no tests defined' && exit 0",
     "dist": "rollup --config",
     "version": "perl -pi -e s,\\{version\\},${SEMVER:-Development},g dist/playlister.user.js",
-    "build": "npm-run-all test dist version"
+    "build": "npm-run-all clean format lint compile test dist version"
   }
 }
