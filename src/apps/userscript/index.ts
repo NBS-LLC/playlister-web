@@ -86,11 +86,8 @@ async function main() {
       );
     },
   );
-
-  console.log("Reach the end of main!");
 }
 
 (async function () {
   await main();
-  console.log("Reach the end of the userscript!");
 })();
