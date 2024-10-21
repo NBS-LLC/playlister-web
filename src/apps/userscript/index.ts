@@ -86,6 +86,13 @@ async function main() {
       );
     },
   );
+
+  // Track List
+  // TODO: [data-testid="track-list"] [data-testid="tracklist-row"] a[href*="/track"]
+
+  waitForElem('[data-testid="track-list"]').then(async (elemTrackList) => {
+    console.dir(elemTrackList);
+  });
 }
 
 (async function () {
