@@ -91,7 +91,15 @@ async function main() {
   // TODO: [data-testid="track-list"] [data-testid="tracklist-row"] a[href*="/track"]
 
   waitForElem('[data-testid="track-list"]').then(async (elemTrackList) => {
-    console.dir(elemTrackList);
+    const trackCount =
+      parseInt(elemTrackList.getAttribute("aria-rowcount"), 10) - 1;
+    console.dir(`track count: ${trackCount}`);
+
+    onMutation(elemTrackList, async (_mutation) => {
+      const trackCount =
+        parseInt(elemTrackList.getAttribute("aria-rowcount"), 10) - 1;
+      console.dir(`track count: ${trackCount}`);
+    });
   });
 }
 
