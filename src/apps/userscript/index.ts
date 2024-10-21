@@ -1,3 +1,4 @@
+import { until } from "../../lib/async";
 import { onMutation, waitForElem } from "../../lib/html";
 
 import {
@@ -93,12 +94,25 @@ async function main() {
   waitForElem('[data-testid="track-list"]').then(async (elemTrackList) => {
     const trackCount =
       parseInt(elemTrackList.getAttribute("aria-rowcount"), 10) - 1;
-    console.dir(`track count: ${trackCount}`);
+    console.log(`track count: ${trackCount}`);
+
+    const elemTracks = await until(() => {
+      const tracks = elemTrackList.querySelectorAll(
+        '[data-testid="tracklist-row"] a[href*="/track"]',
+      );
+      if (tracks.length == trackCount) {
+        return tracks;
+      }
+    });
+
+    elemTracks.forEach((elem) => {
+      console.log(elem.getAttribute("href"));
+    });
 
     onMutation(elemTrackList, async (_mutation) => {
       const trackCount =
         parseInt(elemTrackList.getAttribute("aria-rowcount"), 10) - 1;
-      console.dir(`track count: ${trackCount}`);
+      console.log(`track count: ${trackCount}`);
     });
   });
 }
