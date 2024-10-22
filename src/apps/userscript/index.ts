@@ -105,8 +105,14 @@ async function main() {
       }
     });
 
-    elemTracks.forEach((elem) => {
-      console.log(elem.getAttribute("href"));
+    elemTracks.forEach(async (elem) => {
+      const href = elem.getAttribute("href");
+      const trackId = href.replace("/track/", "");
+      const trackAudioFeatures = await getTrackAudioFeatures(
+        accessToken,
+        trackId,
+      );
+      console.dir(trackAudioFeatures);
     });
 
     onMutation(elemTrackList, async (_mutation) => {
