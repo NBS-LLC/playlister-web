@@ -1,8 +1,4 @@
-import {
-  formatTrack,
-  formatTrackDetails,
-  TrackWithAudioFeatures,
-} from "./spotify-web";
+import { formatTrackDetails, TrackWithAudioFeatures } from "./spotify-web";
 
 function createTestTrackWithAudioFeatures() {
   return {
@@ -21,18 +17,9 @@ function createTestTrackWithAudioFeatures() {
 }
 
 describe(formatTrackDetails.name, () => {
-  it("should return the correct track details", () => {
-    const track = createTestTrackWithAudioFeatures();
-    expect(formatTrackDetails(track)).toBe(
-      "Track Name by Artist Name (120 E 12B)",
-    );
-  });
-});
-
-describe(formatTrack.name, () => {
   it("should return the correct formatted track details", () => {
     const track = createTestTrackWithAudioFeatures();
-    const expectedOutput = "Track Name (120)";
-    expect(formatTrack(track)).toBe(expectedOutput);
+    const expectedOutput = "Track Name (120 E 12B)";
+    expect(formatTrackDetails(track.track.name, track)).toBe(expectedOutput);
   });
 });

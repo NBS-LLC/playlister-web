@@ -95,3 +95,11 @@ export async function getSeveralAudioFeatures(
 
   return audioFeatureChunks.flat();
 }
+
+export async function getTrack(accessToken: string, trackId: string) {
+  const response = await fetch("https://api.spotify.com/v1/tracks/" + trackId, {
+    headers: { Authorization: "Bearer " + accessToken },
+  });
+
+  return (await response.json()) as Track;
+}

@@ -13,14 +13,16 @@ export type TrackWithAudioFeatures = PlaylistItemWithAudioFeatures;
 type TracksWithAudioFeatures = Map<string, PlaylistItemWithAudioFeatures>;
 
 /**
- * Formats the track details including title, key name, and camelot value.
+ * Provides a simple format for displaying track details.
  *
- * @param track - The playlist item with audio features to format.
- * @return The formatted track details as a string.
+ * @param title - The track's title.
+ * @param track - The track with audio features to format.
+ * @return The formatted track details.
  */
-export function formatTrackDetails(track: PlaylistItemWithAudioFeatures) {
-  const trackTitle = `${track.track.name} by ${track.track.artists[0].name}`;
-
+export function formatTrackDetails(
+  title: string,
+  track: TrackWithAudioFeatures,
+) {
   const trackKeyName = getKeyName(
     track.audioFeatures.key,
     track.audioFeatures.mode,
@@ -31,31 +33,30 @@ export function formatTrackDetails(track: PlaylistItemWithAudioFeatures) {
     track.audioFeatures.mode,
   );
 
-  return `${trackTitle} (${track.audioFeatures.tempo} ${trackKeyName} ${trackCamelotValue})`;
-}
-
-/**
- * Provides a simple format for displaying track name and basic details.
- *
- * @param track - The track with audio features to format.
- * @return The formatted track details.
- */
-export function formatTrack(track: TrackWithAudioFeatures) {
-  return `${track.track.name} (${track.audioFeatures.tempo})`;
+  return `${title} (${track.audioFeatures.tempo} ${trackKeyName} ${trackCamelotValue})`;
 }
 
 export function updateNowPlayingWidget(
   elemNowPlayingWidget: Element,
   track: TrackWithAudioFeatures,
 ) {
-  console.log(formatTrackDetails(track));
+  console.info(
+    formatTrackDetails(
+      `${track.track.name} by ${track.track.artists[0].name}`,
+      track,
+    ),
+    track,
+  );
 
   const elemCurrentTrackName = elemNowPlayingWidget.querySelector(
     'a[data-testid="context-item-link"]',
   );
 
   if (elemCurrentTrackName) {
-    elemCurrentTrackName.textContent = formatTrack(track);
+    elemCurrentTrackName.textContent = formatTrackDetails(
+      track.track.name,
+      track,
+    );
   }
 }
 
@@ -71,11 +72,8 @@ export function updatePlaylistWidget(
     const trackId = elem.getAttribute("href")!.replace("/track/", "");
 
     if (tracksWithAudioFeatures.has(trackId)) {
-      const audioFeatures = tracksWithAudioFeatures.get(trackId)!;
-      elem.textContent = formatTrackDetails({
-        track: audioFeatures.track,
-        audioFeatures: audioFeatures.audioFeatures,
-      });
+      const track = tracksWithAudioFeatures.get(trackId)!;
+      elem.textContent = formatTrackDetails(track.track.name, track);
     }
   });
 }

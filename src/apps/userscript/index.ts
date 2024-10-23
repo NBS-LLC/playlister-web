@@ -6,11 +6,13 @@ import {
   getCurrentlyPlayingTrack,
   getPlaylistItems,
   getSeveralAudioFeatures,
+  getTrack,
   getTrackAudioFeatures,
 } from "../../lib/spotify-api";
 
 import {
   combinePlaylistItemsWithAudioFeatures,
+  formatTrackDetails,
   getPlaylistContainer,
   getPlaylistId,
   TrackWithAudioFeatures,
@@ -108,11 +110,12 @@ async function main() {
     elemTracks.forEach(async (elem) => {
       const href = elem.getAttribute("href");
       const trackId = href.replace("/track/", "");
-      const trackAudioFeatures = await getTrackAudioFeatures(
-        accessToken,
-        trackId,
-      );
-      console.dir(trackAudioFeatures);
+      const track = await getTrack(accessToken, trackId);
+      const audioFeatures = await getTrackAudioFeatures(accessToken, trackId);
+      elem.textContent = formatTrackDetails(track.name, {
+        track,
+        audioFeatures,
+      });
     });
 
     onMutation(elemTrackList, async (_mutation) => {
