@@ -116,12 +116,40 @@ async function main() {
         track,
         audioFeatures,
       });
+
+      elem.setAttribute("playlister:has-track-details", "true");
     });
 
     onMutation(elemTrackList, async (_mutation) => {
       const trackCount =
         parseInt(elemTrackList.getAttribute("aria-rowcount"), 10) - 1;
       console.log(`track count: ${trackCount}`);
+
+      const elemTracks = await until(() => {
+        const tracks = elemTrackList.querySelectorAll(
+          '[data-testid="tracklist-row"] a[href*="/track"]',
+        );
+        if (tracks.length == trackCount) {
+          return tracks;
+        }
+      });
+
+      elemTracks.forEach(async (elem) => {
+        if (elem.getAttribute("playlister:has-track-details") == "true") {
+          return;
+        }
+
+        const href = elem.getAttribute("href");
+        const trackId = href.replace("/track/", "");
+        const track = await getTrack(accessToken, trackId);
+        const audioFeatures = await getTrackAudioFeatures(accessToken, trackId);
+        elem.textContent = formatTrackDetails(track.name, {
+          track,
+          audioFeatures,
+        });
+
+        elem.setAttribute("playlister:has-track-details", "true");
+      });
     });
   });
 }
