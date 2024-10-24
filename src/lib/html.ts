@@ -31,16 +31,18 @@ export function waitForElem(selector: string): Promise<Element> {
  *
  * @param targetElement - The element to observe mutations on.
  * @param callback - The function to call when a mutation is observed.
+ * @param options - (Optional) The MutationObserverInit options.
  */
-export function onMutation(targetElement: Element, callback: MutationHandler) {
+export function onMutation(
+  targetElement: Element,
+  callback: MutationHandler,
+  options: MutationObserverInit = { attributes: true, childList: true },
+) {
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       callback(mutation);
     }
   });
 
-  observer.observe(targetElement, {
-    attributes: true,
-    childList: true,
-  });
+  observer.observe(targetElement, options);
 }
