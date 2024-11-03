@@ -91,7 +91,7 @@ async function main() {
         );
       }
 
-      return { track, audioFeatures };
+      return { track, audioFeatures } as TrackWithAudioFeatures;
     });
 
     enhancedTracks.forEach((enhancedTrack) => {
