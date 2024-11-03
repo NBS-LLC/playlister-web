@@ -1,15 +1,9 @@
 import { chunk } from "./array";
-import { fetchAllData } from "./http";
-import { measurePerformance } from "./perf";
 
 export type Track = {
   id: string;
   name: string;
   artists: { name: string }[];
-};
-
-export type PlaylistItem = {
-  track: Track;
 };
 
 export type AudioFeature = {
@@ -53,21 +47,6 @@ export async function getTrackAudioFeatures(
   );
 
   return (await trackAudioFeaturesResponse.json()) as AudioFeature;
-}
-
-export async function getPlaylistItems(
-  accessToken: string,
-  playlistId: string,
-) {
-  const result = await measurePerformance(async () => {
-    return (await fetchAllData(
-      "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks",
-      { headers: { Authorization: "Bearer " + accessToken } },
-    )) as PlaylistItem[];
-  });
-
-  console.log(`${getPlaylistItems.name} took ${result.time}ms`);
-  return result.returnValue;
 }
 
 async function _getChunkOfTracks(accessToken: string, trackIds: string[]) {
