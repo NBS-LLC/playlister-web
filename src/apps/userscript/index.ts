@@ -3,13 +3,17 @@ import { onMutation, waitForElem } from "../../lib/html";
 import {
   getAccessToken,
   getCurrentlyPlayingTrack,
+  getTrack,
   getTrackAudioFeatures,
 } from "../../lib/spotify-api";
 
 import {
+  formatTrackDetails,
   TrackWithAudioFeatures,
   updateNowPlayingWidget,
 } from "../../lib/spotify-web";
+
+import { sleep } from "../../lib/async";
 
 async function getCurrentlyPlayingTrackDetails(
   accessToken: string,
@@ -67,11 +71,43 @@ async function main() {
           for (const elemRow of elemRows) {
             const elemTrack = elemRow.querySelector('a[href*="/track"]');
             if (elemTrack.getAttribute("playlister:visited") === null) {
-              elemTrack.textContent = "visited - " + elemTrack.textContent;
-              console.log(elemTrack.textContent, elemTrack);
+              const trackId = elemTrack
+                .getAttribute("href")
+                .replace("/track/", "");
+
+              const track = await getTrack(accessToken, trackId);
+
+              const audioFeatures = await getTrackAudioFeatures(
+                accessToken,
+                trackId,
+              );
+
+              elemTrack.textContent = formatTrackDetails(track.name, {
+                track,
+                audioFeatures,
+              });
+
+              console.info(
+                formatTrackDetails(
+                  `${track.name} by ${track.artists[0].name}`,
+                  {
+                    track,
+                    audioFeatures,
+                  },
+                ),
+                {
+                  track,
+                  audioFeatures,
+                },
+              );
             }
 
             elemTrack.setAttribute("playlister:visited", "true");
+
+            // TODO: Use smart some kind of smart throttling.
+            await sleep(250); // Intentionally throttle to prevent 429 (Too Many Requests).
+
+            // TODO: Use getSeveralAudioFeatures() instead of making an API call for each track.
           }
         }
       }
