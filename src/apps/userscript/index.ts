@@ -13,8 +13,6 @@ import {
   updateNowPlayingWidget,
 } from "../../lib/spotify-web";
 
-import { sleep } from "../../lib/async";
-
 async function getCurrentlyPlayingTrackDetails(
   accessToken: string,
 ): Promise<TrackWithAudioFeatures> {
@@ -60,6 +58,36 @@ async function main() {
   // Any Track List
   // TODO: [data-testid="track-list"] [data-testid="tracklist-row"] a[href*="/track"]
 
+  const elemTracks: Element[] = [];
+  setInterval(async () => {
+    const elemTrack = elemTracks.shift();
+    if (!elemTrack) {
+      return;
+    }
+
+    const trackId = elemTrack.getAttribute("href").replace("/track/", "");
+    const track = await getTrack(accessToken, trackId);
+    const audioFeatures = await getTrackAudioFeatures(accessToken, trackId);
+
+    // TODO: Use getSeveralAudioFeatures() instead of making an API call for each track.
+
+    elemTrack.textContent = formatTrackDetails(track.name, {
+      track,
+      audioFeatures,
+    });
+
+    console.info(
+      formatTrackDetails(`${track.name} by ${track.artists[0].name}`, {
+        track,
+        audioFeatures,
+      }),
+      {
+        track,
+        audioFeatures,
+      },
+    );
+  }, 250);
+
   onMutation(
     document.body,
     async (mutation) => {
@@ -68,46 +96,15 @@ async function main() {
           const elemRows = node.querySelectorAll(
             '[data-testid="tracklist-row"]',
           );
+
           for (const elemRow of elemRows) {
             const elemTrack = elemRow.querySelector('a[href*="/track"]');
+
             if (elemTrack.getAttribute("playlister:visited") === null) {
-              const trackId = elemTrack
-                .getAttribute("href")
-                .replace("/track/", "");
-
-              const track = await getTrack(accessToken, trackId);
-
-              const audioFeatures = await getTrackAudioFeatures(
-                accessToken,
-                trackId,
-              );
-
-              elemTrack.textContent = formatTrackDetails(track.name, {
-                track,
-                audioFeatures,
-              });
-
-              console.info(
-                formatTrackDetails(
-                  `${track.name} by ${track.artists[0].name}`,
-                  {
-                    track,
-                    audioFeatures,
-                  },
-                ),
-                {
-                  track,
-                  audioFeatures,
-                },
-              );
+              elemTracks.push(elemTrack);
             }
 
             elemTrack.setAttribute("playlister:visited", "true");
-
-            // TODO: Use smart some kind of smart throttling.
-            await sleep(250); // Intentionally throttle to prevent 429 (Too Many Requests).
-
-            // TODO: Use getSeveralAudioFeatures() instead of making an API call for each track.
           }
         }
       }
