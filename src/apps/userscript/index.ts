@@ -3,12 +3,12 @@ import { onMutation, waitForElem } from "../../lib/html";
 import {
   getAccessToken,
   getCurrentlyPlayingTrack,
-  getTrack,
+  getSeveralAudioFeatures,
+  getSeveralTracks,
   getTrackAudioFeatures,
 } from "../../lib/spotify-api";
 
 import {
-  formatTrackDetails,
   TrackWithAudioFeatures,
   updateNowPlayingWidget,
 } from "../../lib/spotify-web";
@@ -58,34 +58,63 @@ async function main() {
   // Any Track List
   // TODO: [data-testid="track-list"] [data-testid="tracklist-row"] a[href*="/track"]
 
-  const elemTracks: Element[] = [];
+  let elemTracks: Element[] = [];
   setInterval(async () => {
-    const elemTrack = elemTracks.shift();
-    if (!elemTrack) {
+    if (elemTracks.length == 0) {
       return;
     }
 
-    const trackId = elemTrack.getAttribute("href").replace("/track/", "");
-    const track = await getTrack(accessToken, trackId);
-    const audioFeatures = await getTrackAudioFeatures(accessToken, trackId);
+    const maxTracks = 10;
+    const elemTracksToProcess = elemTracks.slice(0, maxTracks);
+    const elemTracksRemaining = elemTracks.slice(maxTracks);
+    elemTracks = elemTracksRemaining;
 
-    // TODO: Use getSeveralAudioFeatures() instead of making an API call for each track.
-
-    elemTrack.textContent = formatTrackDetails(track.name, {
-      track,
-      audioFeatures,
+    const trackIds = elemTracksToProcess.map((elemTrack) => {
+      return elemTrack.getAttribute("href").replace("/track/", "");
     });
 
-    console.info(
-      formatTrackDetails(`${track.name} by ${track.artists[0].name}`, {
-        track,
-        audioFeatures,
-      }),
-      {
-        track,
-        audioFeatures,
-      },
+    const severalTracks = await getSeveralTracks(accessToken, trackIds);
+    const severalAudioFeatures = await getSeveralAudioFeatures(
+      accessToken,
+      severalTracks,
     );
+
+    const enhancedTracks = severalTracks.map((track) => {
+      const audioFeature = severalAudioFeatures.find(
+        (item) => item.id === track.id,
+      );
+
+      if (!audioFeature) {
+        console.warn(
+          `Could not find matching audio features for: ${track.name}.`,
+          track,
+        );
+      }
+
+      return { track, audioFeature };
+    });
+
+    console.dir(enhancedTracks);
+
+    // const trackId = elemTrack.getAttribute("href").replace("/track/", "");
+    // const track = await getTrack(accessToken, trackId);
+    // const audioFeatures = await getTrackAudioFeatures(accessToken, trackId);
+
+    // elemTrack.textContent = formatTrackDetails(track.name, {
+    //   track,
+    //   audioFeatures,
+    // });
+
+    // console.info(
+    //   formatTrackDetails(`${track.name} by ${track.artists[0].name}`, {
+    //     track,
+    //     audioFeatures,
+    //   }),
+    //   {
+    //     track,
+    //     audioFeatures,
+    //   },
+    // );
   }, 250);
 
   onMutation(
