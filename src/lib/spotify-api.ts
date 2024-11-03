@@ -70,6 +70,31 @@ export async function getPlaylistItems(
   return result.returnValue;
 }
 
+async function _getChunkOfTracks(accessToken: string, trackIds: string[]) {
+  const result = await fetch(
+    `https://api.spotify.com/v1/tracks?ids=${trackIds.join(",")}`,
+    { headers: { Authorization: "Bearer " + accessToken } },
+  );
+
+  return (await result.json()).tracks as Track[];
+}
+
+export async function getSeveralTracks(
+  accessToken: string,
+  trackIds: string[],
+) {
+  const spotifyApiTrackMax = 50; // https://tinyurl.com/42h4r9y2
+  const chunkedTrackIds = chunk(trackIds, spotifyApiTrackMax);
+
+  const trackChunks = await Promise.all(
+    chunkedTrackIds.map(
+      async (chunk) => await _getChunkOfTracks(accessToken, chunk),
+    ),
+  );
+
+  return trackChunks.flat();
+}
+
 async function _getChunkOfAudioFeatures(accessToken: string, tracks: Track[]) {
   const trackIds = tracks.map((track) => track.id);
   const result = await fetch(
@@ -84,7 +109,7 @@ export async function getSeveralAudioFeatures(
   accessToken: string,
   tracks: Track[],
 ) {
-  const spotifyApiTrackMax = 100; // https://g.co/gemini/share/3d6aefc1b030
+  const spotifyApiTrackMax = 100; // https://tinyurl.com/3jmz3kxu
   const chunkedTracks = chunk(tracks, spotifyApiTrackMax);
 
   const audioFeatureChunks = await Promise.all(
