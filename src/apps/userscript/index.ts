@@ -9,6 +9,7 @@ import {
 } from "../../lib/spotify-api";
 
 import {
+  formatTrackDetails,
   TrackWithAudioFeatures,
   updateNowPlayingWidget,
 } from "../../lib/spotify-web";
@@ -56,7 +57,6 @@ async function main() {
   );
 
   // Any Track List
-  // TODO: [data-testid="track-list"] [data-testid="tracklist-row"] a[href*="/track"]
 
   let elemTracks: Element[] = [];
   setInterval(async () => {
@@ -67,7 +67,7 @@ async function main() {
     const maxTracks = 10;
     const elemTracksToProcess = elemTracks.slice(0, maxTracks);
     const elemTracksRemaining = elemTracks.slice(maxTracks);
-    elemTracks = elemTracksRemaining;
+    elemTracks = elemTracksRemaining; // Will be processed by the next interval to prevent 429 (Too Many Requests).
 
     const trackIds = elemTracksToProcess.map((elemTrack) => {
       return elemTrack.getAttribute("href").replace("/track/", "");
@@ -80,42 +80,48 @@ async function main() {
     );
 
     const enhancedTracks = severalTracks.map((track) => {
-      const audioFeature = severalAudioFeatures.find(
+      const audioFeatures = severalAudioFeatures.find(
         (item) => item.id === track.id,
       );
 
-      if (!audioFeature) {
+      if (!audioFeatures) {
         console.warn(
           `Could not find matching audio features for: ${track.name}.`,
           track,
         );
       }
 
-      return { track, audioFeature };
+      return { track, audioFeatures };
     });
 
-    console.dir(enhancedTracks);
+    enhancedTracks.forEach((enhancedTrack) => {
+      const elemTrack = elemTracksToProcess.find((item) => {
+        const trackId = item.getAttribute("href").replace("/track/", "");
+        return trackId === enhancedTrack.track.id;
+      });
 
-    // const trackId = elemTrack.getAttribute("href").replace("/track/", "");
-    // const track = await getTrack(accessToken, trackId);
-    // const audioFeatures = await getTrackAudioFeatures(accessToken, trackId);
+      if (!elemTrack) {
+        console.warn(
+          `Could not find matching track element for: ${enhancedTrack.track.name}`,
+          enhancedTrack,
+        );
+        return;
+      }
 
-    // elemTrack.textContent = formatTrackDetails(track.name, {
-    //   track,
-    //   audioFeatures,
-    // });
+      elemTrack.textContent = formatTrackDetails(
+        enhancedTrack.track.name,
+        enhancedTrack,
+      );
 
-    // console.info(
-    //   formatTrackDetails(`${track.name} by ${track.artists[0].name}`, {
-    //     track,
-    //     audioFeatures,
-    //   }),
-    //   {
-    //     track,
-    //     audioFeatures,
-    //   },
-    // );
-  }, 250);
+      console.info(
+        formatTrackDetails(
+          `${enhancedTrack.track.name} by ${enhancedTrack.track.artists[0].name}`,
+          enhancedTrack,
+        ),
+        enhancedTrack,
+      );
+    });
+  }, 250); // Intentionally delay track processing to prevent 429 (Too Many Requests).
 
   onMutation(
     document.body,
