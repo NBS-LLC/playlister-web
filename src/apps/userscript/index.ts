@@ -1,23 +1,14 @@
-import { until } from "../../lib/async";
 import { onMutation, waitForElem } from "../../lib/html";
 
 import {
   getAccessToken,
   getCurrentlyPlayingTrack,
-  getPlaylistItems,
-  getSeveralAudioFeatures,
-  getTrack,
   getTrackAudioFeatures,
 } from "../../lib/spotify-api";
 
 import {
-  combinePlaylistItemsWithAudioFeatures,
-  formatTrackDetails,
-  getPlaylistContainer,
-  getPlaylistId,
   TrackWithAudioFeatures,
   updateNowPlayingWidget,
-  updatePlaylistWidget,
 } from "../../lib/spotify-web";
 
 async function getCurrentlyPlayingTrackDetails(
@@ -62,96 +53,31 @@ async function main() {
     },
   );
 
-  // Playlist Widget
-
-  waitForElem('[data-testid="playlist-tracklist"]').then(
-    async (elemPlaylistWidget) => {
-      const currentPlaylistId = await getPlaylistId();
-      const playlistItems = await getPlaylistItems(
-        accessToken,
-        currentPlaylistId,
-      );
-      const tracks = playlistItems.map((item) => item.track);
-      const audioFeatures = await getSeveralAudioFeatures(accessToken, tracks);
-
-      const tracksWithAudioFeatures = combinePlaylistItemsWithAudioFeatures(
-        playlistItems,
-        audioFeatures,
-      );
-
-      updatePlaylistWidget(elemPlaylistWidget, tracksWithAudioFeatures);
-
-      onMutation(
-        getPlaylistContainer(elemPlaylistWidget),
-        async function (_mutation) {
-          updatePlaylistWidget(elemPlaylistWidget, tracksWithAudioFeatures);
-        },
-      );
-    },
-  );
-
-  // Track List
+  // Any Track List
   // TODO: [data-testid="track-list"] [data-testid="tracklist-row"] a[href*="/track"]
 
-  waitForElem('[data-testid="track-list"]').then(async (elemTrackList) => {
-    const trackCount =
-      parseInt(elemTrackList.getAttribute("aria-rowcount"), 10) - 1;
-    console.log(`track count: ${trackCount}`);
+  onMutation(
+    document.body,
+    async (mutation) => {
+      for (const node of mutation.addedNodes) {
+        if (node instanceof HTMLElement) {
+          const elemRows = node.querySelectorAll(
+            '[data-testid="tracklist-row"]',
+          );
+          for (const elemRow of elemRows) {
+            const elemTrack = elemRow.querySelector('a[href*="/track"]');
+            if (elemTrack.getAttribute("playlister:visited") === null) {
+              elemTrack.textContent = "visited - " + elemTrack.textContent;
+              console.log(elemTrack.textContent, elemTrack);
+            }
 
-    const elemTracks = await until(() => {
-      const tracks = elemTrackList.querySelectorAll(
-        '[data-testid="tracklist-row"] a[href*="/track"]',
-      );
-      if (tracks.length == trackCount) {
-        return tracks;
+            elemTrack.setAttribute("playlister:visited", "true");
+          }
+        }
       }
-    });
-
-    elemTracks.forEach(async (elem) => {
-      const href = elem.getAttribute("href");
-      const trackId = href.replace("/track/", "");
-      const track = await getTrack(accessToken, trackId);
-      const audioFeatures = await getTrackAudioFeatures(accessToken, trackId);
-      elem.textContent = formatTrackDetails(track.name, {
-        track,
-        audioFeatures,
-      });
-
-      elem.setAttribute("playlister:has-track-details", "true");
-    });
-
-    onMutation(elemTrackList, async (_mutation) => {
-      const trackCount =
-        parseInt(elemTrackList.getAttribute("aria-rowcount"), 10) - 1;
-      console.log(`track count: ${trackCount}`);
-
-      const elemTracks = await until(() => {
-        const tracks = elemTrackList.querySelectorAll(
-          '[data-testid="tracklist-row"] a[href*="/track"]',
-        );
-        if (tracks.length == trackCount) {
-          return tracks;
-        }
-      });
-
-      elemTracks.forEach(async (elem) => {
-        if (elem.getAttribute("playlister:has-track-details") == "true") {
-          return;
-        }
-
-        const href = elem.getAttribute("href");
-        const trackId = href.replace("/track/", "");
-        const track = await getTrack(accessToken, trackId);
-        const audioFeatures = await getTrackAudioFeatures(accessToken, trackId);
-        elem.textContent = formatTrackDetails(track.name, {
-          track,
-          audioFeatures,
-        });
-
-        elem.setAttribute("playlister:has-track-details", "true");
-      });
-    });
-  });
+    },
+    { childList: true, subtree: true },
+  );
 }
 
 (async function () {
