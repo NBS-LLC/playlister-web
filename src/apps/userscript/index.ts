@@ -10,6 +10,7 @@ import {
 
 import {
   formatTrackDetails,
+  getTrackIdsFromTrackElements,
   TrackWithAudioFeatures,
   updateNowPlayingWidget,
 } from "../../lib/spotify-web";
@@ -69,10 +70,7 @@ async function main() {
     const elemTracksRemaining = elemTracks.slice(maxTracks);
     elemTracks = elemTracksRemaining; // Will be processed by the next interval to prevent 429 (Too Many Requests).
 
-    const trackIds = elemTracksToProcess.map((elemTrack) => {
-      return elemTrack.getAttribute("href").replace("/track/", "");
-    });
-
+    const trackIds = getTrackIdsFromTrackElements(elemTracksToProcess);
     const severalTracks = await getSeveralTracks(accessToken, trackIds);
     const severalAudioFeatures = await getSeveralAudioFeatures(
       accessToken,

@@ -1,4 +1,12 @@
-import { formatTrackDetails, TrackWithAudioFeatures } from "./spotify-web";
+/**
+ * @jest-environment jsdom
+ */
+
+import {
+  formatTrackDetails,
+  getTrackIdsFromTrackElements,
+  TrackWithAudioFeatures,
+} from "./spotify-web";
 
 function createTestTrackWithAudioFeatures() {
   return {
@@ -21,5 +29,27 @@ describe(formatTrackDetails.name, () => {
     const track = createTestTrackWithAudioFeatures();
     const expectedOutput = "Track Name (120 E 12B)";
     expect(formatTrackDetails(track.track.name, track)).toBe(expectedOutput);
+  });
+});
+
+describe(getTrackIdsFromTrackElements.name, () => {
+  it("should return track ids if they exist", () => {
+    document.body.innerHTML = `
+      <div class="track-list">
+        <a href="/track/1111">track 1</a>
+        <a href="/album/5555">album 1</a>
+        <a href="/track/2222">track 2</a>
+        <a name="more">more items</a>
+        <a href="/track/3333">track 3</a>
+        <a href="/track/4444">track 4</a>
+      </div>
+    `;
+
+    const elements = document.querySelectorAll("a");
+
+    const expectedTrackIds = ["1111", "2222", "3333", "4444"];
+    expect(getTrackIdsFromTrackElements(Array.from(elements))).toEqual(
+      expectedTrackIds,
+    );
   });
 });

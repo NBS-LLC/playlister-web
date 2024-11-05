@@ -54,3 +54,18 @@ export function updateNowPlayingWidget(
     );
   }
 }
+
+/**
+ * Extracts track IDs from a list of elements.
+ *
+ * @param elements - An array of HTML elements.
+ * @return An array of track IDs.
+ */
+export function getTrackIdsFromTrackElements(elements: Element[]) {
+  return elements
+    .map((elemTrack) => {
+      const href = elemTrack.getAttribute("href");
+      return href && href.includes("/track/") ? href.split("/track/")[1] : null;
+    })
+    .filter((trackId) => trackId !== null);
+}
