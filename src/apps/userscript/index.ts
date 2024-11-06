@@ -3,8 +3,7 @@ import { onMutation, waitForElem } from "../../lib/html";
 import {
   getAccessToken,
   getCurrentlyPlayingTrack,
-  getSeveralAudioFeatures,
-  getSeveralTracks,
+  getSeveralTracksWithAudioFeatures,
   getTrackAudioFeatures,
 } from "../../lib/spotify-api";
 
@@ -71,26 +70,10 @@ async function main() {
     elemTracks = elemTracksRemaining; // Will be processed by the next interval to prevent 429 (Too Many Requests).
 
     const trackIds = getTrackIdsFromTrackElements(elemTracksToProcess);
-    const severalTracks = await getSeveralTracks(accessToken, trackIds);
-    const severalAudioFeatures = await getSeveralAudioFeatures(
+    const enhancedTracks = await getSeveralTracksWithAudioFeatures(
       accessToken,
-      severalTracks,
+      trackIds,
     );
-
-    const enhancedTracks = severalTracks.map((track) => {
-      const audioFeatures = severalAudioFeatures.find(
-        (item) => item.id === track.id,
-      );
-
-      if (!audioFeatures) {
-        console.warn(
-          `Could not find matching audio features for: ${track.name}.`,
-          track,
-        );
-      }
-
-      return { track, audioFeatures } as TrackWithAudioFeatures;
-    });
 
     enhancedTracks.forEach((enhancedTrack) => {
       const elemTrack = elemTracksToProcess.find((item) => {

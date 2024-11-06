@@ -99,3 +99,29 @@ export async function getSeveralAudioFeatures(
 
   return audioFeatureChunks.flat();
 }
+
+export async function getSeveralTracksWithAudioFeatures(
+  accessToken: string,
+  trackIds: string[],
+) {
+  const severalTracks = await getSeveralTracks(accessToken, trackIds);
+  const severalAudioFeatures = await getSeveralAudioFeatures(
+    accessToken,
+    severalTracks,
+  );
+
+  return severalTracks.map((track) => {
+    const audioFeatures = severalAudioFeatures.find(
+      (item) => item.id === track.id,
+    );
+
+    if (!audioFeatures) {
+      console.warn(
+        `Could not find matching audio features for: ${track.name}.`,
+        track,
+      );
+    }
+
+    return { track, audioFeatures };
+  });
+}
