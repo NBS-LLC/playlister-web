@@ -13,6 +13,11 @@ export type AudioFeature = {
   tempo: number;
 };
 
+export type TrackWithAudioFeatures = {
+  track: Track;
+  audioFeatures: AudioFeature;
+};
+
 /**
  * Assumes the user is logged into Spotify (uses auth from cookies).
  */
@@ -100,6 +105,13 @@ export async function getSeveralAudioFeatures(
   return audioFeatureChunks.flat();
 }
 
+/**
+ * Gets several tracks including their audio features.
+ *
+ * @param accessToken - The Spotify access token.
+ * @param trackIds - An array of Spotify track IDs.
+ * @return An array of objects with track information and the corresponding audio features.
+ */
 export async function getSeveralTracksWithAudioFeatures(
   accessToken: string,
   trackIds: string[],
@@ -122,6 +134,6 @@ export async function getSeveralTracksWithAudioFeatures(
       );
     }
 
-    return { track, audioFeatures };
+    return { track, audioFeatures } as TrackWithAudioFeatures;
   });
 }

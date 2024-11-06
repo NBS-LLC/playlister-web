@@ -5,12 +5,12 @@ import {
   getCurrentlyPlayingTrack,
   getSeveralTracksWithAudioFeatures,
   getTrackAudioFeatures,
+  TrackWithAudioFeatures,
 } from "../../lib/spotify-api";
 
 import {
   formatTrackDetails,
   getTrackIdsFromTrackElements,
-  TrackWithAudioFeatures,
   updateNowPlayingWidget,
 } from "../../lib/spotify-web";
 

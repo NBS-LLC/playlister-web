@@ -1,11 +1,5 @@
 import { getCamelotValue, getKeyName } from "./audio";
-
-import { AudioFeature, Track } from "./spotify-api";
-
-export type TrackWithAudioFeatures = {
-  track: Track;
-  audioFeatures: AudioFeature;
-};
+import { TrackWithAudioFeatures } from "./spotify-api";
 
 /**
  * Provides a simple format for displaying track details.

@@ -2,10 +2,10 @@
  * @jest-environment jsdom
  */
 
+import { TrackWithAudioFeatures } from "./spotify-api";
 import {
   formatTrackDetails,
   getTrackIdsFromTrackElements,
-  TrackWithAudioFeatures,
 } from "./spotify-web";
 
 function createTestTrackWithAudioFeatures() {
