@@ -84,7 +84,7 @@ async function main() {
 
       if (!elemTrack) {
         console.warn(
-          `Could not find matching track element for: ${enhancedTrack.track.name}`,
+          `Could not find matching track element for: ${enhancedTrack.track.name}.`,
           enhancedTrack,
         );
         return;
@@ -116,6 +116,10 @@ async function main() {
 
           for (const elemRow of elemRows) {
             const elemTrack = elemRow.querySelector('a[href*="/track"]');
+            if (!elemTrack) {
+              console.warn("The row did not contain a track element.", elemRow);
+              continue;
+            }
 
             if (elemTrack.getAttribute("playlister:visited") === null) {
               elemTracks.push(elemTrack);

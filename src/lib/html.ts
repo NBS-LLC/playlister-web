@@ -8,14 +8,16 @@ type MutationHandler = { (mutation: MutationRecord): Promise<void> };
  */
 export function waitForElem(selector: string): Promise<Element> {
   return new Promise((resolve) => {
-    if (document.querySelector(selector)) {
-      return resolve(document.querySelector(selector));
+    const element = document.querySelector(selector);
+    if (element) {
+      return resolve(element);
     }
 
     const observer = new MutationObserver((_mutations) => {
-      if (document.querySelector(selector)) {
+      const element = document.querySelector(selector);
+      if (element) {
         observer.disconnect();
-        resolve(document.querySelector(selector));
+        resolve(element);
       }
     });
 

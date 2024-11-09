@@ -81,7 +81,7 @@ describe(onMutation.name, () => {
     document.body.innerHTML = "<div id='container'><div id='content'></div>";
 
     onMutation(
-      document.querySelector("#container"),
+      document.querySelector("#container")!,
       async () => {
         done();
       },
@@ -91,7 +91,7 @@ describe(onMutation.name, () => {
     setTimeout(() => {
       const element = document.createElement("div");
       element.id = "unit-test";
-      document.querySelector("#content").appendChild(element);
+      document.querySelector("#content")!.appendChild(element);
     }, 100);
   });
 });
