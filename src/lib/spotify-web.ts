@@ -63,3 +63,20 @@ export function getTrackIdsFromTrackElements(elements: Element[]) {
     })
     .filter((trackId) => trackId !== null);
 }
+
+/**
+ * Finds an element in a list of elements that corresponds to a given track ID.
+ *
+ * @param elemTracks - An array of HTML elements.
+ * @param trackId - The track ID to search for.
+ * @return The element that corresponds to the given track ID, or undefined if not found.
+ */
+export function findTrackElementByTrackId(
+  elemTracks: Element[],
+  trackId: string,
+) {
+  return elemTracks.find((item) => {
+    const elemTrackId = item.getAttribute("href")?.replace("/track/", "");
+    return elemTrackId === trackId;
+  });
+}

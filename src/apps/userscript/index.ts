@@ -9,6 +9,7 @@ import {
 } from "../../lib/spotify-api";
 
 import {
+  findTrackElementByTrackId,
   formatTrackDetails,
   getTrackIdsFromTrackElements,
   updateNowPlayingWidget,
@@ -76,10 +77,10 @@ async function main() {
     );
 
     enhancedTracks.forEach((enhancedTrack) => {
-      const elemTrack = elemTracksToProcess.find((item) => {
-        const trackId = item.getAttribute("href").replace("/track/", "");
-        return trackId === enhancedTrack.track.id;
-      });
+      const elemTrack = findTrackElementByTrackId(
+        elemTracksToProcess,
+        enhancedTrack.track.id,
+      );
 
       if (!elemTrack) {
         console.warn(
