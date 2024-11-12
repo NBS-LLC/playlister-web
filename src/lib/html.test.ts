@@ -73,4 +73,25 @@ describe(onMutation.name, () => {
       elemContent.appendChild(element);
     }, 100);
   });
+
+  /**
+   * Covers the use case of tracks being added to a track list.
+   */
+  it("should invoke callback when a subtree mutation occurs", (done) => {
+    document.body.innerHTML = "<div id='container'><div id='content'></div>";
+
+    onMutation(
+      document.querySelector("#container")!,
+      async () => {
+        done();
+      },
+      { childList: true, subtree: true },
+    );
+
+    setTimeout(() => {
+      const element = document.createElement("div");
+      element.id = "unit-test";
+      document.querySelector("#content")!.appendChild(element);
+    }, 100);
+  });
 });

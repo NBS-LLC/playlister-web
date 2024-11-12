@@ -1,26 +1,17 @@
 import { getCamelotValue, getKeyName } from "./audio";
-import { waitForElem } from "./html";
-
-import { AudioFeature, PlaylistItem, Track } from "./spotify-api";
-
-export type PlaylistItemWithAudioFeatures = {
-  track: Track;
-  audioFeatures: AudioFeature;
-};
-
-export type TrackWithAudioFeatures = PlaylistItemWithAudioFeatures;
-
-type TracksWithAudioFeatures = Map<string, PlaylistItemWithAudioFeatures>;
+import { TrackWithAudioFeatures } from "./spotify-api";
 
 /**
- * Formats the track details including title, key name, and camelot value.
+ * Provides a simple format for displaying track details.
  *
- * @param track - The playlist item with audio features to format.
- * @return The formatted track details as a string.
+ * @param title - The track's title.
+ * @param track - The track with audio features to format.
+ * @return The formatted track details.
  */
-export function formatTrackDetails(track: PlaylistItemWithAudioFeatures) {
-  const trackTitle = `${track.track.name} by ${track.track.artists[0].name}`;
-
+export function formatTrackDetails(
+  title: string,
+  track: TrackWithAudioFeatures,
+) {
   const trackKeyName = getKeyName(
     track.audioFeatures.key,
     track.audioFeatures.mode,
@@ -31,87 +22,61 @@ export function formatTrackDetails(track: PlaylistItemWithAudioFeatures) {
     track.audioFeatures.mode,
   );
 
-  return `${trackTitle} (${track.audioFeatures.tempo} ${trackKeyName} ${trackCamelotValue})`;
-}
-
-/**
- * Provides a simple format for displaying track name and basic details.
- *
- * @param track - The track with audio features to format.
- * @return The formatted track details.
- */
-export function formatTrack(track: TrackWithAudioFeatures) {
-  return `${track.track.name} (${track.audioFeatures.tempo})`;
+  return `${title} (${track.audioFeatures.tempo} ${trackKeyName} ${trackCamelotValue})`;
 }
 
 export function updateNowPlayingWidget(
   elemNowPlayingWidget: Element,
   track: TrackWithAudioFeatures,
 ) {
-  console.log(formatTrackDetails(track));
+  console.info(
+    formatTrackDetails(
+      `${track.track.name} by ${track.track.artists[0].name}`,
+      track,
+    ),
+    track,
+  );
 
   const elemCurrentTrackName = elemNowPlayingWidget.querySelector(
     'a[data-testid="context-item-link"]',
   );
 
   if (elemCurrentTrackName) {
-    elemCurrentTrackName.textContent = formatTrack(track);
+    elemCurrentTrackName.textContent = formatTrackDetails(
+      track.track.name,
+      track,
+    );
   }
 }
 
-export function updatePlaylistWidget(
-  elemPlaylistWidget: Element,
-  tracksWithAudioFeatures: TracksWithAudioFeatures,
+/**
+ * Extracts track IDs from a list of elements.
+ *
+ * @param elements - An array of HTML elements.
+ * @return An array of track IDs.
+ */
+export function getTrackIdsFromTrackElements(elements: Element[]) {
+  return elements
+    .map((elemTrack) => {
+      const href = elemTrack.getAttribute("href");
+      return href && href.includes("/track/") ? href.split("/track/")[1] : null;
+    })
+    .filter((trackId) => trackId !== null);
+}
+
+/**
+ * Finds an element in a list of elements that corresponds to a given track ID.
+ *
+ * @param elemTracks - An array of HTML elements.
+ * @param trackId - The track ID to search for.
+ * @return The element that corresponds to the given track ID, or undefined if not found.
+ */
+export function findTrackElementByTrackId(
+  elemTracks: Element[],
+  trackId: string,
 ) {
-  const elemsTracks = elemPlaylistWidget.querySelectorAll(
-    'a[data-testid="internal-track-link"]',
-  );
-
-  elemsTracks.forEach((elem) => {
-    const trackId = elem.getAttribute("href")!.replace("/track/", "");
-
-    if (tracksWithAudioFeatures.has(trackId)) {
-      const audioFeatures = tracksWithAudioFeatures.get(trackId)!;
-      elem.textContent = formatTrackDetails({
-        track: audioFeatures.track,
-        audioFeatures: audioFeatures.audioFeatures,
-      });
-    }
+  return elemTracks.find((item) => {
+    const elemTrackId = item.getAttribute("href")?.replace("/track/", "");
+    return elemTrackId === trackId;
   });
-}
-
-export function getPlaylistContainer(elemPlaylistWidget: Element) {
-  return elemPlaylistWidget.querySelector(
-    '[role="presentation"]:nth-child(2) > [role="presentation"]:nth-child(2)',
-  );
-}
-
-export async function getPlaylistId() {
-  const elemPlaylistPage = await waitForElem('[data-testid="playlist-page"]');
-
-  if (!elemPlaylistPage.hasAttribute("data-test-uri")) {
-    throw new Error("unable to locate playlist id");
-  }
-
-  return elemPlaylistPage
-    .getAttribute("data-test-uri")!
-    .replace("spotify:playlist:", "");
-}
-
-export function combinePlaylistItemsWithAudioFeatures(
-  playlistItems: PlaylistItem[],
-  audioFeatures: AudioFeature[],
-) {
-  const trackMap: TracksWithAudioFeatures = new Map();
-
-  playlistItems.forEach((item) => {
-    trackMap.set(item.track.id, {
-      track: item.track,
-      audioFeatures: audioFeatures.find(
-        (feature) => feature.id === item.track.id,
-      )!,
-    });
-  });
-
-  return trackMap;
 }

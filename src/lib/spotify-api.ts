@@ -1,6 +1,4 @@
 import { chunk } from "./array";
-import { fetchAllData } from "./http";
-import { measurePerformance } from "./perf";
 
 export type Track = {
   id: string;
@@ -8,15 +6,16 @@ export type Track = {
   artists: { name: string }[];
 };
 
-export type PlaylistItem = {
-  track: Track;
-};
-
 export type AudioFeature = {
   id: string;
   key: number;
   mode: number;
   tempo: number;
+};
+
+export type TrackWithAudioFeatures = {
+  track: Track;
+  audioFeatures: AudioFeature;
 };
 
 /**
@@ -55,19 +54,29 @@ export async function getTrackAudioFeatures(
   return (await trackAudioFeaturesResponse.json()) as AudioFeature;
 }
 
-export async function getPlaylistItems(
-  accessToken: string,
-  playlistId: string,
-) {
-  const result = await measurePerformance(async () => {
-    return (await fetchAllData(
-      "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks",
-      { headers: { Authorization: "Bearer " + accessToken } },
-    )) as PlaylistItem[];
-  });
+async function _getChunkOfTracks(accessToken: string, trackIds: string[]) {
+  const result = await fetch(
+    `https://api.spotify.com/v1/tracks?ids=${trackIds.join(",")}`,
+    { headers: { Authorization: "Bearer " + accessToken } },
+  );
 
-  console.log(`${getPlaylistItems.name} took ${result.time}ms`);
-  return result.returnValue;
+  return (await result.json()).tracks as Track[];
+}
+
+export async function getSeveralTracks(
+  accessToken: string,
+  trackIds: string[],
+) {
+  const spotifyApiTrackMax = 50; // https://tinyurl.com/42h4r9y2
+  const chunkedTrackIds = chunk(trackIds, spotifyApiTrackMax);
+
+  const trackChunks = await Promise.all(
+    chunkedTrackIds.map(
+      async (chunk) => await _getChunkOfTracks(accessToken, chunk),
+    ),
+  );
+
+  return trackChunks.flat();
 }
 
 async function _getChunkOfAudioFeatures(accessToken: string, tracks: Track[]) {
@@ -84,7 +93,7 @@ export async function getSeveralAudioFeatures(
   accessToken: string,
   tracks: Track[],
 ) {
-  const spotifyApiTrackMax = 100; // https://g.co/gemini/share/3d6aefc1b030
+  const spotifyApiTrackMax = 100; // https://tinyurl.com/3jmz3kxu
   const chunkedTracks = chunk(tracks, spotifyApiTrackMax);
 
   const audioFeatureChunks = await Promise.all(
@@ -94,4 +103,37 @@ export async function getSeveralAudioFeatures(
   );
 
   return audioFeatureChunks.flat();
+}
+
+/**
+ * Gets several tracks including their audio features.
+ *
+ * @param accessToken - The Spotify access token.
+ * @param trackIds - An array of Spotify track IDs.
+ * @return An array of objects with track information and the corresponding audio features.
+ */
+export async function getSeveralTracksWithAudioFeatures(
+  accessToken: string,
+  trackIds: string[],
+) {
+  const severalTracks = await getSeveralTracks(accessToken, trackIds);
+  const severalAudioFeatures = await getSeveralAudioFeatures(
+    accessToken,
+    severalTracks,
+  );
+
+  return severalTracks.map((track) => {
+    const audioFeatures = severalAudioFeatures.find(
+      (item) => item.id === track.id,
+    );
+
+    if (!audioFeatures) {
+      console.warn(
+        `Could not find matching audio features for: ${track.name}.`,
+        track,
+      );
+    }
+
+    return { track, audioFeatures } as TrackWithAudioFeatures;
+  });
 }
