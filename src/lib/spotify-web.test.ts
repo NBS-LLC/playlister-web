@@ -4,6 +4,7 @@
 
 import { TrackWithAudioFeatures } from "./spotify-api";
 import {
+  findTrackElementByTrackId,
   formatTrackDetails,
   getTrackIdsFromTrackElements,
 } from "./spotify-web";
@@ -51,5 +52,25 @@ describe(getTrackIdsFromTrackElements.name, () => {
     expect(getTrackIdsFromTrackElements(Array.from(elements))).toEqual(
       expectedTrackIds,
     );
+  });
+});
+
+describe(findTrackElementByTrackId.name, () => {
+  it("should find a track element by its track id", () => {
+    document.body.innerHTML = `
+      <div class="track-list">
+        <a href="/track/1111">track 1</a>
+        <a href="/album/2222">album 1</a>
+        <a href="/track/2222">track 2</a>
+        <a name="more">more items</a>
+        <a href="/track/3333">track 3</a>
+        <a href="/track/4444">track 4</a>
+      </div>
+    `;
+
+    const elements = document.querySelectorAll("a");
+
+    const actual = findTrackElementByTrackId(Array.from(elements), "2222");
+    expect(actual?.textContent).toEqual("track 2");
   });
 });
