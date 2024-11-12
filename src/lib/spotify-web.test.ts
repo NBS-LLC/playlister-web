@@ -7,6 +7,7 @@ import {
   findTrackElementByTrackId,
   formatTrackDetails,
   getTrackIdsFromTrackElements,
+  updateNowPlayingWidget,
 } from "./spotify-web";
 
 function createTestTrackWithAudioFeatures() {
@@ -72,5 +73,21 @@ describe(findTrackElementByTrackId.name, () => {
 
     const actual = findTrackElementByTrackId(Array.from(elements), "2222");
     expect(actual?.textContent).toEqual("track 2");
+  });
+});
+
+describe(updateNowPlayingWidget.name, () => {
+  it("should update the now playing widget with enhanced track details", () => {
+    document.body.innerHTML = `
+      <div>
+        <a data-testid="context-item-link">Original Track Name</a>
+      </div>
+    `;
+
+    const element = document.querySelector("div")!;
+    updateNowPlayingWidget(element, createTestTrackWithAudioFeatures());
+
+    const actual = document.querySelector("a");
+    expect(actual?.textContent).toEqual("Track Name (120 E 12B)");
   });
 });
