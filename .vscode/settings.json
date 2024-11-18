@@ -1,5 +1,5 @@
 {
-  "eslint.useFlatConfig": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "eslint.useFlatConfig": true,
   "explorer.excludeGitIgnore": true
 }
