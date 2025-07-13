@@ -7,7 +7,7 @@ on:
     paths:
       - src/apps/userscript/**
       - .github/workflows/build-userscript.yml
-      - .nvmrc
+      - .tool-versions
       - eslint.config.mjs
       - package*
       - tsconfig.json

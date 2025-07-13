@@ -7,7 +7,7 @@ on:
     paths:
       - src/lib/**
       - .github/workflows/build-lib.yml
-      - .nvmrc
+      - .tool-versions
       - eslint.config.mjs
       - package*
       - tsconfig.json
