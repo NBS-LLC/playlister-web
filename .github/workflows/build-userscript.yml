@@ -1,5 +1,8 @@
 name: build-userscript
 
+env:
+  SEMVER: 0.0.${{ github.run_number }}-build-userscript
+
 on:
   pull_request:
     branches:
@@ -31,3 +34,8 @@ jobs:
 
       - name: Build
         run: npm run build:userscript
+
+      - name: Archive
+        uses: actions/upload-artifact@v4
+        with:
+          path: dist/userscript/playlister.user.js
