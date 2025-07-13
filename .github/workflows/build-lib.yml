@@ -7,7 +7,7 @@ on:
     paths:
       - src/lib/**
       - .github/workflows/build-lib.yml
-      - .nvmrc
+      - .tool-versions
       - eslint.config.mjs
       - package*
       - tsconfig.json
@@ -23,7 +23,7 @@ jobs:
       - name: Setup
         uses: actions/setup-node@v4
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: ".tool-versions"
           cache: "npm"
 
       - name: Install

@@ -4,13 +4,12 @@ A Userscript Version of Playlister
 
 ## Prerequisites
 
-- [NVM](https://github.com/nvm-sh/nvm)
-- Or [ASDF](https://asdf-vm.com) with `legacy_version_file = yes`
+- [ASDF](https://asdf-vm.com)
 
 ## Build
 
 ```bash
-> nvm use # or: asdf install
+> asdf install
 > npm install
 > npm run package:userscript
 ```

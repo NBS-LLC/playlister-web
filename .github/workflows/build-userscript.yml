@@ -1,5 +1,8 @@
 name: build-userscript
 
+env:
+  SEMVER: 0.0.${{ github.run_number }}-build-userscript
+
 on:
   pull_request:
     branches:
@@ -7,7 +10,7 @@ on:
     paths:
       - src/apps/userscript/**
       - .github/workflows/build-userscript.yml
-      - .nvmrc
+      - .tool-versions
       - eslint.config.mjs
       - package*
       - tsconfig.json
@@ -23,7 +26,7 @@ jobs:
       - name: Setup
         uses: actions/setup-node@v4
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: ".tool-versions"
           cache: "npm"
 
       - name: Install
@@ -31,3 +34,8 @@ jobs:
 
       - name: Build
         run: npm run build:userscript
+
+      - name: Archive
+        uses: actions/upload-artifact@v4
+        with:
+          path: src/apps/userscript/dist
