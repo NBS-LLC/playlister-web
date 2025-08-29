@@ -1,0 +1,22 @@
+{
+  "name": "@playlister/proxy",
+  "description": "A proxy server for the Playlister userscript.",
+  "author": "Nick Derevjanik",
+  "license": "GPL-3.0-only",
+  "version": "0.0.1",
+  "private": true,
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node ."
+  },
+  "dependencies": {
+    "cors": "~2.8.5",
+    "express": "~5.1.0"
+  },
+  "devDependencies": {
+    "@types/cors": "~2.8.19",
+    "@types/express": "~5.0.3"
+  }
+}

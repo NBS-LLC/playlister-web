@@ -11,7 +11,10 @@
     "clean:userscript": "rimraf dist/userscript",
     "build:userscript": "npm run --workspace=src/apps/userscript build",
     "dist:userscript": "mkdir -p dist/userscript && cp -r src/apps/userscript/dist/* dist/userscript",
-    "package:userscript": "npm-run-all clean:userscript build:userscript dist:userscript"
+    "package:userscript": "npm-run-all clean:userscript build:userscript dist:userscript",
+    "build:proxy": "npm run --workspace=src/apps/proxy build",
+    "start:proxy": "npm run build:proxy && npm run --workspace=src/apps/proxy start",
+    "build": "npm run build:lib && npm run build:userscript && npm run build:proxy"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
@@ -31,6 +34,7 @@
   },
   "workspaces": [
     "src/lib",
-    "src/apps/userscript"
+    "src/apps/userscript",
+    "src/apps/proxy"
   ]
 }
