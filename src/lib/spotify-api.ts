@@ -22,11 +22,9 @@ export type TrackWithAudioFeatures = {
  * Assumes the user is logged into Spotify (uses auth from cookies).
  */
 export async function getAccessToken() {
-  const tokenResponse = await fetch(
-    "https://open.spotify.com/get_access_token?reason=transport&productType=web_player",
-  );
-
-  return (await tokenResponse.json()).accessToken as string;
+  const tokenResponse = await fetch("http://localhost:3000/get-spotify-token");
+  const data = await tokenResponse.json();
+  return data.access_token as string;
 }
 
 export async function getCurrentlyPlayingTrack(accessToken: string) {
