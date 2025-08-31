@@ -25,6 +25,7 @@ interface TrackFeatures {
   acousticness: number;
   danceability: number;
   energy: number;
+  instrumentalness: number;
   key: number;
   liveness: number;
   loudness: number;
@@ -82,6 +83,18 @@ async function getTrackDetails(id: string): Promise<TrackDetails> {
   return trackDetails;
 }
 
+class GetTrackFeaturesError extends Error {}
+
+async function getTrackFeatures(id: string): Promise<TrackFeatures> {
+  const trackDetails = (await fetchMultipleTrackFeatures([id]))[0];
+
+  if (!trackDetails) {
+    throw new GetTrackFeaturesError(`Unable to get track features for: ${id}.`);
+  }
+
+  return trackDetails;
+}
+
 class ParseTrackIdError extends Error {}
 
 function parseNowPlayingHref(element: Element) {
@@ -103,6 +116,7 @@ async function logNowPlayingTrack(element: Element) {
   const trackId = parseNowPlayingHref(element);
   console.log("now playing track:", trackId);
   console.log(await getTrackDetails(trackId));
+  console.log(await getTrackFeatures(trackId));
 }
 
 async function main() {
