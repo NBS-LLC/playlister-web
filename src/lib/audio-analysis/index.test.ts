@@ -27,11 +27,11 @@ describe(AudioAnalysis.name, () => {
         .mockResolvedValue(Response.json({ content: [mockTrackDetails] }));
 
       const audioAnalysis = new AudioAnalysis(mockHttpClient);
-      const trackDetails = await audioAnalysis.getTrackDetails("abcd1234");
+      const trackDetails = await audioAnalysis.getTrackDetails("spotifyId");
 
       expect(mockHttpClient).toHaveBeenCalledTimes(1);
       expect(mockHttpClient).toHaveBeenCalledWith(
-        "https://api.reccobeats.com/v1/track?ids=abcd1234",
+        "https://api.reccobeats.com/v1/track?ids=spotifyId",
       );
       expect(trackDetails).toEqual(mockTrackDetails);
     });
