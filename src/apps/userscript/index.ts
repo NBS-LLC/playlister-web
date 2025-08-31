@@ -6,7 +6,7 @@ interface Artist {
   href: string;
 }
 
-interface Track {
+interface TrackDetails {
   id: string;
   trackTitle: string;
   artists: Artist[];
@@ -19,24 +19,61 @@ interface Track {
   popularity: number;
 }
 
-async function findMultipleTrackDetails(ids: string[]): Promise<Track[]> {
+interface TrackFeatures {
+  id: string;
+  href: string;
+  acousticness: number;
+  danceability: number;
+  energy: number;
+  key: number;
+  liveness: number;
+  loudness: number;
+  mode: number;
+  speechiness: number;
+  tempo: number;
+  valence: number;
+}
+
+async function fetchMultipleTrackDetails(
+  ids: string[],
+): Promise<TrackDetails[]> {
   const baseUrl = "https://api.reccobeats.com/v1/track";
   const params = new URLSearchParams({ ids: ids.join(",") });
   const url = `${baseUrl}?${params.toString()}`;
   const response = await fetch(url);
 
   if (!response.ok) {
-    console.log(response);
-    throw new Error("An error occurred trying to retrieve tracks.");
+    console.error(response);
+    throw new Error(
+      "An error occurred trying to fetch multiple track details.",
+    );
   }
 
-  return (await response.json()).content as Track[];
+  return (await response.json()).content as TrackDetails[];
+}
+
+async function fetchMultipleTrackFeatures(
+  ids: string[],
+): Promise<TrackFeatures[]> {
+  const baseUrl = "https://api.reccobeats.com/v1/audio-features";
+  const params = new URLSearchParams({ ids: ids.join(",") });
+  const url = `${baseUrl}?${params.toString()}`;
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    console.error(response);
+    throw new Error(
+      "An error occurred trying to fetch multiple track features.",
+    );
+  }
+
+  return (await response.json()).content as TrackFeatures[];
 }
 
 class GetTrackDetailsError extends Error {}
 
-async function getTrackDetails(id: string): Promise<Track> {
-  const trackDetails = (await findMultipleTrackDetails([id]))[0];
+async function getTrackDetails(id: string): Promise<TrackDetails> {
+  const trackDetails = (await fetchMultipleTrackDetails([id]))[0];
 
   if (!trackDetails) {
     throw new GetTrackDetailsError(`Unable to get track details for: ${id}.`);
