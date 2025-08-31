@@ -4,14 +4,41 @@ import { TrackFeatures } from "./track-features";
 class GetTrackDetailsError extends Error {}
 class GetTrackFeaturesError extends Error {}
 
-export async function getTrackDetails(id: string): Promise<TrackDetails> {
-  const trackDetails = (await fetchMultipleTrackDetails([id]))[0];
+export class AudioAnalysis {
+  constructor(
+    readonly httpClient: (
+      input: RequestInfo,
+      init?: RequestInit,
+    ) => Promise<Response>,
+  ) {}
 
-  if (!trackDetails) {
-    throw new GetTrackDetailsError(`Unable to get track details for: ${id}.`);
+  async getTrackDetails(id: string): Promise<TrackDetails> {
+    const trackDetails = (await this.fetchMultipleTrackDetails([id]))[0];
+
+    if (!trackDetails) {
+      throw new GetTrackDetailsError(`Unable to get track details for: ${id}.`);
+    }
+
+    return trackDetails;
   }
 
-  return trackDetails;
+  private async fetchMultipleTrackDetails(
+    ids: string[],
+  ): Promise<TrackDetails[]> {
+    const baseUrl = "https://api.reccobeats.com/v1/track";
+    const params = new URLSearchParams({ ids: ids.join(",") });
+    const url = `${baseUrl}?${params.toString()}`;
+    const response = await this.httpClient(url);
+
+    if (!response.ok) {
+      console.error(response);
+      throw new Error(
+        "An error occurred trying to fetch multiple track details.",
+      );
+    }
+
+    return (await response.json()).content as TrackDetails[];
+  }
 }
 
 export async function getTrackFeatures(id: string): Promise<TrackFeatures> {
@@ -22,24 +49,6 @@ export async function getTrackFeatures(id: string): Promise<TrackFeatures> {
   }
 
   return trackDetails;
-}
-
-async function fetchMultipleTrackDetails(
-  ids: string[],
-): Promise<TrackDetails[]> {
-  const baseUrl = "https://api.reccobeats.com/v1/track";
-  const params = new URLSearchParams({ ids: ids.join(",") });
-  const url = `${baseUrl}?${params.toString()}`;
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    console.error(response);
-    throw new Error(
-      "An error occurred trying to fetch multiple track details.",
-    );
-  }
-
-  return (await response.json()).content as TrackDetails[];
 }
 
 async function fetchMultipleTrackFeatures(

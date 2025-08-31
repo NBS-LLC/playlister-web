@@ -1,4 +1,4 @@
-import { getTrackDetails, getTrackFeatures } from "../../lib/audio-analysis";
+import { AudioAnalysis, getTrackFeatures } from "../../lib/audio-analysis";
 import { onMutation, waitForElem } from "../../lib/html";
 
 class ParseTrackIdError extends Error {}
@@ -20,8 +20,9 @@ function parseNowPlayingHref(element: Element) {
 
 async function logNowPlayingTrack(element: Element) {
   const trackId = parseNowPlayingHref(element);
+  const audioAnalysis = new AudioAnalysis(fetch);
   console.log("now playing track:", trackId);
-  console.log(await getTrackDetails(trackId));
+  console.log(await audioAnalysis.getTrackDetails(trackId));
   console.log(await getTrackFeatures(trackId));
 }
 
