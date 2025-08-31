@@ -1,4 +1,5 @@
 import { readFileSync } from "fs";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 
 export default {
   input: "out/apps/userscript/index.js",
@@ -7,4 +8,5 @@ export default {
     file: "dist/playlister.user.js",
     format: "cjs",
   },
+  plugins: [nodeResolve()],
 };
