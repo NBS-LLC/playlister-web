@@ -1,40 +1,8 @@
+import { TrackDetails } from "./track-details";
+import { TrackFeatures } from "./track-features";
+
 class GetTrackDetailsError extends Error {}
 class GetTrackFeaturesError extends Error {}
-
-export interface TrackDetails {
-  id: string;
-  trackTitle: string;
-  artists: Artist[];
-  durationMs: number;
-  isrc: string;
-  ean: string;
-  upc: string;
-  href: string;
-  availableCountries?: string;
-  popularity: number;
-}
-
-export interface TrackFeatures {
-  id: string;
-  href: string;
-  acousticness: number;
-  danceability: number;
-  energy: number;
-  instrumentalness: number;
-  key: number;
-  liveness: number;
-  loudness: number;
-  mode: number;
-  speechiness: number;
-  tempo: number;
-  valence: number;
-}
-
-interface Artist {
-  id: string;
-  name: string;
-  href: string;
-}
 
 export async function getTrackDetails(id: string): Promise<TrackDetails> {
   const trackDetails = (await fetchMultipleTrackDetails([id]))[0];
