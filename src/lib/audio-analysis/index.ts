@@ -58,7 +58,7 @@ export class AudioAnalysis {
     const baseUrl = "https://api.reccobeats.com/v1/audio-features";
     const params = new URLSearchParams({ ids: ids.join(",") });
     const url = `${baseUrl}?${params.toString()}`;
-    const response = await fetch(url);
+    const response = await this.httpClient(url);
 
     if (!response.ok) {
       console.error(response);
