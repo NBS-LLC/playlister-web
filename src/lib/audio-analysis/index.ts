@@ -22,6 +22,18 @@ export class AudioAnalysis {
     return trackDetails;
   }
 
+  async getTrackFeatures(id: string): Promise<TrackFeatures> {
+    const trackDetails = (await this.fetchMultipleTrackFeatures([id]))[0];
+
+    if (!trackDetails) {
+      throw new GetTrackFeaturesError(
+        `Unable to get track features for: ${id}.`,
+      );
+    }
+
+    return trackDetails;
+  }
+
   private async fetchMultipleTrackDetails(
     ids: string[],
   ): Promise<TrackDetails[]> {
@@ -39,32 +51,22 @@ export class AudioAnalysis {
 
     return (await response.json()).content as TrackDetails[];
   }
-}
 
-export async function getTrackFeatures(id: string): Promise<TrackFeatures> {
-  const trackDetails = (await fetchMultipleTrackFeatures([id]))[0];
+  private async fetchMultipleTrackFeatures(
+    ids: string[],
+  ): Promise<TrackFeatures[]> {
+    const baseUrl = "https://api.reccobeats.com/v1/audio-features";
+    const params = new URLSearchParams({ ids: ids.join(",") });
+    const url = `${baseUrl}?${params.toString()}`;
+    const response = await fetch(url);
 
-  if (!trackDetails) {
-    throw new GetTrackFeaturesError(`Unable to get track features for: ${id}.`);
+    if (!response.ok) {
+      console.error(response);
+      throw new Error(
+        "An error occurred trying to fetch multiple track features.",
+      );
+    }
+
+    return (await response.json()).content as TrackFeatures[];
   }
-
-  return trackDetails;
-}
-
-async function fetchMultipleTrackFeatures(
-  ids: string[],
-): Promise<TrackFeatures[]> {
-  const baseUrl = "https://api.reccobeats.com/v1/audio-features";
-  const params = new URLSearchParams({ ids: ids.join(",") });
-  const url = `${baseUrl}?${params.toString()}`;
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    console.error(response);
-    throw new Error(
-      "An error occurred trying to fetch multiple track features.",
-    );
-  }
-
-  return (await response.json()).content as TrackFeatures[];
 }
