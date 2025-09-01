@@ -1,4 +1,4 @@
-import { AudioAnalysis } from ".";
+import { AudioAnalysis, GetTrackDetailsError, GetTrackFeaturesError } from ".";
 import { TrackDetails } from "./track-details";
 import { TrackFeatures } from "./track-features";
 
@@ -36,6 +36,17 @@ describe(AudioAnalysis.name, () => {
       );
       expect(trackDetails).toEqual(mockTrackDetails);
     });
+
+    it("throws an error when the track is not found", async () => {
+      const mockHttpClient = jest
+        .fn()
+        .mockResolvedValue(Response.json({ content: [] }));
+
+      const audioAnalysis = new AudioAnalysis(mockHttpClient);
+      await expect(async () => {
+        await audioAnalysis.getTrackDetails("abcd1234");
+      }).rejects.toThrow(GetTrackDetailsError);
+    });
   });
 
   describe(AudioAnalysis.prototype.getTrackFeatures.name, () => {
@@ -68,6 +79,17 @@ describe(AudioAnalysis.name, () => {
         "https://api.reccobeats.com/v1/audio-features?ids=spotifyId",
       );
       expect(trackFeatures).toEqual(mockTrackFeatures);
+    });
+
+    it("throws an error when the track is not found", async () => {
+      const mockHttpClient = jest
+        .fn()
+        .mockResolvedValue(Response.json({ content: [] }));
+
+      const audioAnalysis = new AudioAnalysis(mockHttpClient);
+      await expect(async () => {
+        await audioAnalysis.getTrackFeatures("abcd1234");
+      }).rejects.toThrow(GetTrackFeaturesError);
     });
   });
 });

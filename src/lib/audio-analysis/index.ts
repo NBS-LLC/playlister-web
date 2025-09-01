@@ -1,8 +1,8 @@
 import { TrackDetails } from "./track-details";
 import { TrackFeatures } from "./track-features";
 
-class GetTrackDetailsError extends Error {}
-class GetTrackFeaturesError extends Error {}
+export class GetTrackDetailsError extends Error {}
+export class GetTrackFeaturesError extends Error {}
 
 export class AudioAnalysis {
   constructor(
