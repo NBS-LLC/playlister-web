@@ -2,43 +2,37 @@
  * @jest-environment jsdom
  */
 
-import { SpotifyWebPage } from ".";
-import { waitForElem } from "../html";
-
-jest.mock("../html");
-const mockWaitForElem = waitForElem as jest.Mock;
+import { ElementNotFoundError, SpotifyWebPage } from ".";
 
 describe(SpotifyWebPage.name, () => {
   beforeEach(() => {
     document.body.innerHTML = "";
-    jest.clearAllMocks();
-  });
-
-  describe(SpotifyWebPage.prototype.getNowPlayingTrackElement.name, () => {
-    it("returns the 'now playing' track element", async () => {
-      const mockElement = document.createElement("a");
-      mockElement.href = "/playlist/1111?uid=2222&uri=spotify:track:1234abcd";
-      mockWaitForElem.mockResolvedValue(mockElement);
-
-      const page = new SpotifyWebPage();
-      const element = await page.getNowPlayingTrackElement();
-
-      expect(mockWaitForElem).toHaveBeenCalledTimes(1);
-      expect(element).toEqual(mockElement);
-    });
   });
 
   describe(SpotifyWebPage.prototype.getNowPlayingTrackId.name, () => {
-    it("returns the 'now playing' track id", async () => {
-      const mockElement = document.createElement("a");
-      mockElement.href = "/playlist/1111?uid=2222&uri=spotify:track:1234abcd";
-      mockWaitForElem.mockResolvedValue(mockElement);
+    it("returns the 'now playing' track id", () => {
+      document.body.innerHTML = `
+        <aside aria-label="Now playing view">
+          <div><a href="/playlist/1111?uid=2222&uri=spotify:track:1234abcd">Example Track</a></div>
+        </aside>
+      `;
 
-      const page = new SpotifyWebPage();
-      const trackId = await page.getNowPlayingTrackId();
-
-      expect(mockWaitForElem).toHaveBeenCalledTimes(1);
+      const spotifyWebPage = new SpotifyWebPage();
+      const trackId = spotifyWebPage.getNowPlayingTrackId();
       expect(trackId).toEqual("1234abcd");
+    });
+
+    it("throws an error when the element cannot be found", () => {
+      document.body.innerHTML = `
+        <aside aria-label="Now playing view">
+          <div><a href="/playlist/1111?uid=2222&uri=spotify:episode:1234abcd">Example Episode</a></div>
+        </aside>
+      `;
+
+      const spotifyWebPage = new SpotifyWebPage();
+      expect(() => spotifyWebPage.getNowPlayingTrackId()).toThrow(
+        ElementNotFoundError,
+      );
     });
   });
 });

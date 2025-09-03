@@ -1,20 +1,26 @@
-import { waitForElem } from "../html";
-
+export class ElementNotFoundError extends Error {}
 export class ParseTrackIdError extends Error {}
 
 export class SpotifyWebPage {
-  async getNowPlayingTrackElement() {
-    return waitForElem(
-      'aside[aria-label="Now playing view"] a[href*="spotify:track:"]',
-    ) as Promise<HTMLAnchorElement>;
+  readonly nowPlayingTrack =
+    'aside[aria-label="Now playing view"] a[href*="spotify:track:"]';
+
+  getNowPlayingTrackId() {
+    const element = this.getElement<HTMLAnchorElement>(this.nowPlayingTrack);
+    return this.parseNowPlayingTrackId(element);
   }
 
-  async getNowPlayingTrackId() {
-    const element = await this.getNowPlayingTrackElement();
-    return this.parseNowPlayingHref(element);
+  private getElement<T extends HTMLElement>(selector: string): T {
+    const elem = document.querySelector<T>(selector);
+
+    if (!elem) {
+      throw new ElementNotFoundError(`Unable to locate: ${selector}.`);
+    }
+
+    return elem;
   }
 
-  private parseNowPlayingHref(element: HTMLAnchorElement) {
+  private parseNowPlayingTrackId(element: HTMLAnchorElement) {
     const url = new URLSearchParams(element.href);
     const uri = url.get("uri");
 

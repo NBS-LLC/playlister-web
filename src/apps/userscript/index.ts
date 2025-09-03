@@ -1,11 +1,11 @@
 import { AudioAnalysis } from "../../lib/audio-analysis";
-import { onMutation } from "../../lib/html";
+import { onMutation, waitForElem } from "../../lib/html";
 import { SpotifyWebPage } from "../../lib/spotify-web/index";
 
 const spotifyWebPage = new SpotifyWebPage();
 
 async function logNowPlayingTrack() {
-  const trackId = await spotifyWebPage.getNowPlayingTrackId();
+  const trackId = spotifyWebPage.getNowPlayingTrackId();
   console.log("now playing track:", trackId);
 
   const audioAnalysis = new AudioAnalysis(fetch);
@@ -14,7 +14,7 @@ async function logNowPlayingTrack() {
 }
 
 async function main() {
-  spotifyWebPage.getNowPlayingTrackElement().then(async (elem) => {
+  waitForElem(spotifyWebPage.nowPlayingTrack).then(async (elem) => {
     onMutation(elem, logNowPlayingTrack);
     await logNowPlayingTrack();
   });
