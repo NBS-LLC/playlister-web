@@ -1,6 +1,6 @@
 import { AudioAnalysis, GetTrackDetailsError, GetTrackFeaturesError } from ".";
-import { TrackDetails } from "./track-details";
-import { TrackFeatures } from "./track-features";
+import { TrackDetails } from "./TrackDetails";
+import { TrackFeatures } from "./TrackFeatures";
 
 describe(AudioAnalysis.name, () => {
   describe(AudioAnalysis.prototype.getTrackDetails.name, () => {

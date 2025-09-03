@@ -1,5 +1,5 @@
-import { TrackDetails } from "./track-details";
-import { TrackFeatures } from "./track-features";
+import { TrackDetails } from "./TrackDetails";
+import { TrackFeatures } from "./TrackFeatures";
 
 export class GetTrackDetailsError extends Error {}
 export class GetTrackFeaturesError extends Error {}
