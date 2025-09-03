@@ -6,6 +6,10 @@ import { describe, expect, it } from "@jest/globals";
 import { onMutation, waitForElem } from "./html";
 
 describe(waitForElem.name, () => {
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
   it("should resolve immediately if the element already exists", () => {
     const element = document.createElement("div");
     element.id = "unit-test";
@@ -39,6 +43,10 @@ describe(waitForElem.name, () => {
 });
 
 describe(onMutation.name, () => {
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
   /**
    * Covers the use case of detecting when the now playing widget changes.
    */
