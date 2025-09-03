@@ -22,10 +22,10 @@ async function enrichNowPlaying() {
   );
 }
 
-async function main() {
-  waitForElem(spotifyWebPage.nowPlayingTrack).then(async (elem) => {
+function main() {
+  waitForElem(spotifyWebPage.nowPlayingTrack).then((elem) => {
     onMutation(elem, enrichNowPlaying);
-    await enrichNowPlaying();
+    enrichNowPlaying();
   });
 }
 
