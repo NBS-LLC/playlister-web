@@ -56,21 +56,21 @@ describe(SpotifyWebPage.name, () => {
       `;
 
       const spotifyWebPage = new SpotifyWebPage();
-      spotifyWebPage.enrichNowPlayingTitle(123.45);
+      spotifyWebPage.enrichNowPlayingTitle(123.45, "C", "8B");
 
       const title = document.querySelector<HTMLDivElement>(
         'div[data-testid="context-item-info-title"]',
       );
 
-      expect(title?.textContent).toEqual("Example Title (123.45)");
+      expect(title?.textContent).toEqual("Example Title (123.45|C|8B)");
     });
 
     it("throws an error when the element cannot be found", () => {
       const spotifyWebPage = new SpotifyWebPage();
 
-      expect(() => spotifyWebPage.enrichNowPlayingTitle(123.45)).toThrow(
-        ElementNotFoundError,
-      );
+      expect(() =>
+        spotifyWebPage.enrichNowPlayingTitle(123.45, "C", "8B"),
+      ).toThrow(ElementNotFoundError);
     });
   });
 });

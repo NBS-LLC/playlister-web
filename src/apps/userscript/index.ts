@@ -1,3 +1,4 @@
+import { getCamelotValue, getKeyName } from "../../lib/audio";
 import { AudioAnalysis } from "../../lib/audio-analysis";
 import { onMutation, waitForElem } from "../../lib/html";
 import { SpotifyWebPage } from "../../lib/spotify-web/index";
@@ -14,7 +15,11 @@ async function enrichNowPlaying() {
   console.log(trackDetails);
   console.log(trackFeatures);
 
-  spotifyWebPage.enrichNowPlayingTitle(trackFeatures.tempo);
+  spotifyWebPage.enrichNowPlayingTitle(
+    Math.round(trackFeatures.tempo),
+    getKeyName(trackFeatures.key, trackFeatures.mode),
+    getCamelotValue(trackFeatures.key, trackFeatures.mode),
+  );
 }
 
 async function main() {

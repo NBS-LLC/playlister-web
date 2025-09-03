@@ -12,19 +12,23 @@ export class SpotifyWebPage {
     return this.parseNowPlayingTrackId(element);
   }
 
-  enrichNowPlayingTitle(tempo: number) {
-    const element = this.getElement<HTMLDivElement>(this.nowPlayingTitle);
-    element.textContent += ` (${tempo})`;
+  enrichNowPlayingTitle(tempo: number, key: string, camelot: string) {
+    const elements = this.getElements<HTMLDivElement>(this.nowPlayingTitle);
+    elements.forEach((element) => {
+      element.textContent += ` (${tempo}|${key}|${camelot})`;
+    });
+  }
+
+  private getElements<T extends HTMLElement>(selector: string): T[] {
+    const elems = Array.from(document.querySelectorAll<T>(selector));
+    if (!elems.length) {
+      throw new ElementNotFoundError(`Unable to locate: ${selector}.`);
+    }
+    return elems;
   }
 
   private getElement<T extends HTMLElement>(selector: string): T {
-    const elem = document.querySelector<T>(selector);
-
-    if (!elem) {
-      throw new ElementNotFoundError(`Unable to locate: ${selector}.`);
-    }
-
-    return elem;
+    return this.getElements<T>(selector)[0];
   }
 
   private parseNowPlayingTrackId(element: HTMLAnchorElement) {
