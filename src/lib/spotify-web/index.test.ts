@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { ElementNotFoundError, SpotifyWebPage } from ".";
+import { ElementNotFoundError, ParseTrackIdError, SpotifyWebPage } from ".";
 
 describe(SpotifyWebPage.name, () => {
   beforeEach(() => {
@@ -34,5 +34,19 @@ describe(SpotifyWebPage.name, () => {
         ElementNotFoundError,
       );
     });
+
+
+    it("throws an error when the track id is missing", () => {
+      document.body.innerHTML = `
+        <aside aria-label="Now playing view">
+          <div><a href="/playlist/1111?uid=2222&uri=spotify:track:">Missing Track Id</a></div>
+        </aside>
+      `;
+
+      const spotifyWebPage = new SpotifyWebPage();
+      expect(() => spotifyWebPage.getNowPlayingTrackId()).toThrow(
+        ParseTrackIdError,
+      );
+    })
   });
 });
