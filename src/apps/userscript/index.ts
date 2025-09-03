@@ -1,7 +1,7 @@
-import { getCamelotValue, getKeyName } from "../../lib/audio";
-import { AudioAnalyzer } from "../../lib/audio-analysis";
-import { onMutation, waitForElem } from "../../lib/html";
-import { SpotifyWebPage } from "../../lib/spotify-web";
+import { getCamelotValue, getKeyName } from "#lib/audio";
+import { AudioAnalyzer } from "#lib/audio-analysis";
+import { onMutation, waitForElem } from "#lib/html";
+import { SpotifyWebPage } from "#lib/spotify-web";
 
 const spotifyWebPage = new SpotifyWebPage();
 

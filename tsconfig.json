@@ -4,6 +4,12 @@
     "module": "ES2022",
     "moduleResolution": "Bundler",
     "strict": true,
-    "target": "ES2022"
+    "target": "ES2022",
+    "baseUrl": ".",
+    "paths": {
+      "#lib/*": [
+        "src/lib/*"
+      ]
+    }
   }
 }
