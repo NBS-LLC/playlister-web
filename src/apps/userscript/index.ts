@@ -4,19 +4,23 @@ import { SpotifyWebPage } from "../../lib/spotify-web/index";
 
 const spotifyWebPage = new SpotifyWebPage();
 
-async function logNowPlayingTrack() {
+async function enrichNowPlaying() {
   const trackId = spotifyWebPage.getNowPlayingTrackId();
   console.log("now playing track:", trackId);
 
   const audioAnalysis = new AudioAnalysis(fetch);
-  console.log(await audioAnalysis.getTrackDetails(trackId));
-  console.log(await audioAnalysis.getTrackFeatures(trackId));
+  const trackDetails = await audioAnalysis.getTrackDetails(trackId);
+  const trackFeatures = await audioAnalysis.getTrackFeatures(trackId);
+  console.log(trackDetails);
+  console.log(trackFeatures);
+
+  spotifyWebPage.enrichNowPlayingTitle(trackFeatures.tempo);
 }
 
 async function main() {
   waitForElem(spotifyWebPage.nowPlayingTrack).then(async (elem) => {
-    onMutation(elem, logNowPlayingTrack);
-    await logNowPlayingTrack();
+    onMutation(elem, enrichNowPlaying);
+    await enrichNowPlaying();
   });
 }
 

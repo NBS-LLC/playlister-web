@@ -5,9 +5,16 @@ export class SpotifyWebPage {
   readonly nowPlayingTrack =
     'aside[aria-label="Now playing view"] a[href*="spotify:track:"]';
 
+  readonly nowPlayingTitle = 'div[data-testid="context-item-info-title"]';
+
   getNowPlayingTrackId() {
     const element = this.getElement<HTMLAnchorElement>(this.nowPlayingTrack);
     return this.parseNowPlayingTrackId(element);
+  }
+
+  enrichNowPlayingTitle(tempo: number) {
+    const element = this.getElement<HTMLDivElement>(this.nowPlayingTitle);
+    element.textContent += ` (${tempo})`;
   }
 
   private getElement<T extends HTMLElement>(selector: string): T {

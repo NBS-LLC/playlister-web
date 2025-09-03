@@ -35,7 +35,6 @@ describe(SpotifyWebPage.name, () => {
       );
     });
 
-
     it("throws an error when the track id is missing", () => {
       document.body.innerHTML = `
         <aside aria-label="Now playing view">
@@ -47,6 +46,31 @@ describe(SpotifyWebPage.name, () => {
       expect(() => spotifyWebPage.getNowPlayingTrackId()).toThrow(
         ParseTrackIdError,
       );
-    })
+    });
+  });
+
+  describe(SpotifyWebPage.prototype.enrichNowPlayingTitle.name, () => {
+    it("enriches the 'now playing' title with the given tempo", () => {
+      document.body.innerHTML = `
+        <div data-testid="context-item-info-title">Example Title</div>
+      `;
+
+      const spotifyWebPage = new SpotifyWebPage();
+      spotifyWebPage.enrichNowPlayingTitle(123.45);
+
+      const title = document.querySelector<HTMLDivElement>(
+        'div[data-testid="context-item-info-title"]',
+      );
+
+      expect(title?.textContent).toEqual("Example Title (123.45)");
+    });
+
+    it("throws an error when the element cannot be found", () => {
+      const spotifyWebPage = new SpotifyWebPage();
+
+      expect(() => spotifyWebPage.enrichNowPlayingTitle(123.45)).toThrow(
+        ElementNotFoundError,
+      );
+    });
   });
 });
