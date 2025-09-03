@@ -1,9 +1,9 @@
-import { AudioAnalysis, GetTrackDetailsError, GetTrackFeaturesError } from ".";
+import { AudioAnalyzer, GetTrackDetailsError, GetTrackFeaturesError } from ".";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 
-describe(AudioAnalysis.name, () => {
-  describe(AudioAnalysis.prototype.getTrackDetails.name, () => {
+describe(AudioAnalyzer.name, () => {
+  describe(AudioAnalyzer.prototype.getTrackDetails.name, () => {
     it("can get details of a known track", async () => {
       const mockTrackDetails: TrackDetails = {
         id: "mock-id",
@@ -27,7 +27,7 @@ describe(AudioAnalysis.name, () => {
         .fn()
         .mockResolvedValue(Response.json({ content: [mockTrackDetails] }));
 
-      const audioAnalysis = new AudioAnalysis(mockHttpClient);
+      const audioAnalysis = new AudioAnalyzer(mockHttpClient);
       const trackDetails = await audioAnalysis.getTrackDetails("spotifyId");
 
       expect(mockHttpClient).toHaveBeenCalledTimes(1);
@@ -42,14 +42,14 @@ describe(AudioAnalysis.name, () => {
         .fn()
         .mockResolvedValue(Response.json({ content: [] }));
 
-      const audioAnalysis = new AudioAnalysis(mockHttpClient);
+      const audioAnalysis = new AudioAnalyzer(mockHttpClient);
       await expect(async () => {
         await audioAnalysis.getTrackDetails("abcd1234");
       }).rejects.toThrow(GetTrackDetailsError);
     });
   });
 
-  describe(AudioAnalysis.prototype.getTrackFeatures.name, () => {
+  describe(AudioAnalyzer.prototype.getTrackFeatures.name, () => {
     it("can get features of a known track", async () => {
       const mockTrackFeatures: TrackFeatures = {
         id: "mock-id",
@@ -71,7 +71,7 @@ describe(AudioAnalysis.name, () => {
         .fn()
         .mockResolvedValue(Response.json({ content: [mockTrackFeatures] }));
 
-      const audioAnalysis = new AudioAnalysis(mockHttpClient);
+      const audioAnalysis = new AudioAnalyzer(mockHttpClient);
       const trackFeatures = await audioAnalysis.getTrackFeatures("spotifyId");
 
       expect(mockHttpClient).toHaveBeenCalledTimes(1);
@@ -86,7 +86,7 @@ describe(AudioAnalysis.name, () => {
         .fn()
         .mockResolvedValue(Response.json({ content: [] }));
 
-      const audioAnalysis = new AudioAnalysis(mockHttpClient);
+      const audioAnalysis = new AudioAnalyzer(mockHttpClient);
       await expect(async () => {
         await audioAnalysis.getTrackFeatures("abcd1234");
       }).rejects.toThrow(GetTrackFeaturesError);
