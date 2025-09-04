@@ -12,8 +12,20 @@ async function enrichNowPlaying() {
   const audioAnalysis = new AudioAnalyzer(fetch);
   const trackDetails = await audioAnalysis.getTrackDetails(trackId);
   const trackFeatures = await audioAnalysis.getTrackFeatures(trackId);
+
+  console.log(
+    "%s by %s (%s %s %s)",
+    trackDetails.trackTitle,
+    trackDetails.artists[0].name,
+    trackFeatures.tempo,
+    getKeyName(trackFeatures.key, trackFeatures.mode),
+    getCamelotValue(trackFeatures.key, trackFeatures.mode),
+  );
+
+  console.groupCollapsed("enriched track data");
   console.log(trackDetails);
   console.log(trackFeatures);
+  console.groupEnd();
 
   spotifyWebPage.enrichNowPlayingTrack(
     Math.round(trackFeatures.tempo),
