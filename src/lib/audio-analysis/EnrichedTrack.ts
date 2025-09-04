@@ -17,4 +17,11 @@ export class EnrichedTrack {
     const camelotValue = getCamelotValue(this.features.key, this.features.mode);
     return `${title} by ${artist} (${tempo} ${keyName} ${camelotValue})`;
   }
+
+  toStats() {
+    const tempo = this.features.tempo;
+    const keyName = getKeyName(this.features.key, this.features.mode);
+    const camelotValue = getCamelotValue(this.features.key, this.features.mode);
+    return `${Math.round(tempo)} | ${keyName} | ${camelotValue}`;
+  }
 }
