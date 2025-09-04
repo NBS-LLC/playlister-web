@@ -1,5 +1,5 @@
 import { getCamelotValue, getKeyName } from "../audio";
-import { Enrichment } from "../spotify-web/Enrichment";
+import { Enrichment } from "./Enrichment";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 

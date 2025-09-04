@@ -1,4 +1,4 @@
-import { Enrichment } from "./Enrichment";
+import { Enrichment } from "../audio-analysis/Enrichment";
 
 export class ElementNotFoundError extends Error {}
 export class ParseTrackIdError extends Error {}
