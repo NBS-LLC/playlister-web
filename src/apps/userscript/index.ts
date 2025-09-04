@@ -15,7 +15,7 @@ async function enrichNowPlaying() {
   console.log(trackDetails);
   console.log(trackFeatures);
 
-  spotifyWebPage.enrichNowPlayingTitle(
+  spotifyWebPage.enrichNowPlayingTrack(
     Math.round(trackFeatures.tempo),
     getKeyName(trackFeatures.key, trackFeatures.mode),
     getCamelotValue(trackFeatures.key, trackFeatures.mode),
