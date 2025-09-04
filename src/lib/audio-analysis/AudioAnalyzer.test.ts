@@ -1,4 +1,5 @@
 import { AudioAnalyzer, GetTrackDetailsError, GetTrackFeaturesError } from ".";
+import { _createMockEnrichedTracks } from "./EnrichedTrack.test";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 
@@ -90,6 +91,33 @@ describe(AudioAnalyzer.name, () => {
       await expect(async () => {
         await audioAnalysis.getTrackFeatures("abcd1234");
       }).rejects.toThrow(GetTrackFeaturesError);
+    });
+  });
+
+  describe(AudioAnalyzer.prototype.getEnrichedTrack.name, () => {
+    it("can get an enriched track for a known track", async () => {
+      const [mockEnrichedTrack] = _createMockEnrichedTracks();
+      const mockId = mockEnrichedTrack.id;
+      const mockDetails = mockEnrichedTrack.details;
+      const mockFeatures = mockEnrichedTrack.features;
+
+      const mockHttpClient = jest
+        .fn()
+        .mockResolvedValueOnce(Response.json({ content: [mockDetails] }))
+        .mockResolvedValueOnce(Response.json({ content: [mockFeatures] }));
+
+      const audioAnalysis = new AudioAnalyzer(mockHttpClient);
+      const enrichedTrack = await audioAnalysis.getEnrichedTrack(mockId);
+
+      expect(mockHttpClient).toHaveBeenCalledTimes(2);
+      expect(mockHttpClient).toHaveBeenCalledWith(
+        `https://api.reccobeats.com/v1/track?ids=${mockId}`,
+      );
+      expect(mockHttpClient).toHaveBeenCalledWith(
+        `https://api.reccobeats.com/v1/audio-features?ids=${mockId}`,
+      );
+
+      expect(enrichedTrack).toEqual(mockEnrichedTrack);
     });
   });
 });

@@ -1,3 +1,4 @@
+import { EnrichedTrack } from "./EnrichedTrack";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 
@@ -32,6 +33,12 @@ export class AudioAnalyzer {
     }
 
     return trackDetails;
+  }
+
+  async getEnrichedTrack(id: string): Promise<EnrichedTrack> {
+    const details = await this.getTrackDetails(id);
+    const features = await this.getTrackFeatures(id);
+    return new EnrichedTrack(id, details, features);
   }
 
   private async fetchMultipleTrackDetails(

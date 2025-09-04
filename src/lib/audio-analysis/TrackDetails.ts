@@ -9,9 +9,9 @@ export interface TrackDetails {
   trackTitle: string;
   artists: Artist[];
   durationMs: number;
-  isrc: string;
-  ean: string;
-  upc: string;
+  isrc: string | null;
+  ean: string | null;
+  upc: string | null;
   href: string;
   availableCountries?: string;
   popularity: number;
