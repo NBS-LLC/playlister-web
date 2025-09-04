@@ -1,3 +1,5 @@
+import { Enrichment } from "./Enrichment";
+
 export class ElementNotFoundError extends Error {}
 export class ParseTrackIdError extends Error {}
 
@@ -12,12 +14,12 @@ export class SpotifyWebPage {
     return this.parseNowPlayingTrackId(element);
   }
 
-  enrichNowPlayingTrack(enrichedTrack: { toStats: () => string }) {
+  enrichNowPlayingTrack(enrichedTrack: Enrichment) {
     const elements = this.getElements<HTMLDivElement>(this.nowPlayingTitle);
     elements.forEach((element) => {
       const div = document.createElement("div");
       div.className = "playlister-web-enriched";
-      div.textContent = enrichedTrack.toStats();
+      div.textContent = enrichedTrack.getStatsString();
       element.insertAdjacentElement("beforebegin", div);
       element.parentElement!.style.flexDirection = "column";
     });

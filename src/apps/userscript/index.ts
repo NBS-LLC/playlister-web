@@ -10,7 +10,7 @@ async function enrichNowPlaying() {
 
   const audioAnalyzer = new AudioAnalyzer(fetch);
   const enrichedTrack = await audioAnalyzer.getEnrichedTrack(trackId);
-  console.log(enrichedTrack.toString());
+  console.log(enrichedTrack.getHumanReadableString());
 
   console.groupCollapsed("enriched track data");
   console.log(enrichedTrack.details);
