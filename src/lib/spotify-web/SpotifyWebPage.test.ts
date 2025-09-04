@@ -3,6 +3,7 @@
  */
 
 import { ElementNotFoundError, ParseTrackIdError, SpotifyWebPage } from ".";
+import { _createMockEnrichedTracks } from "../audio-analysis/EnrichedTrack.test-data";
 
 describe(SpotifyWebPage.name, () => {
   beforeEach(() => {
@@ -56,19 +57,19 @@ describe(SpotifyWebPage.name, () => {
       `;
 
       const spotifyWebPage = new SpotifyWebPage();
-      spotifyWebPage.enrichNowPlayingTrack(123.45, "C", "8B");
+      spotifyWebPage.enrichNowPlayingTrack(_createMockEnrichedTracks()[0]);
       const div = document.querySelector<HTMLDivElement>(
         ".playlister-web-enriched",
       );
 
-      expect(div?.textContent.trim()).toEqual("123.45 | C | 8B");
+      expect(div?.textContent.trim()).toEqual("168 | Dbm | 12A");
     });
 
     it("throws an error when the 'now playing' track cannot be found", () => {
       const spotifyWebPage = new SpotifyWebPage();
 
       expect(() =>
-        spotifyWebPage.enrichNowPlayingTrack(123.45, "C", "8B"),
+        spotifyWebPage.enrichNowPlayingTrack(_createMockEnrichedTracks()[0]),
       ).toThrow(ElementNotFoundError);
     });
   });
