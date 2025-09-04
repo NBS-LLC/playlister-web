@@ -14,7 +14,7 @@ async function enrichNowPlaying() {
   const trackFeatures = await audioAnalysis.getTrackFeatures(trackId);
 
   console.log(
-    "%s by %s (%s %s %s)",
+    "%s by %s (%f %s %s)",
     trackDetails.trackTitle,
     trackDetails.artists[0].name,
     trackFeatures.tempo,
