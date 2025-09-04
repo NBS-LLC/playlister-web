@@ -9,9 +9,9 @@ async function enrichNowPlaying() {
   const trackId = spotifyWebPage.getNowPlayingTrackId();
   console.log("now playing track:", trackId);
 
-  const audioAnalysis = new AudioAnalyzer(fetch);
-  const trackDetails = await audioAnalysis.getTrackDetails(trackId);
-  const trackFeatures = await audioAnalysis.getTrackFeatures(trackId);
+  const audioAnalyzer = new AudioAnalyzer(fetch);
+  const trackDetails = await audioAnalyzer.getTrackDetails(trackId);
+  const trackFeatures = await audioAnalyzer.getTrackFeatures(trackId);
 
   console.log(
     "%s by %s (%f %s %s)",
