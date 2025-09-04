@@ -49,27 +49,26 @@ describe(SpotifyWebPage.name, () => {
     });
   });
 
-  describe(SpotifyWebPage.prototype.enrichNowPlayingTitle.name, () => {
-    it("enriches the 'now playing' title with the given tempo", () => {
+  describe(SpotifyWebPage.prototype.enrichNowPlayingTrack.name, () => {
+    it("enriches the 'now playing' track", () => {
       document.body.innerHTML = `
         <div data-testid="context-item-info-title">Example Title</div>
       `;
 
       const spotifyWebPage = new SpotifyWebPage();
-      spotifyWebPage.enrichNowPlayingTitle(123.45, "C", "8B");
-
-      const title = document.querySelector<HTMLDivElement>(
-        'div[data-testid="context-item-info-title"]',
+      spotifyWebPage.enrichNowPlayingTrack(123.45, "C", "8B");
+      const div = document.querySelector<HTMLDivElement>(
+        ".playlister-web-enriched",
       );
 
-      expect(title?.textContent).toEqual("Example Title (123.45|C|8B)");
+      expect(div?.textContent.trim()).toEqual("123.45 | C | 8B");
     });
 
-    it("throws an error when the element cannot be found", () => {
+    it("throws an error when the 'now playing' track cannot be found", () => {
       const spotifyWebPage = new SpotifyWebPage();
 
       expect(() =>
-        spotifyWebPage.enrichNowPlayingTitle(123.45, "C", "8B"),
+        spotifyWebPage.enrichNowPlayingTrack(123.45, "C", "8B"),
       ).toThrow(ElementNotFoundError);
     });
   });
