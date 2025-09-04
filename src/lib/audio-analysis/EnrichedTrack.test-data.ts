@@ -1,6 +1,6 @@
-import { EnrichedTrack } from "../audio-analysis/EnrichedTrack";
-import { TrackDetails } from "../audio-analysis/TrackDetails";
-import { TrackFeatures } from "../audio-analysis/TrackFeatures";
+import { EnrichedTrack } from "./EnrichedTrack";
+import { TrackDetails } from "./TrackDetails";
+import { TrackFeatures } from "./TrackFeatures";
 
 export function _createMockEnrichedTracks(): EnrichedTrack[] {
   const mockTrackDetails1: TrackDetails = {
