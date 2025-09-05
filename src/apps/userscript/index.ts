@@ -17,7 +17,7 @@ async function enrichNowPlaying() {
   console.log(enrichedTrack.features);
   console.groupEnd();
 
-  spotifyWebPage.enrichNowPlayingTrack(enrichedTrack);
+  spotifyWebPage.insertNowPlayingTrackStats(enrichedTrack.getStatsString());
 }
 
 function main() {

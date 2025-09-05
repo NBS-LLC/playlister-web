@@ -1,9 +1,8 @@
 import { getCamelotValue, getKeyName } from "../audio";
-import { Enriched } from "./Enriched";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 
-export class EnrichedTrack implements Enriched {
+export class EnrichedTrack {
   constructor(
     readonly id: string,
     readonly details: TrackDetails,

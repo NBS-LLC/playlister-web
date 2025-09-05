@@ -3,7 +3,6 @@
  */
 
 import { ElementNotFoundError, ParseTrackIdError, SpotifyWebPage } from ".";
-import { _createMockEnrichedTracks } from "../audio-analysis/EnrichedTrack.test-data";
 
 describe(SpotifyWebPage.name, () => {
   beforeEach(() => {
@@ -50,14 +49,14 @@ describe(SpotifyWebPage.name, () => {
     });
   });
 
-  describe(SpotifyWebPage.prototype.enrichNowPlayingTrack.name, () => {
+  describe(SpotifyWebPage.prototype.insertNowPlayingTrackStats.name, () => {
     it("enriches the 'now playing' track", () => {
       document.body.innerHTML = `
         <div data-testid="context-item-info-title">Example Title</div>
       `;
 
       const spotifyWebPage = new SpotifyWebPage();
-      spotifyWebPage.enrichNowPlayingTrack(_createMockEnrichedTracks()[0]);
+      spotifyWebPage.insertNowPlayingTrackStats("168 | Dbm | 12A");
       const div = document.querySelector<HTMLDivElement>(
         ".playlister-web-enriched",
       );
@@ -69,7 +68,7 @@ describe(SpotifyWebPage.name, () => {
       const spotifyWebPage = new SpotifyWebPage();
 
       expect(() =>
-        spotifyWebPage.enrichNowPlayingTrack(_createMockEnrichedTracks()[0]),
+        spotifyWebPage.insertNowPlayingTrackStats("168 | Dbm | 12A"),
       ).toThrow(ElementNotFoundError);
     });
   });
