@@ -1,4 +1,4 @@
-import { Enrichment } from "../audio-analysis/Enrichment";
+import { Enriched } from "../audio-analysis/Enriched";
 
 export class ElementNotFoundError extends Error {}
 export class ParseTrackIdError extends Error {}
@@ -14,7 +14,7 @@ export class SpotifyWebPage {
     return this.parseNowPlayingTrackId(element);
   }
 
-  enrichNowPlayingTrack(enrichedTrack: Enrichment) {
+  enrichNowPlayingTrack(enrichedTrack: Enriched) {
     const elements = this.getElements<HTMLDivElement>(this.nowPlayingTitle);
     elements.forEach((element) => {
       const div = document.createElement("div");

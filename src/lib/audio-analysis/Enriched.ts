@@ -1,4 +1,4 @@
-export interface Enrichment {
+export interface Enriched {
   getHumanReadableString(): string;
   getStatsString(): string;
 }
