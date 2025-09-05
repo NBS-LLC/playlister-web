@@ -1,4 +1,3 @@
-import { getCamelotValue, getKeyName } from "#lib/audio";
 import { AudioAnalyzer } from "#lib/audio-analysis";
 import { onMutation, waitForElem } from "#lib/html";
 import { SpotifyWebPage } from "#lib/spotify-web";
@@ -9,17 +8,16 @@ async function enrichNowPlaying() {
   const trackId = spotifyWebPage.getNowPlayingTrackId();
   console.log("now playing track:", trackId);
 
-  const audioAnalysis = new AudioAnalyzer(fetch);
-  const trackDetails = await audioAnalysis.getTrackDetails(trackId);
-  const trackFeatures = await audioAnalysis.getTrackFeatures(trackId);
-  console.log(trackDetails);
-  console.log(trackFeatures);
+  const audioAnalyzer = new AudioAnalyzer(fetch);
+  const enrichedTrack = await audioAnalyzer.getEnrichedTrack(trackId);
+  console.log(enrichedTrack.getHumanReadableString());
 
-  spotifyWebPage.enrichNowPlayingTitle(
-    Math.round(trackFeatures.tempo),
-    getKeyName(trackFeatures.key, trackFeatures.mode),
-    getCamelotValue(trackFeatures.key, trackFeatures.mode),
-  );
+  console.groupCollapsed("enriched track data");
+  console.log(enrichedTrack.details);
+  console.log(enrichedTrack.features);
+  console.groupEnd();
+
+  spotifyWebPage.insertNowPlayingTrackStats(enrichedTrack.getStatsString());
 }
 
 function main() {

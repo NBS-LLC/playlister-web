@@ -12,10 +12,14 @@ export class SpotifyWebPage {
     return this.parseNowPlayingTrackId(element);
   }
 
-  enrichNowPlayingTitle(tempo: number, key: string, camelot: string) {
+  insertNowPlayingTrackStats(stats: string) {
     const elements = this.getElements<HTMLDivElement>(this.nowPlayingTitle);
     elements.forEach((element) => {
-      element.textContent += ` (${tempo}|${key}|${camelot})`;
+      const div = document.createElement("div");
+      div.className = "playlister-web-enriched";
+      div.textContent = stats;
+      element.insertAdjacentElement("beforebegin", div);
+      element.parentElement!.style.flexDirection = "column";
     });
   }
 
