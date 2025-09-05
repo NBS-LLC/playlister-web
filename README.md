@@ -16,4 +16,12 @@ A Userscript Version of Playlister
 
 ## Usage
 
-After building, copy `dist/userscript/playlister.user.js` into a userscript [manager](https://www.tampermonkey.net/).
+After building, install it locally:
+
+```bash
+> npm run serve:userscript
+```
+
+This will launch a local http server, host the userscript and open your default browser for installation.
+
+Once installed the http server can be stopped (ctrl+c).
