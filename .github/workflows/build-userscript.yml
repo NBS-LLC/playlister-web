@@ -7,13 +7,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - src/apps/userscript/**
-      - .github/workflows/build-userscript.yml
-      - .tool-versions
-      - eslint.config.mjs
-      - package*
-      - tsconfig.json
 
 jobs:
   build:
