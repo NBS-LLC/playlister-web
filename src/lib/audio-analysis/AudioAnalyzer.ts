@@ -7,6 +7,8 @@ export class GetTrackDetailsError extends Error {}
 export class GetTrackFeaturesError extends Error {}
 
 export class AudioAnalyzer implements AudioAnalysisProvider {
+  private readonly baseUrl = "https://api.reccobeats.com/v1";
+
   constructor(
     readonly httpClient: (
       input: RequestInfo,
@@ -45,9 +47,8 @@ export class AudioAnalyzer implements AudioAnalysisProvider {
   private async fetchMultipleTrackDetails(
     ids: string[],
   ): Promise<TrackDetails[]> {
-    const baseUrl = "https://api.reccobeats.com/v1/track";
     const params = new URLSearchParams({ ids: ids.join(",") });
-    const url = `${baseUrl}?${params.toString()}`;
+    const url = `${this.baseUrl}/track?${params.toString()}`;
     const response = await this.httpClient(url);
 
     if (!response.ok) {
@@ -63,9 +64,8 @@ export class AudioAnalyzer implements AudioAnalysisProvider {
   private async fetchMultipleTrackFeatures(
     ids: string[],
   ): Promise<TrackFeatures[]> {
-    const baseUrl = "https://api.reccobeats.com/v1/audio-features";
     const params = new URLSearchParams({ ids: ids.join(",") });
-    const url = `${baseUrl}?${params.toString()}`;
+    const url = `${this.baseUrl}/audio-features?${params.toString()}`;
     const response = await this.httpClient(url);
 
     if (!response.ok) {
