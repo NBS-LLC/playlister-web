@@ -1,3 +1,4 @@
+import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
 import { EnrichedTrack } from "./EnrichedTrack";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
@@ -5,7 +6,7 @@ import { TrackFeatures } from "./TrackFeatures";
 export class GetTrackDetailsError extends Error {}
 export class GetTrackFeaturesError extends Error {}
 
-export class AudioAnalyzer {
+export class AudioAnalyzer implements AudioAnalysisProvider {
   constructor(
     readonly httpClient: (
       input: RequestInfo,
