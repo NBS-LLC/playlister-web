@@ -1,10 +1,11 @@
-import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
+import {
+  AudioAnalysisProvider,
+  GetTrackDetailsError,
+  GetTrackFeaturesError,
+} from "./AudioAnalysisProvider";
 import { EnrichedTrack } from "./EnrichedTrack";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
-
-export class GetTrackDetailsError extends Error {}
-export class GetTrackFeaturesError extends Error {}
 
 export class ReccoBeatsAnalyzer implements AudioAnalysisProvider {
   private readonly baseUrl = "https://api.reccobeats.com/v1";

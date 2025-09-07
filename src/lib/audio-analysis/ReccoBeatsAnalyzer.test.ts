@@ -1,8 +1,8 @@
+import { ReccoBeatsAnalyzer } from ".";
 import {
   GetTrackDetailsError,
   GetTrackFeaturesError,
-  ReccoBeatsAnalyzer,
-} from ".";
+} from "./AudioAnalysisProvider";
 import { _createMockEnrichedTracks } from "./EnrichedTrack.test-data";
 
 describe(ReccoBeatsAnalyzer.name, () => {
