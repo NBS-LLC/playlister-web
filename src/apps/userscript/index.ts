@@ -1,4 +1,5 @@
-import { AudioAnalyzer } from "#lib/audio-analysis";
+import { ReccoBeatsAnalyzer } from "#lib/audio-analysis";
+import { AudioAnalysisProvider } from "#lib/audio-analysis/AudioAnalysisProvider";
 import { onMutation, waitForElem } from "#lib/html";
 import { SpotifyWebPage } from "#lib/spotify-web";
 
@@ -8,7 +9,7 @@ async function enrichNowPlaying() {
   const trackId = spotifyWebPage.getNowPlayingTrackId();
   console.log("now playing track:", trackId);
 
-  const audioAnalyzer = new AudioAnalyzer(fetch);
+  const audioAnalyzer: AudioAnalysisProvider = new ReccoBeatsAnalyzer(fetch);
   const enrichedTrack = await audioAnalyzer.getEnrichedTrack(trackId);
   console.log(enrichedTrack.getHumanReadableString());
 
