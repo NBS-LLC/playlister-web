@@ -10,3 +10,6 @@ export interface AudioAnalysisProvider {
   getTrackFeatures(id: string): Promise<TrackFeatures>;
   getEnrichedTrack(id: string): Promise<EnrichedTrack>;
 }
+
+export type AudioAnalysisKnown = "AUDIO_ANALYSIS_KNOWN";
+export type AudioAnalysisUnknown = "AUDIO_ANALYSIS_UNKNOWN";
