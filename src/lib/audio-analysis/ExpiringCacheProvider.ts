@@ -1,5 +1,13 @@
-import { AudioAnalysisUnknown } from "./AudioAnalysisProvider";
-import { CacheProvider } from "./CacheProvider";
+import {
+  AudioAnalysisUnknown,
+  GetTrackDetailsError,
+} from "./AudioAnalysisProvider";
+import {
+  CacheExpiredError,
+  CacheItem,
+  CacheProvider,
+  NotCachedError,
+} from "./CacheProvider";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 
@@ -13,22 +21,33 @@ export class ExpiringCacheProvider implements CacheProvider {
     throw new Error("Method not implemented.");
   }
 
-  async hasTrackDetails(id: string) {
-    return Boolean(this.storage.getItem(`trackDetails_${id}`));
-  }
+  async getTrackDetails(id: string) {
+    const result = this.storage.getItem(this.getTrackDetailsKey(id));
 
-  getTrackDetails(_id: string): Promise<TrackDetails> {
-    throw new Error("Method not implemented.");
+    if (!result) {
+      throw new NotCachedError(`Track: ${id}, details not cached.`);
+    }
+
+    const cacheItem: CacheItem = JSON.parse(result);
+
+    if (new Date() >= new Date(cacheItem.expirationDateUtc)) {
+      this.storage.removeItem(this.getTrackDetailsKey(id));
+      throw new CacheExpiredError(`Track: ${id}, has expired cache data.`);
+    }
+
+    if (cacheItem.status == "AUDIO_ANALYSIS_UNKNOWN") {
+      throw new GetTrackDetailsError(
+        `Track: ${id}, is cached but details are unknown.`,
+      );
+    }
+
+    return cacheItem.data as TrackDetails;
   }
 
   setTrackDetails(
     _id: string,
     _details: TrackDetails | AudioAnalysisUnknown,
   ): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-
-  hasTrackFeatures(_id: string): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
 
@@ -41,5 +60,9 @@ export class ExpiringCacheProvider implements CacheProvider {
     _features: TrackFeatures | AudioAnalysisUnknown,
   ): Promise<void> {
     throw new Error("Method not implemented.");
+  }
+
+  private getTrackDetailsKey(id: string) {
+    return `trackDetails_${id}`;
   }
 }

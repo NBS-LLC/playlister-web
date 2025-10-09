@@ -17,15 +17,16 @@ export type CacheItem =
       expirationDateUtc: string;
     };
 
+export class NotCachedError extends Error {}
+export class CacheExpiredError extends Error {}
+
 export interface CacheProvider {
-  hasTrackDetails(id: string): Promise<boolean>;
   getTrackDetails(id: string): Promise<TrackDetails>;
   setTrackDetails(
     id: string,
     details: TrackDetails | AudioAnalysisUnknown,
   ): Promise<void>;
 
-  hasTrackFeatures(id: string): Promise<boolean>;
   getTrackFeatures(id: string): Promise<TrackFeatures>;
   setTrackFeatures(
     id: string,
