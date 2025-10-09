@@ -1,25 +1,10 @@
-import {
-  AudioAnalysisKnown,
-  AudioAnalysisUnknown,
-} from "./AudioAnalysisProvider";
+import { AudioAnalysisUnknown } from "./AudioAnalysisProvider";
 import { CacheProvider } from "./CacheProvider";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 
 const _SHORT_EXPIRATION_MS = 1 * 24 * 60 * 60 * 1000;
 const _LONG_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
-
-type _CacheItem =
-  | {
-      status: AudioAnalysisKnown;
-      data: TrackDetails | TrackFeatures;
-      expirationDateUtc: string;
-    }
-  | {
-      status: AudioAnalysisUnknown;
-      data: null;
-      expirationDateUtc: string;
-    };
 
 export class ExpiringCacheProvider implements CacheProvider {
   constructor(private readonly storage: Storage) {}
@@ -28,8 +13,8 @@ export class ExpiringCacheProvider implements CacheProvider {
     throw new Error("Method not implemented.");
   }
 
-  hasTrackDetails(_id: string): Promise<boolean> {
-    throw new Error("Method not implemented.");
+  async hasTrackDetails(id: string) {
+    return Boolean(this.storage.getItem(`trackDetails_${id}`));
   }
 
   getTrackDetails(_id: string): Promise<TrackDetails> {

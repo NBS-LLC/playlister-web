@@ -1,6 +1,21 @@
-import { AudioAnalysisUnknown } from "./AudioAnalysisProvider";
+import {
+  AudioAnalysisKnown,
+  AudioAnalysisUnknown,
+} from "./AudioAnalysisProvider";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
+
+export type CacheItem =
+  | {
+      status: AudioAnalysisKnown;
+      data: TrackDetails | TrackFeatures;
+      expirationDateUtc: string;
+    }
+  | {
+      status: AudioAnalysisUnknown;
+      data: null;
+      expirationDateUtc: string;
+    };
 
 export interface CacheProvider {
   hasTrackDetails(id: string): Promise<boolean>;
