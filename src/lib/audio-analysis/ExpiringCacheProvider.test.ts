@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 
+import { AsyncObjectStorage } from "../storage/AsyncObjectStorage";
 import { LocalStorageAdapter } from "../storage/LocalStorageAdapter";
 import { GetTrackDetailsError } from "./AudioAnalysisProvider";
 import { CacheExpiredError, CacheItem, NotCachedError } from "./CacheProvider";
@@ -9,7 +10,7 @@ import { _createMockEnrichedTracks } from "./EnrichedTrack.test-data";
 import { ExpiringCacheProvider } from "./ExpiringCacheProvider";
 
 describe(ExpiringCacheProvider.name, () => {
-  let storage: LocalStorageAdapter;
+  let storage: AsyncObjectStorage;
 
   beforeEach(() => {
     localStorage.clear();
