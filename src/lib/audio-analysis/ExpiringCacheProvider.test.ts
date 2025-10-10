@@ -2,14 +2,18 @@
  * @jest-environment jsdom
  */
 
+import { LocalStorageAdapter } from "../storage/LocalStorageAdapter";
 import { GetTrackDetailsError } from "./AudioAnalysisProvider";
 import { CacheExpiredError, CacheItem, NotCachedError } from "./CacheProvider";
 import { _createMockEnrichedTracks } from "./EnrichedTrack.test-data";
 import { ExpiringCacheProvider } from "./ExpiringCacheProvider";
 
 describe(ExpiringCacheProvider.name, () => {
+  let storage: LocalStorageAdapter;
+
   beforeEach(() => {
     localStorage.clear();
+    storage = new LocalStorageAdapter(localStorage);
   });
 
   describe(ExpiringCacheProvider.prototype.getTrackDetails.name, () => {
@@ -23,13 +27,13 @@ describe(ExpiringCacheProvider.name, () => {
       };
       localStorage.setItem("trackDetails_abcd1234", JSON.stringify(cacheItem));
 
-      const cacheProvider = new ExpiringCacheProvider(localStorage);
+      const cacheProvider = new ExpiringCacheProvider(storage);
       const result = await cacheProvider.getTrackDetails("abcd1234");
       expect(result).toEqual(trackDetails);
     });
 
     it("throws an error when the track details are not cached", async () => {
-      const cacheProvider = new ExpiringCacheProvider(localStorage);
+      const cacheProvider = new ExpiringCacheProvider(storage);
       await expect(async () => {
         await cacheProvider.getTrackDetails("abcd1234");
       }).rejects.toThrow(NotCachedError);
@@ -45,7 +49,7 @@ describe(ExpiringCacheProvider.name, () => {
       };
       localStorage.setItem("trackDetails_abcd1234", JSON.stringify(cacheItem));
 
-      const cacheProvider = new ExpiringCacheProvider(localStorage);
+      const cacheProvider = new ExpiringCacheProvider(storage);
       await expect(async () => {
         await cacheProvider.getTrackDetails("abcd1234");
       }).rejects.toThrow(CacheExpiredError);
@@ -60,7 +64,7 @@ describe(ExpiringCacheProvider.name, () => {
       };
       localStorage.setItem("trackDetails_abcd1234", JSON.stringify(cacheItem));
 
-      const cacheProvider = new ExpiringCacheProvider(localStorage);
+      const cacheProvider = new ExpiringCacheProvider(storage);
       await expect(async () => {
         await cacheProvider.getTrackDetails("abcd1234");
       }).rejects.toThrow(GetTrackDetailsError);
@@ -76,7 +80,7 @@ describe(ExpiringCacheProvider.name, () => {
       };
       localStorage.setItem("trackDetails_abcd1234", JSON.stringify(cacheItem));
 
-      const cacheProvider = new ExpiringCacheProvider(localStorage);
+      const cacheProvider = new ExpiringCacheProvider(storage);
       try {
         await cacheProvider.getTrackDetails("abcd1234");
       } catch {
