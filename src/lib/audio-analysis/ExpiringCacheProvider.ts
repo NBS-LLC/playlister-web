@@ -12,8 +12,8 @@ import {
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 
-const _SHORT_EXPIRATION_MS = 1 * 24 * 60 * 60 * 1000;
-const _LONG_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
+const SHORT_EXPIRATION_MS = 1 * 24 * 60 * 60 * 1000;
+const LONG_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 
 export class ExpiringCacheProvider implements CacheProvider {
   constructor(private readonly storage: AsyncObjectStorage) {}
@@ -45,11 +45,32 @@ export class ExpiringCacheProvider implements CacheProvider {
     return result.data as TrackDetails;
   }
 
-  setTrackDetails(
-    _id: string,
-    _details: TrackDetails | AudioAnalysisUnknown,
+  async storeTrackDetails(
+    id: string,
+    details: TrackDetails | AudioAnalysisUnknown,
   ): Promise<void> {
-    throw new Error("Method not implemented.");
+    if (details == "AUDIO_ANALYSIS_UNKNOWN") {
+      const cacheItem: CacheItem = {
+        status: "AUDIO_ANALYSIS_UNKNOWN",
+        data: null,
+        expirationDateUtc: new Date(
+          Date.now() + SHORT_EXPIRATION_MS,
+        ).toISOString(),
+      };
+      await this.storage.setItem(this.getTrackDetailsKey(id), cacheItem);
+      return;
+    }
+
+    const cacheItem: CacheItem = {
+      status: "AUDIO_ANALYSIS_KNOWN",
+      data: details,
+      expirationDateUtc: new Date(
+        Date.now() + LONG_EXPIRATION_MS,
+      ).toISOString(),
+    };
+
+    await this.storage.setItem(this.getTrackDetailsKey(id), cacheItem);
+    return;
   }
 
   getTrackFeatures(_id: string): Promise<TrackFeatures> {

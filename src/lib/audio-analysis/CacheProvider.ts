@@ -22,7 +22,7 @@ export class CacheExpiredError extends Error {}
 
 export interface CacheProvider {
   getTrackDetails(id: string): Promise<TrackDetails>;
-  setTrackDetails(
+  storeTrackDetails(
     id: string,
     details: TrackDetails | AudioAnalysisUnknown,
   ): Promise<void>;

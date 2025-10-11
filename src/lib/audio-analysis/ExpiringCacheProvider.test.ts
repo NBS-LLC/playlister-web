@@ -91,4 +91,24 @@ describe(ExpiringCacheProvider.name, () => {
       expect(localStorage.getItem("trackDetails_abcd1234")).toBeNull();
     });
   });
+
+  describe(ExpiringCacheProvider.prototype.storeTrackDetails.name, () => {
+    it("stores known track details for a long duration", async () => {
+      const trackDetails = _createMockEnrichedTracks()[0].details;
+
+      const cacheProvider = new ExpiringCacheProvider(storage);
+      await cacheProvider.storeTrackDetails("abcd1234", trackDetails);
+
+      const result = localStorage.getItem("trackDetails_abcd1234");
+      expect(result).not.toBeNull();
+
+      const cacheItem: CacheItem = JSON.parse(result!);
+      expect(cacheItem.data).toEqual(trackDetails);
+
+      const aDayFromNow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      expect(new Date(cacheItem.expirationDateUtc).getTime()).toBeGreaterThan(
+        aDayFromNow.getTime(),
+      );
+    });
+  });
 });
