@@ -110,5 +110,24 @@ describe(ExpiringCacheProvider.name, () => {
         aDayFromNow.getTime(),
       );
     });
+
+    it("stores unknown track details for a short duration", async () => {
+      const cacheProvider = new ExpiringCacheProvider(storage);
+      await cacheProvider.storeTrackDetails(
+        "abcd1234",
+        "AUDIO_ANALYSIS_UNKNOWN",
+      );
+
+      const result = localStorage.getItem("trackDetails_abcd1234");
+      expect(result).not.toBeNull();
+
+      const cacheItem: CacheItem = JSON.parse(result!);
+      expect(cacheItem.data).toEqual(null);
+
+      const aDayFromNow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      expect(
+        new Date(cacheItem.expirationDateUtc).getTime(),
+      ).toBeLessThanOrEqual(aDayFromNow.getTime());
+    });
   });
 });
