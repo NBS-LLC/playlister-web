@@ -242,4 +242,43 @@ describe(ExpiringCacheProvider.name, () => {
       expect(localStorage.getItem("trackFeatures_abcd1234")).toBeNull();
     });
   });
+
+  describe(ExpiringCacheProvider.prototype.storeTrackFeatures.name, () => {
+    it("stores known track features for a long duration", async () => {
+      const trackFeatures = _createMockEnrichedTracks()[0].features;
+
+      const cacheProvider = new ExpiringCacheProvider(storage);
+      await cacheProvider.storeTrackFeatures("abcd1234", trackFeatures);
+
+      const result = localStorage.getItem("trackFeatures_abcd1234");
+      expect(result).not.toBeNull();
+
+      const cacheItem: CacheItem = JSON.parse(result!);
+      expect(cacheItem.data).toEqual(trackFeatures);
+
+      const aDayFromNow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      expect(new Date(cacheItem.expirationDateUtc).getTime()).toBeGreaterThan(
+        aDayFromNow.getTime(),
+      );
+    });
+
+    it("stores unknown track features for a short duration", async () => {
+      const cacheProvider = new ExpiringCacheProvider(storage);
+      await cacheProvider.storeTrackFeatures(
+        "abcd1234",
+        "AUDIO_ANALYSIS_UNKNOWN",
+      );
+
+      const result = localStorage.getItem("trackFeatures_abcd1234");
+      expect(result).not.toBeNull();
+
+      const cacheItem: CacheItem = JSON.parse(result!);
+      expect(cacheItem.data).toEqual(null);
+
+      const aDayFromNow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      expect(
+        new Date(cacheItem.expirationDateUtc).getTime(),
+      ).toBeLessThanOrEqual(aDayFromNow.getTime());
+    });
+  });
 });

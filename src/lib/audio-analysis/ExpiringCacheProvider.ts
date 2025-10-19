@@ -55,7 +55,7 @@ export class ExpiringCacheProvider implements CacheProvider {
     if (details != "AUDIO_ANALYSIS_UNKNOWN") {
       cacheItem = this.createCacheItemForKnownTrackDetails(details);
     } else {
-      cacheItem = this.createCacheItemForUnknownTrackDetails();
+      cacheItem = this.createCacheItemForUnknownAnalysis();
     }
 
     await this.storage.setItem(this.getTrackDetailsKey(id), cacheItem);
@@ -83,28 +83,42 @@ export class ExpiringCacheProvider implements CacheProvider {
     return result.data as TrackFeatures;
   }
 
-  setTrackFeatures(
-    _id: string,
-    _features: TrackFeatures | AudioAnalysisUnknown,
+  async storeTrackFeatures(
+    id: string,
+    features: TrackFeatures | AudioAnalysisUnknown,
   ): Promise<void> {
-    throw new Error("Method not implemented.");
+    let cacheItem: CacheItem;
+
+    if (features != "AUDIO_ANALYSIS_UNKNOWN") {
+      cacheItem = this.createCacheItemForKnownTrackFeatures(features);
+    } else {
+      cacheItem = this.createCacheItemForUnknownAnalysis();
+    }
+
+    await this.storage.setItem(this.getTrackFeaturesKey(id), cacheItem);
   }
 
-  private createCacheItemForKnownTrackDetails(
-    details: TrackDetails,
-  ): CacheItem {
+  private createCacheItemForKnownTrackDetails(data: TrackDetails): CacheItem {
     return {
       status: "AUDIO_ANALYSIS_KNOWN",
-      data: details,
+      data,
       expirationDateUtc: this.getExpirationDateUtc(LONG_EXPIRATION_MS),
     };
   }
 
-  private createCacheItemForUnknownTrackDetails(): CacheItem {
+  private createCacheItemForUnknownAnalysis(): CacheItem {
     return {
       status: "AUDIO_ANALYSIS_UNKNOWN",
       data: null,
       expirationDateUtc: this.getExpirationDateUtc(SHORT_EXPIRATION_MS),
+    };
+  }
+
+  private createCacheItemForKnownTrackFeatures(data: TrackFeatures): CacheItem {
+    return {
+      status: "AUDIO_ANALYSIS_KNOWN",
+      data,
+      expirationDateUtc: this.getExpirationDateUtc(LONG_EXPIRATION_MS),
     };
   }
 

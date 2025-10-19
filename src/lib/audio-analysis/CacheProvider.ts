@@ -28,7 +28,7 @@ export interface CacheProvider {
   ): Promise<void>;
 
   getTrackFeatures(id: string): Promise<TrackFeatures>;
-  setTrackFeatures(
+  storeTrackFeatures(
     id: string,
     features: TrackFeatures | AudioAnalysisUnknown,
   ): Promise<void>;
