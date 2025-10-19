@@ -331,5 +331,23 @@ describe(ExpiringCacheProvider.name, () => {
       // We just expect that this doesn't throw an error.
       await cacheProvider.prune();
     });
+
+    it("handles race condition where item is removed after getting keys", async () => {
+      const mockStorage: AsyncObjectStorage = {
+        getItem: jest.fn().mockResolvedValue(null), // Always return null
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+        keys: jest.fn().mockResolvedValue(["key1", "key2"]),
+      };
+
+      const cacheProvider = new ExpiringCacheProvider(mockStorage);
+      await cacheProvider.prune();
+
+      expect(mockStorage.keys).toHaveBeenCalledTimes(1);
+      expect(mockStorage.getItem).toHaveBeenCalledTimes(2);
+      expect(mockStorage.getItem).toHaveBeenCalledWith("key1");
+      expect(mockStorage.getItem).toHaveBeenCalledWith("key2");
+      expect(mockStorage.removeItem).not.toHaveBeenCalled();
+    });
   });
 });
