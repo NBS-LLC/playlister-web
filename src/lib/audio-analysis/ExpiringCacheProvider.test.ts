@@ -130,4 +130,21 @@ describe(ExpiringCacheProvider.name, () => {
       ).toBeLessThanOrEqual(aDayFromNow.getTime());
     });
   });
+
+  describe(ExpiringCacheProvider.prototype.getTrackFeatures.name, () => {
+    it("returns known cached track features", async () => {
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const trackFeatures = _createMockEnrichedTracks()[0].features;
+      const cacheItem: CacheItem = {
+        status: "AUDIO_ANALYSIS_KNOWN",
+        data: trackFeatures,
+        expirationDateUtc: tomorrow.toISOString(),
+      };
+      localStorage.setItem("trackFeatures_abcd1234", JSON.stringify(cacheItem));
+
+      const cacheProvider = new ExpiringCacheProvider(storage);
+      const result = await cacheProvider.getTrackFeatures("abcd1234");
+      expect(result).toEqual(trackFeatures);
+    });
+  });
 });

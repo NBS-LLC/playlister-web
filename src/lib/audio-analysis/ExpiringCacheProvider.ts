@@ -2,6 +2,7 @@ import { AsyncObjectStorage } from "../storage/AsyncObjectStorage";
 import {
   AudioAnalysisUnknown,
   GetTrackDetailsError,
+  GetTrackFeaturesError,
 } from "./AudioAnalysisProvider";
 import {
   CacheExpiredError,
@@ -60,8 +61,26 @@ export class ExpiringCacheProvider implements CacheProvider {
     await this.storage.setItem(this.getTrackDetailsKey(id), cacheItem);
   }
 
-  getTrackFeatures(_id: string): Promise<TrackFeatures> {
-    throw new Error("Method not implemented.");
+  async getTrackFeatures(id: string): Promise<TrackFeatures> {
+    const key = this.getTrackFeaturesKey(id);
+    const result: CacheItem | null = await this.storage.getItem(key);
+
+    if (!result) {
+      throw new NotCachedError(`Track: ${id}, features not cached.`);
+    }
+
+    if (new Date() >= new Date(result.expirationDateUtc)) {
+      this.storage.removeItem(key);
+      throw new CacheExpiredError(`Track: ${id}, has expired cache data.`);
+    }
+
+    if (result.status == "AUDIO_ANALYSIS_UNKNOWN") {
+      throw new GetTrackFeaturesError(
+        `Track: ${id}, is cached but features are unknown.`,
+      );
+    }
+
+    return result.data as TrackFeatures;
   }
 
   setTrackFeatures(
@@ -95,5 +114,9 @@ export class ExpiringCacheProvider implements CacheProvider {
 
   private getTrackDetailsKey(id: string) {
     return `trackDetails_${id}`;
+  }
+
+  private getTrackFeaturesKey(id: string) {
+    return `trackFeatures_${id}`;
   }
 }
