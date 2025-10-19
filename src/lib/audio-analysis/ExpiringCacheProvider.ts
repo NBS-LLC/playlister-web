@@ -1,3 +1,4 @@
+import { namespace } from "../log";
 import { AsyncObjectStorage } from "../storage/AsyncObjectStorage";
 import {
   AudioAnalysisUnknown,
@@ -28,6 +29,7 @@ export class ExpiringCacheProvider implements CacheProvider {
         if (item && item.expirationDateUtc) {
           if (new Date() >= new Date(item.expirationDateUtc)) {
             await this.storage.removeItem(key);
+            console.debug(namespace, `removed ${key} from cache`);
           }
         }
       } catch {
@@ -56,6 +58,7 @@ export class ExpiringCacheProvider implements CacheProvider {
       );
     }
 
+    console.debug(namespace, `track details - cache hit: ${id}`);
     return result.data as TrackDetails;
   }
 
@@ -93,6 +96,7 @@ export class ExpiringCacheProvider implements CacheProvider {
       );
     }
 
+    console.debug(namespace, `track features - cache hit: ${id}`);
     return result.data as TrackFeatures;
   }
 
