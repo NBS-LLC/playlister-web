@@ -19,8 +19,21 @@ const LONG_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 export class ExpiringCacheProvider implements CacheProvider {
   constructor(private readonly storage: AsyncObjectStorage) {}
 
-  prune(): Promise<void> {
-    throw new Error("Method not implemented.");
+  async prune(): Promise<void> {
+    const keys = await this.storage.keys();
+
+    for (const key of keys) {
+      try {
+        const item: CacheItem | null = await this.storage.getItem(key);
+        if (item && item.expirationDateUtc) {
+          if (new Date() >= new Date(item.expirationDateUtc)) {
+            await this.storage.removeItem(key);
+          }
+        }
+      } catch {
+        // Ignore malformed items
+      }
+    }
   }
 
   async getTrackDetails(id: string) {

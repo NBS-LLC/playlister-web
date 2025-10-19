@@ -281,4 +281,55 @@ describe(ExpiringCacheProvider.name, () => {
       ).toBeLessThanOrEqual(aDayFromNow.getTime());
     });
   });
+
+  describe(ExpiringCacheProvider.prototype.prune.name, () => {
+    it("removes expired items from the cache", async () => {
+      const oneSecondAgo = new Date(Date.now() - 1000);
+      const trackDetails = _createMockEnrichedTracks()[0].details;
+      const expiredCacheItem: CacheItem = {
+        status: "AUDIO_ANALYSIS_KNOWN",
+        data: trackDetails,
+        expirationDateUtc: oneSecondAgo.toISOString(),
+      };
+      localStorage.setItem(
+        "trackDetails_expired",
+        JSON.stringify(expiredCacheItem),
+      );
+
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const trackFeatures = _createMockEnrichedTracks()[0].features;
+      const validCacheItem: CacheItem = {
+        status: "AUDIO_ANALYSIS_KNOWN",
+        data: trackFeatures,
+        expirationDateUtc: tomorrow.toISOString(),
+      };
+      localStorage.setItem(
+        "trackFeatures_valid",
+        JSON.stringify(validCacheItem),
+      );
+
+      const cacheProvider = new ExpiringCacheProvider(storage);
+      await cacheProvider.prune();
+
+      expect(localStorage.getItem("trackDetails_expired")).toBeNull();
+      expect(localStorage.getItem("trackFeatures_valid")).not.toBeNull();
+    });
+
+    it("does not remove items that are not cache items", async () => {
+      localStorage.setItem("not-a-cache-item", "some-value");
+
+      const cacheProvider = new ExpiringCacheProvider(storage);
+      await cacheProvider.prune();
+
+      expect(localStorage.getItem("not-a-cache-item")).toEqual("some-value");
+    });
+
+    it("handles malformed cache items", async () => {
+      localStorage.setItem("trackDetails_malformed", "{ not a json");
+
+      const cacheProvider = new ExpiringCacheProvider(storage);
+      // We just expect that this doesn't throw an error.
+      await cacheProvider.prune();
+    });
+  });
 });
