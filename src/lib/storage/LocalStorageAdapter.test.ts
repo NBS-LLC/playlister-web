@@ -77,4 +77,21 @@ describe(LocalStorageAdapter.name, () => {
       expect(result).toEqual(JSON.stringify(replacement));
     });
   });
+
+  describe(LocalStorageAdapter.prototype.keys.name, () => {
+    it("returns all keys in the storage", async () => {
+      localStorage.setItem("key1", "value1");
+      localStorage.setItem("key2", "value2");
+
+      const keys = await storage.keys();
+      expect(keys).toHaveLength(2);
+      expect(keys).toContain("key1");
+      expect(keys).toContain("key2");
+    });
+
+    it("returns an empty array when storage is empty", async () => {
+      const keys = await storage.keys();
+      expect(keys).toHaveLength(0);
+    });
+  });
 });

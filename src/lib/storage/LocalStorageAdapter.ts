@@ -16,4 +16,12 @@ export class LocalStorageAdapter implements AsyncObjectStorage {
   async removeItem(key: string): Promise<void> {
     this.storage.removeItem(key);
   }
+
+  async keys(): Promise<string[]> {
+    const keys: string[] = [];
+    for (let i = 0; i < this.storage.length; i++) {
+      keys.push(this.storage.key(i)!);
+    }
+    return keys;
+  }
 }
