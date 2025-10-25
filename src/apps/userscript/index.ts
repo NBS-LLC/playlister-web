@@ -1,7 +1,8 @@
-import { AudioAnalyzer, ReccoBeatsAnalyzer } from "#lib/audio-analysis";
+import { AudioAnalyzer } from "#lib/audio-analysis/AudioAnalyzer";
+import { ReccoBeatsAnalyzer } from "#lib/audio-analysis/ReccoBeatsAnalyzer";
 import { onMutation, waitForElem } from "#lib/html";
 import { namespace } from "#lib/log";
-import { SpotifyWebPage } from "#lib/spotify-web";
+import { SpotifyWebPage } from "#lib/spotify-web/SpotifyWebPage";
 
 const spotifyWebPage = new SpotifyWebPage();
 

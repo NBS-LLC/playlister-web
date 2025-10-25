@@ -2,7 +2,11 @@
  * @jest-environment jsdom
  */
 
-import { ElementNotFoundError, ParseTrackIdError, SpotifyWebPage } from ".";
+import {
+  ElementNotFoundError,
+  ParseTrackIdError,
+  SpotifyWebPage,
+} from "./SpotifyWebPage";
 
 describe(SpotifyWebPage.name, () => {
   beforeEach(() => {
