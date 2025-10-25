@@ -1,10 +1,11 @@
 import { AsyncObjectStorage } from "./AsyncObjectStorage";
 import { CacheItem } from "./CacheItem";
+import { CacheProvider } from "./CacheProvider";
 
 const SHORT_EXPIRATION_MS = 1 * 24 * 60 * 60 * 1000;
 const LONG_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 
-export class Cache {
+export class Cache implements CacheProvider {
   constructor(private readonly storage: AsyncObjectStorage) {}
 
   async find<T>(id: string): Promise<CacheItem<T> | null> {

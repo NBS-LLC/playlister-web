@@ -1,5 +1,5 @@
+import { CacheProvider } from "../storage/CacheProvider";
 import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
-import { CacheProvider } from "./CacheProvider";
 import { EnrichedTrack } from "./EnrichedTrack";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
