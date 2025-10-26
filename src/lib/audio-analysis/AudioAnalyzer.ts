@@ -7,11 +7,17 @@ import { TrackFeatures } from "./TrackFeatures";
 export class AudioAnalyzer implements AudioAnalysisProvider {
   constructor(
     private readonly primaryProvider: AudioAnalysisProvider,
-    private readonly cacheProvider?: CacheProvider,
+    private readonly cacheProvider: CacheProvider,
   ) {}
 
-  getTrackDetails(id: string): Promise<TrackDetails> {
-    return this.primaryProvider.getTrackDetails(id);
+  async getTrackDetails(id: string): Promise<TrackDetails> {
+    const result = await this.cacheProvider.find(`trackDetails_${id}`);
+
+    if (result) {
+      return result.data as TrackDetails;
+    }
+
+    return await this.primaryProvider.getTrackDetails(id);
   }
 
   getTrackFeatures(id: string): Promise<TrackFeatures> {
