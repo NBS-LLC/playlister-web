@@ -1,3 +1,4 @@
+import { namespace } from "../log";
 import { CacheProvider } from "../storage/CacheProvider";
 import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
 import { EnrichedTrack } from "./EnrichedTrack";
@@ -36,6 +37,10 @@ export class AudioAnalyzer {
       );
     }
 
+    if (fromCache) {
+      console.debug(namespace, `Cache hit - track details for: ${id}.`);
+    }
+
     return result;
   }
 
@@ -59,6 +64,10 @@ export class AudioAnalyzer {
       throw new GetTrackFeaturesError(
         `Unable to get track features for: ${id}${cachedMsg}.`,
       );
+    }
+
+    if (fromCache) {
+      console.debug(namespace, `Cache hit - track features for: ${id}.`);
     }
 
     return result;
