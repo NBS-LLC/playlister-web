@@ -208,29 +208,43 @@ describe(AudioAnalyzer.name, () => {
     });
 
     it("throws when track details are unavailable", async () => {
+      const detailsError = new GetTrackDetailsError();
+
       jest
         .spyOn(audioAnalyzer, "getTrackDetails")
-        .mockRejectedValue(new GetTrackDetailsError());
+        .mockRejectedValue(detailsError);
       jest
         .spyOn(audioAnalyzer, "getTrackFeatures")
         .mockResolvedValue(trackFeatures);
 
-      await expect(async () => {
-        await audioAnalyzer.getEnrichedTrack("unknown");
-      }).rejects.toThrow(GetEnrichedTrackError);
+      await expect(audioAnalyzer.getEnrichedTrack("unknown")).rejects.toThrow(
+        new GetEnrichedTrackError(
+          "Unable to get enriched track for: unknown.",
+          {
+            cause: detailsError,
+          },
+        ),
+      );
     });
 
     it("throws when track features are unavailable", async () => {
+      const featuresError = new GetTrackFeaturesError();
+
       jest
         .spyOn(audioAnalyzer, "getTrackDetails")
         .mockResolvedValue(trackDetails);
       jest
         .spyOn(audioAnalyzer, "getTrackFeatures")
-        .mockRejectedValue(new GetTrackFeaturesError());
+        .mockRejectedValue(featuresError);
 
-      await expect(async () => {
-        await audioAnalyzer.getEnrichedTrack("unknown");
-      }).rejects.toThrow(GetEnrichedTrackError);
+      await expect(audioAnalyzer.getEnrichedTrack("unknown")).rejects.toThrow(
+        new GetEnrichedTrackError(
+          "Unable to get enriched track for: unknown.",
+          {
+            cause: featuresError,
+          },
+        ),
+      );
     });
   });
 });

@@ -72,9 +72,10 @@ export class AudioAnalyzer {
       ]);
 
       return new EnrichedTrack(id, details, features);
-    } catch {
+    } catch (e) {
       throw new GetEnrichedTrackError(
         `Unable to get enriched track for: ${id}.`,
+        { cause: e },
       );
     }
   }
