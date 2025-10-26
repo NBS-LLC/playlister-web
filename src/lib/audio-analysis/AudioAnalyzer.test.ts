@@ -61,7 +61,7 @@ describe(AudioAnalyzer.name, () => {
       );
     });
 
-    it("throws an error when api track details are unavailable", async () => {
+    it("throws when api track details are unavailable", async () => {
       cacheProvider.find.mockResolvedValue(null);
       primaryProvider.findTrackDetails.mockResolvedValue(null);
 
@@ -73,7 +73,7 @@ describe(AudioAnalyzer.name, () => {
       expect(primaryProvider.findTrackDetails).toHaveBeenCalledWith("unknown");
     });
 
-    it("caches unavailable api track details to prevent spamming the api", async () => {
+    it("caches unavailable api track details", async () => {
       cacheProvider.find.mockResolvedValue(null);
       primaryProvider.findTrackDetails.mockResolvedValue(null);
 
@@ -85,6 +85,20 @@ describe(AudioAnalyzer.name, () => {
         "trackDetails_unknown",
         null,
       );
+    });
+
+    it("throws when details are cached as unavailable", async () => {
+      cacheProvider.find.mockResolvedValue({
+        data: null,
+        expirationDateUtc: "",
+      });
+
+      await expect(async () => {
+        await audioAnalyzer.getTrackDetails("unknown");
+      }).rejects.toThrow(GetTrackDetailsError);
+
+      expect(cacheProvider.find).toHaveBeenCalledWith("trackDetails_unknown");
+      expect(primaryProvider.findTrackDetails).not.toHaveBeenCalled();
     });
   });
 });
