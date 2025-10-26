@@ -1,13 +1,9 @@
-import {
-  GetTrackDetailsError,
-  GetTrackFeaturesError,
-} from "./AudioAnalysisProvider";
 import { _createMockEnrichedTracks } from "./EnrichedTrack.test-data";
 import { ReccoBeatsAnalyzer } from "./ReccoBeatsAnalyzer";
 
 describe(ReccoBeatsAnalyzer.name, () => {
-  describe(ReccoBeatsAnalyzer.prototype.getTrackDetails.name, () => {
-    it("can get details of a known track", async () => {
+  describe(ReccoBeatsAnalyzer.prototype.findTrackDetails.name, () => {
+    it("returns the details of a known track", async () => {
       const mockEnrichedTrack = _createMockEnrichedTracks()[0];
       const mockId = mockEnrichedTrack.id;
       const mockDetails = mockEnrichedTrack.details;
@@ -17,7 +13,7 @@ describe(ReccoBeatsAnalyzer.name, () => {
         .mockResolvedValue(Response.json({ content: [mockDetails] }));
 
       const audioAnalysis = new ReccoBeatsAnalyzer(mockHttpClient);
-      const trackDetails = await audioAnalysis.getTrackDetails(mockId);
+      const trackDetails = await audioAnalysis.findTrackDetails(mockId);
 
       expect(mockHttpClient).toHaveBeenCalledTimes(1);
       expect(mockHttpClient).toHaveBeenCalledWith(
@@ -26,20 +22,19 @@ describe(ReccoBeatsAnalyzer.name, () => {
       expect(trackDetails).toEqual(mockDetails);
     });
 
-    it("throws an error when the track is not found", async () => {
+    it("returns null when the track is not found", async () => {
       const mockHttpClient = jest
         .fn()
         .mockResolvedValue(Response.json({ content: [] }));
 
       const audioAnalysis = new ReccoBeatsAnalyzer(mockHttpClient);
-      await expect(async () => {
-        await audioAnalysis.getTrackDetails("abcd1234");
-      }).rejects.toThrow(GetTrackDetailsError);
+      const result = await audioAnalysis.findTrackDetails("abcd1234");
+      expect(result).toBeNull();
     });
   });
 
-  describe(ReccoBeatsAnalyzer.prototype.getTrackFeatures.name, () => {
-    it("can get features of a known track", async () => {
+  describe(ReccoBeatsAnalyzer.prototype.findTrackFeatures.name, () => {
+    it("returns the features of a known track", async () => {
       const mockEnrichedTrack = _createMockEnrichedTracks()[0];
       const mockId = mockEnrichedTrack.id;
       const mockFeatures = mockEnrichedTrack.features;
@@ -49,7 +44,7 @@ describe(ReccoBeatsAnalyzer.name, () => {
         .mockResolvedValue(Response.json({ content: [mockFeatures] }));
 
       const audioAnalysis = new ReccoBeatsAnalyzer(mockHttpClient);
-      const trackFeatures = await audioAnalysis.getTrackFeatures(mockId);
+      const trackFeatures = await audioAnalysis.findTrackFeatures(mockId);
 
       expect(mockHttpClient).toHaveBeenCalledTimes(1);
       expect(mockHttpClient).toHaveBeenCalledWith(
@@ -58,42 +53,14 @@ describe(ReccoBeatsAnalyzer.name, () => {
       expect(trackFeatures).toEqual(mockFeatures);
     });
 
-    it("throws an error when the track is not found", async () => {
+    it("returns null when the track is not found", async () => {
       const mockHttpClient = jest
         .fn()
         .mockResolvedValue(Response.json({ content: [] }));
 
       const audioAnalysis = new ReccoBeatsAnalyzer(mockHttpClient);
-      await expect(async () => {
-        await audioAnalysis.getTrackFeatures("abcd1234");
-      }).rejects.toThrow(GetTrackFeaturesError);
-    });
-  });
-
-  describe(ReccoBeatsAnalyzer.prototype.getEnrichedTrack.name, () => {
-    it("can get an enriched track for a known track", async () => {
-      const mockEnrichedTrack = _createMockEnrichedTracks()[0];
-      const mockId = mockEnrichedTrack.id;
-      const mockDetails = mockEnrichedTrack.details;
-      const mockFeatures = mockEnrichedTrack.features;
-
-      const mockHttpClient = jest
-        .fn()
-        .mockResolvedValueOnce(Response.json({ content: [mockDetails] }))
-        .mockResolvedValueOnce(Response.json({ content: [mockFeatures] }));
-
-      const audioAnalysis = new ReccoBeatsAnalyzer(mockHttpClient);
-      const enrichedTrack = await audioAnalysis.getEnrichedTrack(mockId);
-
-      expect(mockHttpClient).toHaveBeenCalledTimes(2);
-      expect(mockHttpClient).toHaveBeenCalledWith(
-        `https://api.reccobeats.com/v1/track?ids=${mockId}`,
-      );
-      expect(mockHttpClient).toHaveBeenCalledWith(
-        `https://api.reccobeats.com/v1/audio-features?ids=${mockId}`,
-      );
-
-      expect(enrichedTrack).toEqual(mockEnrichedTrack);
+      const result = await audioAnalysis.findTrackFeatures("abcd1234");
+      expect(result).toBeNull();
     });
   });
 });

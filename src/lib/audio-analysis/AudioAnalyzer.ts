@@ -4,7 +4,9 @@ import { EnrichedTrack } from "./EnrichedTrack";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 
-export class AudioAnalyzer implements AudioAnalysisProvider {
+export class GetTrackDetailsError extends Error {}
+
+export class AudioAnalyzer {
   constructor(
     private readonly primaryProvider: AudioAnalysisProvider,
     private readonly cacheProvider: CacheProvider,
@@ -17,14 +19,20 @@ export class AudioAnalyzer implements AudioAnalysisProvider {
       return cacheItem.data as TrackDetails;
     }
 
-    return await this.primaryProvider.getTrackDetails(id);
+    const result = await this.primaryProvider.findTrackDetails(id);
+
+    if (!result) {
+      throw new GetTrackDetailsError(`Unable to get track details for: ${id}.`);
+    }
+
+    return result;
   }
 
-  getTrackFeatures(id: string): Promise<TrackFeatures> {
-    return this.primaryProvider.getTrackFeatures(id);
+  getTrackFeatures(_id: string): Promise<TrackFeatures> {
+    throw new Error("not implemented");
   }
 
-  getEnrichedTrack(id: string): Promise<EnrichedTrack> {
-    return this.primaryProvider.getEnrichedTrack(id);
+  getEnrichedTrack(_id: string): Promise<EnrichedTrack> {
+    throw new Error("not implemented");
   }
 }

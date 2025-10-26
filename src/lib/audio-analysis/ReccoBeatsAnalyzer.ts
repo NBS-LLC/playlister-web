@@ -1,10 +1,5 @@
 import { namespace } from "../log";
-import {
-  AudioAnalysisProvider,
-  GetTrackDetailsError,
-  GetTrackFeaturesError,
-} from "./AudioAnalysisProvider";
-import { EnrichedTrack } from "./EnrichedTrack";
+import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 
@@ -18,32 +13,12 @@ export class ReccoBeatsAnalyzer implements AudioAnalysisProvider {
     ) => Promise<Response>,
   ) {}
 
-  async getTrackDetails(id: string): Promise<TrackDetails> {
-    const trackDetails = (await this.fetchMultipleTrackDetails([id]))[0];
-
-    if (!trackDetails) {
-      throw new GetTrackDetailsError(`Unable to get track details for: ${id}.`);
-    }
-
-    return trackDetails;
+  async findTrackDetails(id: string): Promise<TrackDetails | null> {
+    return (await this.fetchMultipleTrackDetails([id]))[0] || null;
   }
 
-  async getTrackFeatures(id: string): Promise<TrackFeatures> {
-    const trackDetails = (await this.fetchMultipleTrackFeatures([id]))[0];
-
-    if (!trackDetails) {
-      throw new GetTrackFeaturesError(
-        `Unable to get track features for: ${id}.`,
-      );
-    }
-
-    return trackDetails;
-  }
-
-  async getEnrichedTrack(id: string): Promise<EnrichedTrack> {
-    const details = await this.getTrackDetails(id);
-    const features = await this.getTrackFeatures(id);
-    return new EnrichedTrack(id, details, features);
+  async findTrackFeatures(id: string): Promise<TrackFeatures | null> {
+    return (await this.fetchMultipleTrackFeatures([id]))[0] || null;
   }
 
   private async fetchMultipleTrackDetails(
