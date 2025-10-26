@@ -13,13 +13,20 @@ export class AudioAnalyzer {
   ) {}
 
   async getTrackDetails(id: string): Promise<TrackDetails> {
-    const cacheItem = await this.cacheProvider.find(`trackDetails_${id}`);
+    const cacheKey = `trackDetails_${id}`;
+    const cacheItem = await this.cacheProvider.find(cacheKey);
 
     if (cacheItem) {
+      if (!cacheItem.data) {
+        throw new GetTrackDetailsError(
+          `Unable to get track details for: ${id} (cached).`,
+        );
+      }
       return cacheItem.data as TrackDetails;
     }
 
     const result = await this.primaryProvider.findTrackDetails(id);
+    await this.cacheProvider.store(cacheKey, result);
 
     if (!result) {
       throw new GetTrackDetailsError(`Unable to get track details for: ${id}.`);
