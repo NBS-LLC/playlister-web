@@ -11,10 +11,10 @@ export class AudioAnalyzer implements AudioAnalysisProvider {
   ) {}
 
   async getTrackDetails(id: string): Promise<TrackDetails> {
-    const result = await this.cacheProvider.find(`trackDetails_${id}`);
+    const cacheItem = await this.cacheProvider.find(`trackDetails_${id}`);
 
-    if (result) {
-      return result.data as TrackDetails;
+    if (cacheItem) {
+      return cacheItem.data as TrackDetails;
     }
 
     return await this.primaryProvider.getTrackDetails(id);
