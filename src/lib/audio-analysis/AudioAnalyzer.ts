@@ -6,6 +6,7 @@ import { TrackFeatures } from "./TrackFeatures";
 
 export class GetTrackDetailsError extends Error {}
 export class GetTrackFeaturesError extends Error {}
+export class GetEnrichedTrackError extends Error {}
 
 export class AudioAnalyzer {
   constructor(
@@ -63,7 +64,18 @@ export class AudioAnalyzer {
     return result;
   }
 
-  getEnrichedTrack(_id: string): Promise<EnrichedTrack> {
-    throw new Error("not implemented");
+  async getEnrichedTrack(id: string): Promise<EnrichedTrack> {
+    try {
+      const [details, features] = await Promise.all([
+        this.getTrackDetails(id),
+        this.getTrackFeatures(id),
+      ]);
+
+      return new EnrichedTrack(id, details, features);
+    } catch {
+      throw new GetEnrichedTrackError(
+        `Unable to get enriched track for: ${id}.`,
+      );
+    }
   }
 }

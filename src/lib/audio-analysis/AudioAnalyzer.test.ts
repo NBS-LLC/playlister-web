@@ -2,9 +2,11 @@ import { CacheProvider } from "../storage/CacheProvider";
 import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
 import {
   AudioAnalyzer,
+  GetEnrichedTrackError,
   GetTrackDetailsError,
   GetTrackFeaturesError,
 } from "./AudioAnalyzer";
+import { EnrichedTrack } from "./EnrichedTrack";
 import { _createMockEnrichedTracks } from "./EnrichedTrack.test-data";
 
 const trackDetails = _createMockEnrichedTracks()[0].details;
@@ -185,6 +187,50 @@ describe(AudioAnalyzer.name, () => {
 
       expect(cacheProvider.find).toHaveBeenCalledWith("trackFeatures_unknown");
       expect(primaryProvider.findTrackFeatures).not.toHaveBeenCalled();
+    });
+  });
+
+  describe(AudioAnalyzer.prototype.getEnrichedTrack.name, () => {
+    it("returns an enriched track", async () => {
+      jest
+        .spyOn(audioAnalyzer, "getTrackDetails")
+        .mockResolvedValue(trackDetails);
+      jest
+        .spyOn(audioAnalyzer, "getTrackFeatures")
+        .mockResolvedValue(trackFeatures);
+
+      const result = await audioAnalyzer.getEnrichedTrack("abcd1234");
+
+      expect(result).toBeInstanceOf(EnrichedTrack);
+      expect(result.id).toEqual("abcd1234");
+      expect(result.details).toEqual(trackDetails);
+      expect(result.features).toEqual(trackFeatures);
+    });
+
+    it("throws when track details are unavailable", async () => {
+      jest
+        .spyOn(audioAnalyzer, "getTrackDetails")
+        .mockRejectedValue(new GetTrackDetailsError());
+      jest
+        .spyOn(audioAnalyzer, "getTrackFeatures")
+        .mockResolvedValue(trackFeatures);
+
+      await expect(async () => {
+        await audioAnalyzer.getEnrichedTrack("unknown");
+      }).rejects.toThrow(GetEnrichedTrackError);
+    });
+
+    it("throws when track features are unavailable", async () => {
+      jest
+        .spyOn(audioAnalyzer, "getTrackDetails")
+        .mockResolvedValue(trackDetails);
+      jest
+        .spyOn(audioAnalyzer, "getTrackFeatures")
+        .mockRejectedValue(new GetTrackFeaturesError());
+
+      await expect(async () => {
+        await audioAnalyzer.getEnrichedTrack("unknown");
+      }).rejects.toThrow(GetEnrichedTrackError);
     });
   });
 });
