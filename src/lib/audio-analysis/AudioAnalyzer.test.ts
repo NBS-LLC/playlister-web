@@ -1,9 +1,14 @@
 import { CacheProvider } from "../storage/CacheProvider";
 import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
-import { AudioAnalyzer, GetTrackDetailsError } from "./AudioAnalyzer";
+import {
+  AudioAnalyzer,
+  GetTrackDetailsError,
+  GetTrackFeaturesError,
+} from "./AudioAnalyzer";
 import { _createMockEnrichedTracks } from "./EnrichedTrack.test-data";
 
 const trackDetails = _createMockEnrichedTracks()[0].details;
+const trackFeatures = _createMockEnrichedTracks()[0].features;
 
 const primaryProvider = {
   findTrackDetails: jest.fn(),
@@ -99,6 +104,87 @@ describe(AudioAnalyzer.name, () => {
 
       expect(cacheProvider.find).toHaveBeenCalledWith("trackDetails_unknown");
       expect(primaryProvider.findTrackDetails).not.toHaveBeenCalled();
+    });
+  });
+
+  describe(AudioAnalyzer.prototype.getTrackFeatures.name, () => {
+    it("returns cached track features", async () => {
+      cacheProvider.find.mockResolvedValue({
+        data: trackFeatures,
+        expirationDateUtc: "",
+      });
+
+      const result = await audioAnalyzer.getTrackFeatures("abcd1234");
+      expect(result).toEqual(trackFeatures);
+
+      expect(cacheProvider.find).toHaveBeenCalledWith("trackFeatures_abcd1234");
+      expect(primaryProvider.findTrackFeatures).not.toHaveBeenCalled();
+    });
+
+    it("returns api track features when not cached", async () => {
+      cacheProvider.find.mockResolvedValue(null);
+      primaryProvider.findTrackFeatures.mockResolvedValue(trackFeatures);
+
+      const result = await audioAnalyzer.getTrackFeatures("abcd1234");
+      expect(result).toEqual(trackFeatures);
+
+      expect(cacheProvider.find).toHaveBeenCalledWith("trackFeatures_abcd1234");
+      expect(primaryProvider.findTrackFeatures).toHaveBeenCalledWith(
+        "abcd1234",
+      );
+    });
+
+    it("caches api track features", async () => {
+      cacheProvider.find.mockResolvedValue(null);
+      primaryProvider.findTrackFeatures.mockResolvedValue(trackFeatures);
+
+      const result = await audioAnalyzer.getTrackFeatures("abcd1234");
+      expect(result).toEqual(trackFeatures);
+
+      expect(cacheProvider.store).toHaveBeenCalledWith(
+        "trackFeatures_abcd1234",
+        trackFeatures,
+      );
+    });
+
+    it("throws when api track features are unavailable", async () => {
+      cacheProvider.find.mockResolvedValue(null);
+      primaryProvider.findTrackFeatures.mockResolvedValue(null);
+
+      await expect(async () => {
+        await audioAnalyzer.getTrackFeatures("unknown");
+      }).rejects.toThrow(GetTrackFeaturesError);
+
+      expect(cacheProvider.find).toHaveBeenCalledWith("trackFeatures_unknown");
+      expect(primaryProvider.findTrackFeatures).toHaveBeenCalledWith("unknown");
+    });
+
+    it("caches unavailable api track features", async () => {
+      cacheProvider.find.mockResolvedValue(null);
+      primaryProvider.findTrackFeatures.mockResolvedValue(null);
+
+      await expect(async () => {
+        await audioAnalyzer.getTrackFeatures("unknown");
+      }).rejects.toThrow(GetTrackFeaturesError);
+
+      expect(cacheProvider.store).toHaveBeenCalledWith(
+        "trackFeatures_unknown",
+        null,
+      );
+    });
+
+    it("throws when features are cached as unavailable", async () => {
+      cacheProvider.find.mockResolvedValue({
+        data: null,
+        expirationDateUtc: "",
+      });
+
+      await expect(async () => {
+        await audioAnalyzer.getTrackFeatures("unknown");
+      }).rejects.toThrow(GetTrackFeaturesError);
+
+      expect(cacheProvider.find).toHaveBeenCalledWith("trackFeatures_unknown");
+      expect(primaryProvider.findTrackFeatures).not.toHaveBeenCalled();
     });
   });
 });

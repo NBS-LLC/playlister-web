@@ -5,6 +5,7 @@ import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 
 export class GetTrackDetailsError extends Error {}
+export class GetTrackFeaturesError extends Error {}
 
 export class AudioAnalyzer {
   constructor(
@@ -37,8 +38,29 @@ export class AudioAnalyzer {
     return result;
   }
 
-  getTrackFeatures(_id: string): Promise<TrackFeatures> {
-    throw new Error("not implemented");
+  async getTrackFeatures(id: string): Promise<TrackFeatures> {
+    const cacheKey = `trackFeatures_${id}`;
+    const cacheItem = await this.cacheProvider.find<TrackFeatures>(cacheKey);
+
+    let result: TrackFeatures | null;
+    let fromCache = false;
+
+    if (cacheItem) {
+      result = cacheItem.data;
+      fromCache = true;
+    } else {
+      result = await this.primaryProvider.findTrackFeatures(id);
+      await this.cacheProvider.store(cacheKey, result);
+    }
+
+    if (!result) {
+      const cachedMsg = fromCache ? " (cached)" : "";
+      throw new GetTrackFeaturesError(
+        `Unable to get track features for: ${id}${cachedMsg}.`,
+      );
+    }
+
+    return result;
   }
 
   getEnrichedTrack(_id: string): Promise<EnrichedTrack> {
