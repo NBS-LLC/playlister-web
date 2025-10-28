@@ -1,3 +1,7 @@
 import { config } from "./config";
 
-export const namespace = config.appId ? `[${config.appId}]` : "";
+export const log = {
+  get namespace() {
+    return config.appId ? `[${config.appId}]` : "";
+  },
+};

@@ -1,4 +1,4 @@
-import { namespace } from "../log";
+import { log } from "../log";
 import { CacheProvider } from "../storage/CacheProvider";
 import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
 import { EnrichedTrack } from "./EnrichedTrack";
@@ -38,7 +38,7 @@ export class AudioAnalyzer {
     }
 
     if (fromCache) {
-      console.debug(namespace, `Cache hit - track details for: ${id}.`);
+      console.debug(log.namespace, `Cache hit - track details for: ${id}.`);
     }
 
     return result;
@@ -67,7 +67,7 @@ export class AudioAnalyzer {
     }
 
     if (fromCache) {
-      console.debug(namespace, `Cache hit - track features for: ${id}.`);
+      console.debug(log.namespace, `Cache hit - track features for: ${id}.`);
     }
 
     return result;

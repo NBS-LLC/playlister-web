@@ -1,4 +1,4 @@
-import { namespace } from "../log";
+import { log } from "../log";
 import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
@@ -29,7 +29,7 @@ export class ReccoBeatsAnalyzer implements AudioAnalysisProvider {
     const response = await this.httpClient(url);
 
     if (!response.ok) {
-      console.error(namespace, response);
+      console.error(log.namespace, response);
       throw new Error(
         "An error occurred trying to fetch multiple track details.",
       );
@@ -46,7 +46,7 @@ export class ReccoBeatsAnalyzer implements AudioAnalysisProvider {
     const response = await this.httpClient(url);
 
     if (!response.ok) {
-      console.error(namespace, response);
+      console.error(log.namespace, response);
       throw new Error(
         "An error occurred trying to fetch multiple track features.",
       );

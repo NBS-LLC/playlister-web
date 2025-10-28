@@ -1,4 +1,4 @@
-import { namespace } from "../log";
+import { log } from "../log";
 import { AsyncObjectStorage } from "./AsyncObjectStorage";
 import { CacheItem } from "./CacheItem";
 import { CacheProvider } from "./CacheProvider";
@@ -47,7 +47,7 @@ export class Cache implements CacheProvider {
     const promises = keys.map(async (key) => {
       const cacheItem = await this.storage.getItem<CacheItem<unknown>>(key);
       if (cacheItem && new Date() >= new Date(cacheItem.expirationDateUtc)) {
-        console.debug(namespace, `Pruned: ${key} from cache.`);
+        console.debug(log.namespace, `Pruned: ${key} from cache.`);
         await this.storage.removeItem(key);
       }
     });

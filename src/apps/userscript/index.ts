@@ -1,14 +1,14 @@
+import { config } from "#lib/config";
+config.appName = "SpotAVibe Lite";
+config.appId = "spotavibe-lite";
+
 import { AudioAnalyzer } from "#lib/audio-analysis/AudioAnalyzer";
 import { ReccoBeatsAnalyzer } from "#lib/audio-analysis/ReccoBeatsAnalyzer";
-import { config } from "#lib/config";
 import { onMutation, waitForElem } from "#lib/html";
-import { namespace } from "#lib/log";
+import { log } from "#lib/log";
 import { SpotifyWebPage } from "#lib/spotify-web/SpotifyWebPage";
 import { Cache } from "#lib/storage/Cache";
 import { LocalStorageAdapter } from "#lib/storage/LocalStorageAdapter";
-
-config.appName = "SpotAVibe Lite";
-config.appId = "spotavibe-lite";
 
 const cacheProvider = new Cache(new LocalStorageAdapter(localStorage));
 cacheProvider.prune();
@@ -17,7 +17,7 @@ const spotifyWebPage = new SpotifyWebPage();
 
 async function enrichNowPlaying() {
   const trackId = spotifyWebPage.getNowPlayingTrackId();
-  console.log(`${namespace} now playing track:`, trackId);
+  console.log(log.namespace, "now playing track:", trackId);
 
   const audioAnalyzer = new AudioAnalyzer(
     new ReccoBeatsAnalyzer(fetch),
@@ -25,9 +25,9 @@ async function enrichNowPlaying() {
   );
 
   const enrichedTrack = await audioAnalyzer.getEnrichedTrack(trackId);
-  console.log(namespace, enrichedTrack.getHumanReadableString());
+  console.log(log.namespace, enrichedTrack.getHumanReadableString());
 
-  console.groupCollapsed(`${namespace} enriched track data`);
+  console.groupCollapsed(log.namespace, "enriched track data");
   console.log(enrichedTrack.details);
   console.log(enrichedTrack.features);
   console.groupEnd();
