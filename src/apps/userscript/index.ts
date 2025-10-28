@@ -1,10 +1,14 @@
 import { AudioAnalyzer } from "#lib/audio-analysis/AudioAnalyzer";
 import { ReccoBeatsAnalyzer } from "#lib/audio-analysis/ReccoBeatsAnalyzer";
+import { config } from "#lib/config";
 import { onMutation, waitForElem } from "#lib/html";
 import { namespace } from "#lib/log";
 import { SpotifyWebPage } from "#lib/spotify-web/SpotifyWebPage";
 import { Cache } from "#lib/storage/Cache";
 import { LocalStorageAdapter } from "#lib/storage/LocalStorageAdapter";
+
+config.appName = "SpotAVibe Lite";
+config.appId = "spotavibe-lite";
 
 const cacheProvider = new Cache(new LocalStorageAdapter(localStorage));
 cacheProvider.prune();
