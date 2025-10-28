@@ -17,7 +17,7 @@ const spotifyWebPage = new SpotifyWebPage();
 
 async function enrichNowPlaying() {
   const trackId = spotifyWebPage.getNowPlayingTrackId();
-  console.log(log.namespace, "now playing track:", trackId);
+  console.log(log.namespace, `Now playing track: ${trackId}.`);
 
   const audioAnalyzer = new AudioAnalyzer(
     new ReccoBeatsAnalyzer(fetch),
@@ -27,7 +27,7 @@ async function enrichNowPlaying() {
   const enrichedTrack = await audioAnalyzer.getEnrichedTrack(trackId);
   console.log(log.namespace, enrichedTrack.getHumanReadableString());
 
-  console.groupCollapsed(log.namespace, "enriched track data");
+  console.groupCollapsed(log.namespace, "Enriched Track Data");
   console.log(enrichedTrack.details);
   console.log(enrichedTrack.features);
   console.groupEnd();
