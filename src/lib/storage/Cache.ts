@@ -41,12 +41,15 @@ export class Cache implements CacheProvider {
 
   async prune(): Promise<void> {
     const keys = await this.storage.keys();
-    for (const key of keys) {
-      const cacheItem: CacheItem<unknown> = (await this.storage.getItem(key))!;
-      if (new Date() >= new Date(cacheItem.expirationDateUtc)) {
-        this.storage.removeItem(key);
+
+    const promises = keys.map(async (key) => {
+      const cacheItem = await this.storage.getItem<CacheItem<unknown>>(key);
+      if (cacheItem && new Date() >= new Date(cacheItem.expirationDateUtc)) {
+        await this.storage.removeItem(key);
       }
-    }
+    });
+
+    await Promise.all(promises);
   }
 
   private getExpirationDateUtc(offsetInMs: number): string {
