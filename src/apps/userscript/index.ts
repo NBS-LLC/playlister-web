@@ -6,6 +6,9 @@ import { SpotifyWebPage } from "#lib/spotify-web/SpotifyWebPage";
 import { Cache } from "#lib/storage/Cache";
 import { LocalStorageAdapter } from "#lib/storage/LocalStorageAdapter";
 
+const cacheProvider = new Cache(new LocalStorageAdapter(localStorage));
+cacheProvider.prune();
+
 const spotifyWebPage = new SpotifyWebPage();
 
 async function enrichNowPlaying() {
@@ -14,7 +17,7 @@ async function enrichNowPlaying() {
 
   const audioAnalyzer = new AudioAnalyzer(
     new ReccoBeatsAnalyzer(fetch),
-    new Cache(new LocalStorageAdapter(localStorage)),
+    cacheProvider,
   );
 
   const enrichedTrack = await audioAnalyzer.getEnrichedTrack(trackId);
