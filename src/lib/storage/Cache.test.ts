@@ -52,6 +52,23 @@ describe(Cache.name, () => {
       expect(result).toBeNull();
     });
 
+    it("removes the item if it is expired", async () => {
+      const id = "expired-id";
+      const data = { value: "some-data" };
+      const expirationDateUtc = new Date(Date.now() - 1000).toISOString();
+      const cacheItem: CacheItem<typeof data> = {
+        data,
+        expirationDateUtc,
+      };
+
+      await storage.setItem(id, cacheItem);
+      expect(await storage.getItem(id)).not.toBeNull();
+
+      const result = await cache.find(id);
+      expect(result).toBeNull();
+      expect(await storage.getItem(id)).toBeNull();
+    });
+
     it("returns the item if it is not expired", async () => {
       const id = "valid-id";
       const data = { value: "some-data" };

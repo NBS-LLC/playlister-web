@@ -16,6 +16,7 @@ export class Cache implements CacheProvider {
     }
 
     if (new Date() >= new Date(result.expirationDateUtc)) {
+      this.storage.removeItem(id);
       return null;
     }
 
