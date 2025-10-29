@@ -25,21 +25,22 @@ class MockAsyncObjectStorage implements AsyncObjectStorage {
 }
 
 describe(Cache.name, () => {
+  const originalAppId = config.appId;
+
   let cache: Cache;
   let storage: MockAsyncObjectStorage;
 
   beforeEach(() => {
+    config.appId = "";
     storage = new MockAsyncObjectStorage();
     cache = new Cache(storage);
   });
 
+  afterEach(() => {
+    config.appId = originalAppId;
+  });
+
   describe("namespace", () => {
-    const originalAppId = config.appId;
-
-    afterEach(() => {
-      config.appId = originalAppId;
-    });
-
     it("returns an empty string if appId is not set in config", () => {
       config.appId = "";
       expect(Cache.namespace).toBe("");

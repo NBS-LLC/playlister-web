@@ -15,14 +15,16 @@ export class Cache implements CacheProvider {
   }
 
   async find<T>(id: string): Promise<CacheItem<T> | null> {
-    const result: CacheItem<T> | null = await this.storage.getItem(id);
+    const result: CacheItem<T> | null = await this.storage.getItem(
+      this.getKey(id),
+    );
 
     if (!result) {
       return null;
     }
 
     if (new Date() >= new Date(result.expirationDateUtc)) {
-      this.storage.removeItem(id);
+      this.storage.removeItem(this.getKey(id));
       return null;
     }
 
@@ -43,13 +45,17 @@ export class Cache implements CacheProvider {
       expirationDateUtc,
     };
 
-    await this.storage.setItem(id, cacheItem);
+    await this.storage.setItem(this.getKey(id), cacheItem);
   }
 
   async prune(): Promise<void> {
     const keys = await this.storage.keys();
 
     const promises = keys.map(async (key) => {
+      if (!key.startsWith(Cache.namespace)) {
+        return;
+      }
+
       const cacheItem = await this.storage.getItem<CacheItem<unknown>>(key);
       if (cacheItem && new Date() >= new Date(cacheItem.expirationDateUtc)) {
         console.debug(log.namespace, `Pruned: ${key} from cache.`);
@@ -62,5 +68,9 @@ export class Cache implements CacheProvider {
 
   private getExpirationDateUtc(offsetInMs: number): string {
     return new Date(Date.now() + offsetInMs).toISOString();
+  }
+
+  private getKey(id: string): string {
+    return `${Cache.namespace}${id}`;
   }
 }
