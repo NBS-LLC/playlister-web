@@ -1,3 +1,4 @@
+import { config } from "../config";
 import { log } from "../log";
 import { AsyncObjectStorage } from "./AsyncObjectStorage";
 import { CacheItem } from "./CacheItem";
@@ -8,6 +9,10 @@ const LONG_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 
 export class Cache implements CacheProvider {
   constructor(private readonly storage: AsyncObjectStorage) {}
+
+  static get namespace(): string {
+    return config.appId ? `${config.appId}-` : "";
+  }
 
   async find<T>(id: string): Promise<CacheItem<T> | null> {
     const result: CacheItem<T> | null = await this.storage.getItem(id);

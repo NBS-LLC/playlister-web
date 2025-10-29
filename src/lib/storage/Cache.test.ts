@@ -1,3 +1,4 @@
+import { config } from "../config";
 import { AsyncObjectStorage } from "./AsyncObjectStorage";
 import { Cache } from "./Cache";
 import { CacheItem } from "./CacheItem";
@@ -30,6 +31,25 @@ describe(Cache.name, () => {
   beforeEach(() => {
     storage = new MockAsyncObjectStorage();
     cache = new Cache(storage);
+  });
+
+  describe("namespace", () => {
+    const originalAppId = config.appId;
+
+    afterEach(() => {
+      config.appId = originalAppId;
+    });
+
+    it("returns an empty string if appId is not set in config", () => {
+      config.appId = "";
+      expect(Cache.namespace).toBe("");
+    });
+
+    it("returns a formatted namespace string if appId is set in config", () => {
+      const testAppId = "my-test-app";
+      config.appId = testAppId;
+      expect(Cache.namespace).toBe(`${testAppId}-`);
+    });
   });
 
   describe(Cache.prototype.find.name, () => {
