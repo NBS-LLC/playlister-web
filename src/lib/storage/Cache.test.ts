@@ -103,6 +103,23 @@ describe(Cache.name, () => {
       const result = await cache.find(id);
       expect(result).toEqual(cacheItem);
     });
+
+    it("uses a configured app id as a namespace", async () => {
+      config.appId = "test-app-id";
+
+      const id = "some-id";
+      const data = { value: "some-data" };
+      const cacheItem: CacheItem<typeof data> = {
+        data,
+        expirationDateUtc: "",
+      };
+
+      const key = `${Cache.namespace}${id}`;
+      await storage.setItem(key, cacheItem);
+
+      const result = await cache.find(id);
+      expect(result).toEqual(cacheItem);
+    });
   });
 
   describe(Cache.prototype.store.name, () => {
