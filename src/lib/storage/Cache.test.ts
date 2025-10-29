@@ -51,26 +51,6 @@ describe(Cache.name, () => {
       config.appId = testAppId;
       expect(Cache.namespace).toBe(`${testAppId}-`);
     });
-
-    it("isolates cache items by namespace", async () => {
-      const id = "some-id";
-      const data1 = { value: "some-data-1" };
-      const data2 = { value: "some-data-2" };
-
-      config.appId = "app1";
-      await cache.store(id, data1);
-
-      config.appId = "app2";
-      await cache.store(id, data2);
-
-      config.appId = "app1";
-      const result1 = await cache.find(id);
-      expect(result1?.data).toEqual(data1);
-
-      config.appId = "app2";
-      const result2 = await cache.find(id);
-      expect(result2?.data).toEqual(data2);
-    });
   });
 
   describe(Cache.prototype.find.name, () => {
@@ -286,8 +266,30 @@ describe(Cache.name, () => {
       expect(await storage.keys()).toEqual([malformedId]);
       expect(await storage.getItem(malformedId)).toEqual(malformedItem);
     });
+  });
 
-    it("only removes items in the current namespace", async () => {
+  describe("isolation", () => {
+    it("finds and stores by namespace", async () => {
+      const id = "some-id";
+      const data1 = { value: "some-data-1" };
+      const data2 = { value: "some-data-2" };
+
+      config.appId = "app1";
+      await cache.store(id, data1);
+
+      config.appId = "app2";
+      await cache.store(id, data2);
+
+      config.appId = "app1";
+      const result1 = await cache.find(id);
+      expect(result1?.data).toEqual(data1);
+
+      config.appId = "app2";
+      const result2 = await cache.find(id);
+      expect(result2?.data).toEqual(data2);
+    });
+
+    it("prunes by namespace", async () => {
       const keyApp1 = "app1-expired-app1";
       const keyApp2 = "app2-expired-app2";
       const keyValidApp2 = "app2-valid-app2";
