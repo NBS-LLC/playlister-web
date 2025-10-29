@@ -11,7 +11,7 @@ export class Cache implements CacheProvider {
   constructor(private readonly storage: AsyncObjectStorage) {}
 
   static get namespace(): string {
-    return config.appId ? `${config.appId}-` : "";
+    return config.appId ? `${config.appId}:` : "";
   }
 
   async find<T>(id: string): Promise<CacheItem<T> | null> {

@@ -49,7 +49,7 @@ describe(Cache.name, () => {
     it("returns a formatted namespace string if app id is set in config", () => {
       const testAppId = "my-test-app";
       config.appId = testAppId;
-      expect(Cache.namespace).toBe(`${testAppId}-`);
+      expect(Cache.namespace).toBe(`${testAppId}:`);
     });
   });
 
@@ -290,9 +290,9 @@ describe(Cache.name, () => {
     });
 
     it("prunes by namespace", async () => {
-      const keyApp1 = "app1-expired-app1";
-      const keyApp2 = "app2-expired-app2";
-      const keyValidApp2 = "app2-valid-app2";
+      const keyApp1 = "app1:expired-app1";
+      const keyApp2 = "app2:expired-app2";
+      const keyValidApp2 = "app2:valid-app2";
 
       const expiredItem: CacheItem<string> = {
         data: "expired-data",
