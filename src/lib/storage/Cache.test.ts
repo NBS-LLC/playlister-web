@@ -41,15 +41,35 @@ describe(Cache.name, () => {
   });
 
   describe("namespace", () => {
-    it("returns an empty string if appId is not set in config", () => {
+    it("returns an empty string if app id is not set in config", () => {
       config.appId = "";
       expect(Cache.namespace).toBe("");
     });
 
-    it("returns a formatted namespace string if appId is set in config", () => {
+    it("returns a formatted namespace string if app id is set in config", () => {
       const testAppId = "my-test-app";
       config.appId = testAppId;
       expect(Cache.namespace).toBe(`${testAppId}-`);
+    });
+
+    it("isolates cache items by app id", async () => {
+      const id = "some-id";
+      const data1 = { value: "some-data-1" };
+      const data2 = { value: "some-data-2" };
+
+      config.appId = "app1";
+      await cache.store(id, data1);
+
+      config.appId = "app2";
+      await cache.store(id, data2);
+
+      config.appId = "app1";
+      const result1 = await cache.find(id);
+      expect(result1?.data).toEqual(data1);
+
+      config.appId = "app2";
+      const result2 = await cache.find(id);
+      expect(result2?.data).toEqual(data2);
     });
   });
 
@@ -100,23 +120,6 @@ describe(Cache.name, () => {
       };
 
       await storage.setItem(id, cacheItem);
-      const result = await cache.find(id);
-      expect(result).toEqual(cacheItem);
-    });
-
-    it("uses a configured app id as a namespace", async () => {
-      config.appId = "test-app-id";
-
-      const id = "some-id";
-      const data = { value: "some-data" };
-      const cacheItem: CacheItem<typeof data> = {
-        data,
-        expirationDateUtc: "",
-      };
-
-      const key = `${Cache.namespace}${id}`;
-      await storage.setItem(key, cacheItem);
-
       const result = await cache.find(id);
       expect(result).toEqual(cacheItem);
     });
