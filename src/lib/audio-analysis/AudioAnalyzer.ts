@@ -1,79 +1,91 @@
+import { log } from "../log";
+import { CacheProvider } from "../storage/CacheProvider";
+import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
 import { EnrichedTrack } from "./EnrichedTrack";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 
 export class GetTrackDetailsError extends Error {}
 export class GetTrackFeaturesError extends Error {}
+export class GetEnrichedTrackError extends Error {}
 
 export class AudioAnalyzer {
   constructor(
-    readonly httpClient: (
-      input: RequestInfo,
-      init?: RequestInit,
-    ) => Promise<Response>,
+    private readonly primaryProvider: AudioAnalysisProvider,
+    private readonly cacheProvider: CacheProvider,
   ) {}
 
   async getTrackDetails(id: string): Promise<TrackDetails> {
-    const trackDetails = (await this.fetchMultipleTrackDetails([id]))[0];
+    const cacheKey = `trackDetails_${id}`;
+    const cacheItem = await this.cacheProvider.find<TrackDetails>(cacheKey);
 
-    if (!trackDetails) {
-      throw new GetTrackDetailsError(`Unable to get track details for: ${id}.`);
+    let result: TrackDetails | null;
+    let fromCache = false;
+
+    if (cacheItem) {
+      result = cacheItem.data;
+      fromCache = true;
+    } else {
+      result = await this.primaryProvider.findTrackDetails(id);
+      await this.cacheProvider.store(cacheKey, result);
     }
 
-    return trackDetails;
+    if (!result) {
+      const cachedMsg = fromCache ? " (cached)" : "";
+      throw new GetTrackDetailsError(
+        `Unable to get track details for: ${id}${cachedMsg}.`,
+      );
+    }
+
+    if (fromCache) {
+      console.debug(log.namespace, `Cache hit - track details for: ${id}.`);
+    }
+
+    return result;
   }
 
   async getTrackFeatures(id: string): Promise<TrackFeatures> {
-    const trackDetails = (await this.fetchMultipleTrackFeatures([id]))[0];
+    const cacheKey = `trackFeatures_${id}`;
+    const cacheItem = await this.cacheProvider.find<TrackFeatures>(cacheKey);
 
-    if (!trackDetails) {
+    let result: TrackFeatures | null;
+    let fromCache = false;
+
+    if (cacheItem) {
+      result = cacheItem.data;
+      fromCache = true;
+    } else {
+      result = await this.primaryProvider.findTrackFeatures(id);
+      await this.cacheProvider.store(cacheKey, result);
+    }
+
+    if (!result) {
+      const cachedMsg = fromCache ? " (cached)" : "";
       throw new GetTrackFeaturesError(
-        `Unable to get track features for: ${id}.`,
+        `Unable to get track features for: ${id}${cachedMsg}.`,
       );
     }
 
-    return trackDetails;
+    if (fromCache) {
+      console.debug(log.namespace, `Cache hit - track features for: ${id}.`);
+    }
+
+    return result;
   }
 
   async getEnrichedTrack(id: string): Promise<EnrichedTrack> {
-    const details = await this.getTrackDetails(id);
-    const features = await this.getTrackFeatures(id);
-    return new EnrichedTrack(id, details, features);
-  }
+    try {
+      const [details, features] = await Promise.all([
+        this.getTrackDetails(id),
+        this.getTrackFeatures(id),
+      ]);
 
-  private async fetchMultipleTrackDetails(
-    ids: string[],
-  ): Promise<TrackDetails[]> {
-    const baseUrl = "https://api.reccobeats.com/v1/track";
-    const params = new URLSearchParams({ ids: ids.join(",") });
-    const url = `${baseUrl}?${params.toString()}`;
-    const response = await this.httpClient(url);
-
-    if (!response.ok) {
-      console.error(response);
-      throw new Error(
-        "An error occurred trying to fetch multiple track details.",
+      return new EnrichedTrack(id, details, features);
+    } catch (e) {
+      throw new GetEnrichedTrackError(
+        `Unable to get enriched track for: ${id}.`,
+        { cause: e },
       );
     }
-
-    return (await response.json()).content as TrackDetails[];
-  }
-
-  private async fetchMultipleTrackFeatures(
-    ids: string[],
-  ): Promise<TrackFeatures[]> {
-    const baseUrl = "https://api.reccobeats.com/v1/audio-features";
-    const params = new URLSearchParams({ ids: ids.join(",") });
-    const url = `${baseUrl}?${params.toString()}`;
-    const response = await this.httpClient(url);
-
-    if (!response.ok) {
-      console.error(response);
-      throw new Error(
-        "An error occurred trying to fetch multiple track features.",
-      );
-    }
-
-    return (await response.json()).content as TrackFeatures[];
   }
 }
