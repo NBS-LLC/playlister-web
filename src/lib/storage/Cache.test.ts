@@ -52,7 +52,7 @@ describe(Cache.name, () => {
       expect(Cache.namespace).toBe(`${testAppId}-`);
     });
 
-    it("isolates cache items by app id", async () => {
+    it("isolates cache items by namespace", async () => {
       const id = "some-id";
       const data1 = { value: "some-data-1" };
       const data2 = { value: "some-data-2" };
@@ -285,6 +285,39 @@ describe(Cache.name, () => {
 
       expect(await storage.keys()).toEqual([malformedId]);
       expect(await storage.getItem(malformedId)).toEqual(malformedItem);
+    });
+
+    it("only removes items in the current namespace", async () => {
+      const keyApp1 = "app1-expired-app1";
+      const keyApp2 = "app2-expired-app2";
+      const keyValidApp2 = "app2-valid-app2";
+
+      const expiredItem: CacheItem<string> = {
+        data: "expired-data",
+        expirationDateUtc: "2024-01-01T00:00:00.000Z",
+      };
+
+      const validItem: CacheItem<string> = {
+        data: "valid-data",
+        expirationDateUtc: new Date(Date.now() + 100000).toISOString(),
+      };
+
+      await storage.setItem(keyApp1, expiredItem);
+      await storage.setItem(keyApp2, expiredItem);
+      await storage.setItem(keyValidApp2, validItem);
+
+      config.appId = "app2";
+      await cache.prune();
+
+      expect(await storage.getItem(keyApp1)).toEqual(expiredItem); // app1 item should remain
+      expect(await storage.getItem(keyApp2)).toBeNull(); // app2 expired item should be removed
+      expect(await storage.getItem(keyValidApp2)).toEqual(validItem); // app2 valid item should remain
+
+      config.appId = "app1";
+      await cache.prune();
+
+      expect(await storage.getItem(keyApp1)).toBeNull(); // app1 item should now be removed
+      expect(await storage.getItem(keyValidApp2)).toEqual(validItem); // app2 valid item should remain
     });
   });
 });
