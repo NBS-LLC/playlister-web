@@ -43,63 +43,113 @@ describe(waitForElem.name, () => {
 });
 
 describe(onMutation.name, () => {
+  let targetElement: HTMLElement;
+
   beforeEach(() => {
     document.body.innerHTML = "";
+    targetElement = document.createElement("div");
+    document.body.appendChild(targetElement);
   });
 
-  /**
-   * Covers the use case of detecting when the now playing widget changes.
-   */
-  it("should invoke callback when an attribute mutation occurs", (done) => {
-    document.body.innerHTML =
-      "<div id='content' aria-label='unit-test-content'></div>";
+  it("fires when an attribute changes (default options)", (done) => {
+    const callback = jest.fn();
+    onMutation(targetElement, callback);
 
-    const elemContent = document.querySelector("#content")!;
-    onMutation(elemContent, async () => {
+    targetElement.setAttribute("data-test", "value");
+
+    setTimeout(() => {
+      expect(callback).toHaveBeenCalled();
       done();
-    });
-
-    setTimeout(() => {
-      elemContent.setAttribute("aria-label", "changed");
-    }, 100);
+    }, 0);
   });
 
-  /**
-   * Covers the use case of detecting when the playlist widget changes.
-   */
-  it("should invoke callback when a child mutation occurs", (done) => {
-    document.body.innerHTML = "<div id='content'></div>";
+  it("fires when a child is added (default options)", (done) => {
+    const callback = jest.fn();
+    onMutation(targetElement, callback);
 
-    const elemContent = document.querySelector("#content")!;
-    onMutation(elemContent, async () => {
+    const newChild = document.createElement("span");
+    targetElement.appendChild(newChild);
+
+    setTimeout(() => {
+      expect(callback).toHaveBeenCalled();
       done();
-    });
-
-    setTimeout(() => {
-      const element = document.createElement("div");
-      element.id = "unit-test";
-      elemContent.appendChild(element);
-    }, 100);
+    }, 0);
   });
 
-  /**
-   * Covers the use case of tracks being added to a track list.
-   */
-  it("should invoke callback when a subtree mutation occurs", (done) => {
-    document.body.innerHTML = "<div id='container'><div id='content'></div>";
+  it("fires for subtree mutations when configured", (done) => {
+    const childElement = document.createElement("span");
+    targetElement.appendChild(childElement);
 
-    onMutation(
-      document.querySelector("#container")!,
-      async () => {
-        done();
-      },
-      { childList: true, subtree: true },
-    );
+    const callback = jest.fn();
+    onMutation(targetElement, callback, { subtree: true, childList: true });
+
+    const newGrandchild = document.createElement("p");
+    childElement.appendChild(newGrandchild);
 
     setTimeout(() => {
-      const element = document.createElement("div");
-      element.id = "unit-test";
-      document.querySelector("#content")!.appendChild(element);
-    }, 100);
+      expect(callback).toHaveBeenCalled();
+      done();
+    }, 0);
+  });
+
+  it("does not fire for subtree mutations by default", (done) => {
+    const childElement = document.createElement("span");
+    targetElement.appendChild(childElement);
+
+    const callback = jest.fn();
+    // Default options: { attributes: true, childList: true }
+    onMutation(targetElement, callback);
+
+    const newGrandchild = document.createElement("p");
+    childElement.appendChild(newGrandchild);
+
+    setTimeout(() => {
+      expect(callback).not.toHaveBeenCalled();
+      done();
+    }, 0);
+  });
+
+  it("fires for character data changes when configured", (done) => {
+    targetElement.textContent = "initial";
+    const callback = jest.fn();
+    onMutation(targetElement, callback, { characterData: true, subtree: true });
+
+    targetElement.firstChild!.textContent = "changed";
+
+    setTimeout(() => {
+      expect(callback).toHaveBeenCalled();
+      const mutation = callback.mock.calls[0][0] as MutationRecord;
+      expect(mutation.type).toBe("characterData");
+      done();
+    }, 0);
+  });
+
+  it("does not fire for character data changes by default", (done) => {
+    targetElement.textContent = "initial";
+    const callback = jest.fn();
+    // Default options: { attributes: true, childList: true }
+    onMutation(targetElement, callback);
+
+    targetElement.firstChild!.textContent = "changed";
+
+    setTimeout(() => {
+      expect(callback).not.toHaveBeenCalled();
+      done();
+    }, 0);
+  });
+
+  it("supplies the correct mutation record", (done) => {
+    const callback = jest.fn();
+    onMutation(targetElement, callback, { attributes: true });
+
+    targetElement.setAttribute("data-test", "new-value");
+
+    setTimeout(() => {
+      expect(callback).toHaveBeenCalledTimes(1);
+      const mutation = callback.mock.calls[0][0] as MutationRecord;
+      expect(mutation.type).toBe("attributes");
+      expect(mutation.attributeName).toBe("data-test");
+      done();
+    }, 0);
   });
 });
