@@ -37,7 +37,7 @@ async function enrichNowPlaying() {
 
 function main() {
   waitForElem(spotifyWebPage.nowPlayingTrack).then((elem) => {
-    onMutation(elem, enrichNowPlaying);
+    onMutation(elem, enrichNowPlaying, { attributes: true, childList: false });
     enrichNowPlaying();
   });
 }
