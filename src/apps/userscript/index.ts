@@ -35,10 +35,29 @@ async function enrichNowPlaying() {
   spotifyWebPage.insertNowPlayingTrackStats(enrichedTrack.getStatsString());
 }
 
+async function enrichTracks(mutationRecord: MutationRecord) {
+  for (const node of mutationRecord.addedNodes) {
+    if (node instanceof Element) {
+      const links = node.querySelectorAll('a[href^="/track/"]');
+      links.forEach((link) => {
+        console.debug(link);
+      });
+    }
+  }
+}
+
 function main() {
   waitForElem(spotifyWebPage.nowPlayingTrack).then((elem) => {
     onMutation(elem, enrichNowPlaying, { attributes: true, childList: false });
     enrichNowPlaying();
+  });
+
+  waitForElem("#main-view").then((elem) => {
+    onMutation(elem, enrichTracks, {
+      attributes: false,
+      childList: true,
+      subtree: true,
+    });
   });
 }
 
