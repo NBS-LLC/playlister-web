@@ -7,6 +7,8 @@ export class SpotifyWebPage {
 
   readonly nowPlayingTitle = 'div[data-testid="context-item-info-title"]';
 
+  readonly mainView = "#main-view";
+
   getNowPlayingTrackId() {
     const element = this.getElement<HTMLAnchorElement>(this.nowPlayingTrack);
     return this.parseNowPlayingTrackId(element);

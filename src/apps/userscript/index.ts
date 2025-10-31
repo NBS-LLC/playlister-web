@@ -52,7 +52,7 @@ function main() {
     enrichNowPlaying();
   });
 
-  waitForElem("#main-view").then((elem) => {
+  waitForElem(spotifyWebPage.mainView).then((elem) => {
     onMutation(elem, enrichTracks, {
       attributes: false,
       childList: true,
