@@ -26,15 +26,13 @@ export class SequentialProcessor<T> {
     this.isProcessing = true;
 
     while (this.queue.length > 0) {
-      const element = this.queue.shift();
+      const element = this.queue.shift()!;
 
-      if (element) {
-        try {
-          await this.processFn(element);
-        } catch (error) {
-          console.warn(error);
-          // Continue processing the rest of the queue.
-        }
+      try {
+        await this.processFn(element);
+      } catch (error) {
+        console.warn(error);
+        // Continue processing the rest of the queue.
       }
 
       await delay(this.minDelayMs);
