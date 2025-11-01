@@ -94,4 +94,35 @@ describe(SpotifyWebPage.name, () => {
       expect(matches?.length).toBe(1);
     });
   });
+
+  describe(SpotifyWebPage.prototype.insertTrackStats.name, () => {
+    it("should insert track stats into the provided element", () => {
+      const trackElem = document.createElement("a");
+      const titleElem = document.createElement("div");
+      titleElem.textContent = "Example Track";
+      trackElem.append(titleElem);
+
+      const spotifyWebPage = new SpotifyWebPage();
+      spotifyWebPage.insertTrackStats(trackElem, "168 | Dbm | 12A");
+
+      expect(trackElem.textContent).toContain("(168 | Dbm | 12A)");
+      expect(trackElem.className).toContain("enriched");
+    });
+
+    it("should not insert stats if they are already present", () => {
+      const trackElem = document.createElement("a");
+      const titleElem = document.createElement("div");
+      titleElem.textContent = "Example Track (168 | Dbm | 12A)";
+      trackElem.append(titleElem);
+      trackElem.className = "enriched";
+
+      const spotifyWebPage = new SpotifyWebPage();
+      spotifyWebPage.insertTrackStats(trackElem, "168 | Dbm | 12A");
+
+      const content = trackElem.textContent.trim();
+      const regex = new RegExp("168 \\| Dbm \\| 12A", "g");
+      const matches = content.match(regex);
+      expect(matches?.length).toBe(1);
+    });
+  });
 });
