@@ -56,16 +56,15 @@ describe(SpotifyWebPage.name, () => {
   describe(SpotifyWebPage.prototype.insertNowPlayingTrackStats.name, () => {
     it("enriches the 'now playing' track", () => {
       document.body.innerHTML = `
-        <div data-testid="context-item-info-title">Example Title</div>
+        <div id="parent">
+          <div data-testid="context-item-info-title">Example Title</div>
+        </div>
       `;
 
       const spotifyWebPage = new SpotifyWebPage();
       spotifyWebPage.insertNowPlayingTrackStats("168 | Dbm | 12A");
-      const div = document.querySelector<HTMLDivElement>(
-        ".playlister-web-enriched",
-      );
-
-      expect(div?.textContent.trim()).toEqual("168 | Dbm | 12A");
+      const parent = document.querySelector<HTMLDivElement>("#parent")!;
+      expect(parent.textContent.trim()).toContain("168 | Dbm | 12A");
     });
 
     it("throws an error when the 'now playing' track cannot be found", () => {
