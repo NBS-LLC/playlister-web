@@ -3,6 +3,7 @@ import { ReccoBeatsAnalyzer } from "#lib/audio-analysis/ReccoBeatsAnalyzer";
 import { config } from "#lib/config";
 import { onMutation, waitForElem } from "#lib/html";
 import { log } from "#lib/log";
+import { SequentialProcessor } from "#lib/queue/SequentialProcessor";
 import { SpotifyWebPage } from "#lib/spotify-web/SpotifyWebPage";
 import { Cache } from "#lib/storage/Cache";
 import { LocalStorageAdapter } from "#lib/storage/LocalStorageAdapter";
@@ -12,6 +13,8 @@ config.appId = "spotavibe-lite";
 
 const cacheProvider = new Cache(new LocalStorageAdapter(localStorage));
 cacheProvider.prune();
+
+const seqProcessor = new SequentialProcessor(enrichTrack, 150);
 
 const spotifyWebPage = new SpotifyWebPage();
 
@@ -40,10 +43,15 @@ async function enrichTracks(mutationRecord: MutationRecord) {
     if (node instanceof Element) {
       const links = node.querySelectorAll('a[href^="/track/"]');
       links.forEach((link) => {
-        console.debug(link);
+        seqProcessor.enqueue(link);
       });
     }
   }
+}
+
+async function enrichTrack(element: Element) {
+  console.debug(new Date().getTime());
+  console.debug(element);
 }
 
 function main() {
