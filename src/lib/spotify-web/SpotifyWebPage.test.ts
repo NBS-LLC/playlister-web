@@ -74,5 +74,24 @@ describe(SpotifyWebPage.name, () => {
         spotifyWebPage.insertNowPlayingTrackStats("168 | Dbm | 12A"),
       ).toThrow(ElementNotFoundError);
     });
+
+    it("doesn't spam the enrichment data", () => {
+      document.body.innerHTML = `
+        <div id="parent">
+          <div data-testid="context-item-info-title">Example Title</div>
+        </div>
+      `;
+
+      // Try to insert the stats more than once.
+      const spotifyWebPage = new SpotifyWebPage();
+      spotifyWebPage.insertNowPlayingTrackStats("168 | Dbm | 12A");
+      spotifyWebPage.insertNowPlayingTrackStats("168 | Dbm | 12A");
+
+      const parent = document.querySelector<HTMLDivElement>("#parent")!;
+      const content = parent.textContent.trim();
+      const regex = new RegExp("168 \\| Dbm \\| 12A", "g");
+      const matches = content.match(regex);
+      expect(matches?.length).toBe(1);
+    });
   });
 });
