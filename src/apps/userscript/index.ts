@@ -61,6 +61,8 @@ async function enrichTrack(element: HTMLAnchorElement) {
   console.log(enrichedTrack.details);
   console.log(enrichedTrack.features);
   console.groupEnd();
+
+  spotifyWebPage.insertTrackStats(element, enrichedTrack.getStatsString());
 }
 
 function main() {

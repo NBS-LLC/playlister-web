@@ -1,3 +1,5 @@
+import { config } from "../config";
+
 export class ElementNotFoundError extends Error {}
 export class ParseTrackIdError extends Error {}
 
@@ -11,6 +13,14 @@ export class SpotifyWebPage {
 
   readonly trackLink = 'a[href^="/track/"]';
 
+  static get namespace(): string {
+    return config.appId ? `${config.appId}:` : "";
+  }
+
+  private get enrichedClassName() {
+    return `${SpotifyWebPage.namespace}enriched`;
+  }
+
   getNowPlayingTrackId() {
     const element = this.getElement<HTMLAnchorElement>(this.nowPlayingTrack);
     return this.parseNowPlayingTrackId(element);
@@ -19,12 +29,26 @@ export class SpotifyWebPage {
   insertNowPlayingTrackStats(stats: string) {
     const elements = this.getElements<HTMLDivElement>(this.nowPlayingTitle);
     elements.forEach((element) => {
+      if (element.className.includes(this.enrichedClassName)) {
+        return;
+      }
+
       const div = document.createElement("div");
-      div.className = "playlister-web-enriched";
       div.textContent = stats;
       element.insertAdjacentElement("beforebegin", div);
       element.parentElement!.style.flexDirection = "column";
+      element.className += ` ${this.enrichedClassName}`;
     });
+  }
+
+  insertTrackStats(element: HTMLAnchorElement, stats: string) {
+    if (element.className.includes(this.enrichedClassName)) {
+      return;
+    }
+
+    const titleElement = element.querySelector("div");
+    titleElement!.textContent += ` (${stats})`;
+    element.className += ` ${this.enrichedClassName}`;
   }
 
   private getElements<T extends HTMLElement>(selector: string): T[] {
