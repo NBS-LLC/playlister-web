@@ -14,6 +14,11 @@ config.appId = "spotavibe-lite";
 const cacheProvider = new Cache(new LocalStorageAdapter(localStorage));
 cacheProvider.prune();
 
+const audioAnalyzer = new AudioAnalyzer(
+  new ReccoBeatsAnalyzer(fetch),
+  cacheProvider,
+);
+
 const seqProcessor = new SequentialProcessor(enrichTrack, 150);
 
 const spotifyWebPage = new SpotifyWebPage();
@@ -21,11 +26,6 @@ const spotifyWebPage = new SpotifyWebPage();
 async function enrichNowPlaying() {
   const trackId = spotifyWebPage.getNowPlayingTrackId();
   console.log(log.namespace, `Now playing track id: ${trackId}.`);
-
-  const audioAnalyzer = new AudioAnalyzer(
-    new ReccoBeatsAnalyzer(fetch),
-    cacheProvider,
-  );
 
   const enrichedTrack = await audioAnalyzer.getEnrichedTrack(trackId);
   console.log(log.namespace, enrichedTrack.getHumanReadableString());
@@ -41,7 +41,10 @@ async function enrichNowPlaying() {
 async function enrichTracks(mutationRecord: MutationRecord) {
   for (const node of mutationRecord.addedNodes) {
     if (node instanceof Element) {
-      const links = node.querySelectorAll('a[href^="/track/"]');
+      const links = node.querySelectorAll<HTMLAnchorElement>(
+        spotifyWebPage.trackLink,
+      );
+
       links.forEach((link) => {
         seqProcessor.enqueue(link);
       });
@@ -49,9 +52,15 @@ async function enrichTracks(mutationRecord: MutationRecord) {
   }
 }
 
-async function enrichTrack(element: Element) {
-  console.debug(new Date().getTime());
-  console.debug(element);
+async function enrichTrack(element: HTMLAnchorElement) {
+  const trackId = element.href.split("/").at(-1)!;
+  const enrichedTrack = await audioAnalyzer.getEnrichedTrack(trackId);
+  console.log(log.namespace, enrichedTrack.getHumanReadableString());
+
+  console.groupCollapsed(log.namespace, "Enriched Track Data");
+  console.log(enrichedTrack.details);
+  console.log(enrichedTrack.features);
+  console.groupEnd();
 }
 
 function main() {

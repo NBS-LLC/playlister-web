@@ -9,6 +9,8 @@ export class SpotifyWebPage {
 
   readonly mainView = "#main-view";
 
+  readonly trackLink = 'a[href^="/track/"]';
+
   getNowPlayingTrackId() {
     const element = this.getElement<HTMLAnchorElement>(this.nowPlayingTrack);
     return this.parseNowPlayingTrackId(element);
