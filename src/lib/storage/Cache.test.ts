@@ -378,4 +378,51 @@ describe(Cache.name, () => {
       expect(usage).toBe(size1 + size2);
     });
   });
+
+  describe(Cache.prototype.getNamespaceItemCount.name, () => {
+    it("returns 0 for an empty namespace", async () => {
+      config.appId = "app1";
+      const count = await cache.getNamespaceItemCount();
+      expect(count).toBe(0);
+    });
+
+    it("returns the correct count for a namespace with items", async () => {
+      config.appId = "app1";
+      await cache.store("item1", { msg: "a" });
+      await cache.store("item2", { msg: "b" });
+
+      const count = await cache.getNamespaceItemCount();
+      expect(count).toBe(2);
+    });
+
+    it("does not include items from other namespaces", async () => {
+      config.appId = "app1";
+      await cache.store("item1", { msg: "a" });
+
+      config.appId = "app2";
+      await cache.store("item2", { msg: "b" });
+
+      config.appId = "app1";
+      const count = await cache.getNamespaceItemCount();
+      expect(count).toBe(1);
+    });
+  });
+
+  describe(Cache.prototype.getAllItemCount.name, () => {
+    it("returns 0 for an empty cache", async () => {
+      const count = await cache.getAllItemCount();
+      expect(count).toBe(0);
+    });
+
+    it("returns the correct total count for the entire cache", async () => {
+      config.appId = "app1";
+      await cache.store("item1", { msg: "a" });
+
+      config.appId = "app2";
+      await cache.store("item2", { msg: "b" });
+
+      const count = await cache.getAllItemCount();
+      expect(count).toBe(2);
+    });
+  });
 });
