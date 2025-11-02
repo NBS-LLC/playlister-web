@@ -10,10 +10,6 @@ const LONG_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 export class Cache implements CacheProvider {
   constructor(private readonly storage: AsyncObjectStorage) {}
 
-  static get namespace(): string {
-    return config.appId ? `${config.appId}:` : "";
-  }
-
   async find<T>(id: string): Promise<CacheItem<T> | null> {
     const result: CacheItem<T> | null = await this.storage.getItem(
       this.getKey(id),
@@ -52,7 +48,7 @@ export class Cache implements CacheProvider {
     const keys = await this.storage.keys();
 
     const promises = keys.map(async (key) => {
-      if (!key.startsWith(Cache.namespace)) {
+      if (!key.startsWith(config.namespace)) {
         return;
       }
 
@@ -66,11 +62,45 @@ export class Cache implements CacheProvider {
     await Promise.all(promises);
   }
 
+  async getNamespaceUsageInBytes(): Promise<number> {
+    const keys = await this.storage.keys();
+    const namespace = config.namespace;
+    const namespaceKeys = keys.filter((key) => key.startsWith(namespace));
+
+    let usage = 0;
+    for (const key of namespaceKeys) {
+      const item = await this.storage.getItem(key);
+      usage += this.getItemSizeInBytes(key, item);
+    }
+
+    return usage;
+  }
+
+  async getAllUsageInBytes(): Promise<number> {
+    const keys = await this.storage.keys();
+
+    let usage = 0;
+    for (const key of keys) {
+      const item = await this.storage.getItem(key);
+      usage += this.getItemSizeInBytes(key, item);
+    }
+
+    return usage;
+  }
+
+  private getItemSizeInBytes(key: string, value: unknown): number {
+    const jsonString = JSON.stringify(value);
+    return (
+      new TextEncoder().encode(key).length +
+      new TextEncoder().encode(jsonString).length
+    );
+  }
+
   private getExpirationDateUtc(offsetInMs: number): string {
     return new Date(Date.now() + offsetInMs).toISOString();
   }
 
   private getKey(id: string): string {
-    return `${Cache.namespace}${id}`;
+    return `${config.namespace}${id}`;
   }
 }

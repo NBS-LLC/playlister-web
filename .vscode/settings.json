@@ -1,5 +1,6 @@
 {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "eslint.useFlatConfig": true,
-  "explorer.excludeGitIgnore": true
+  "explorer.excludeGitIgnore": true,
+  "jestrunner.jestCommand": "npm test --workspace src/lib -- --no-coverage"
 }

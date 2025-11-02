@@ -40,19 +40,6 @@ describe(Cache.name, () => {
     config.appId = originalAppId;
   });
 
-  describe("namespace", () => {
-    it("returns an empty string if app id is not set in config", () => {
-      config.appId = "";
-      expect(Cache.namespace).toBe("");
-    });
-
-    it("returns a formatted namespace string if app id is set in config", () => {
-      const testAppId = "my-test-app";
-      config.appId = testAppId;
-      expect(Cache.namespace).toBe(`${testAppId}:`);
-    });
-  });
-
   describe(Cache.prototype.find.name, () => {
     it("returns null if item is not in cache", async () => {
       const result = await cache.find("non-existent-id");
@@ -320,6 +307,75 @@ describe(Cache.name, () => {
 
       expect(await storage.getItem(keyApp1)).toBeNull(); // app1 item should now be removed
       expect(await storage.getItem(keyValidApp2)).toEqual(validItem); // app2 valid item should remain
+    });
+  });
+
+  describe(Cache.prototype.getNamespaceUsageInBytes.name, () => {
+    it("returns 0 for an empty namespace", async () => {
+      config.appId = "app1";
+      const usage = await cache.getNamespaceUsageInBytes();
+      expect(usage).toBe(0);
+    });
+
+    it("returns the correct usage for a namespace with items", async () => {
+      config.appId = "app1";
+      await cache.store("item1", { msg: "a" });
+      await cache.store("item2", { msg: "b" });
+
+      // Manually calculate expected size
+      const key1 = "app1:item1";
+      const item1 = await storage.getItem(key1);
+      const size1 = key1.length + JSON.stringify(item1).length;
+
+      const key2 = "app1:item2";
+      const item2 = await storage.getItem(key2);
+      const size2 = key2.length + JSON.stringify(item2).length;
+
+      const usage = await cache.getNamespaceUsageInBytes();
+      expect(usage).toBe(size1 + size2);
+    });
+
+    it("does not include usage from other namespaces", async () => {
+      config.appId = "app1";
+      await cache.store("item1", { msg: "a" });
+
+      config.appId = "app2";
+      await cache.store("item2", { msg: "b" });
+
+      config.appId = "app1";
+
+      const key1 = "app1:item1";
+      const item1 = await storage.getItem(key1);
+      const expectedUsage = key1.length + JSON.stringify(item1).length;
+
+      const usage = await cache.getNamespaceUsageInBytes();
+      expect(usage).toBe(expectedUsage);
+    });
+  });
+
+  describe(Cache.prototype.getAllUsageInBytes.name, () => {
+    it("returns 0 for an empty cache", async () => {
+      const usage = await cache.getAllUsageInBytes();
+      expect(usage).toBe(0);
+    });
+
+    it("returns the correct total usage for the entire cache", async () => {
+      config.appId = "app1";
+      await cache.store("item1", { msg: "a" });
+
+      config.appId = "app2";
+      await cache.store("item2", { msg: "b" });
+
+      const key1 = "app1:item1";
+      const item1 = await storage.getItem(key1);
+      const size1 = key1.length + JSON.stringify(item1).length;
+
+      const key2 = "app2:item2";
+      const item2 = await storage.getItem(key2);
+      const size2 = key2.length + JSON.stringify(item2).length;
+
+      const usage = await cache.getAllUsageInBytes();
+      expect(usage).toBe(size1 + size2);
     });
   });
 });
