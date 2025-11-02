@@ -12,7 +12,12 @@ config.appName = "SpotAVibe Lite";
 config.appId = "spotavibe-lite";
 
 const cacheProvider = new Cache(new LocalStorageAdapter(localStorage));
-cacheProvider.prune();
+cacheProvider.prune().then(async () => {
+  console.debug(
+    log.namespace,
+    `Cache usage: ${await cacheProvider.getNamespaceUsageInBytes()} (namespaced) / ${await cacheProvider.getAllUsageInBytes()} (total) bytes.`,
+  );
+});
 
 const audioAnalyzer = new AudioAnalyzer(
   new ReccoBeatsAnalyzer(fetch),
