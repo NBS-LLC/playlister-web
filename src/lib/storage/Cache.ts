@@ -62,6 +62,40 @@ export class Cache implements CacheProvider {
     await Promise.all(promises);
   }
 
+  async getNamespaceUsageInBytes(): Promise<number> {
+    const keys = await this.storage.keys();
+    const namespace = config.namespace;
+    const namespaceKeys = keys.filter((key) => key.startsWith(namespace));
+
+    let usage = 0;
+    for (const key of namespaceKeys) {
+      const item = await this.storage.getItem(key);
+      usage += this.getItemSizeInBytes(key, item);
+    }
+
+    return usage;
+  }
+
+  async getAllUsageInBytes(): Promise<number> {
+    const keys = await this.storage.keys();
+
+    let usage = 0;
+    for (const key of keys) {
+      const item = await this.storage.getItem(key);
+      usage += this.getItemSizeInBytes(key, item);
+    }
+
+    return usage;
+  }
+
+  private getItemSizeInBytes(key: string, value: unknown): number {
+    const jsonString = JSON.stringify(value);
+    return (
+      new TextEncoder().encode(key).length +
+      new TextEncoder().encode(jsonString).length
+    );
+  }
+
   private getExpirationDateUtc(offsetInMs: number): string {
     return new Date(Date.now() + offsetInMs).toISOString();
   }
