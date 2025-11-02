@@ -88,19 +88,6 @@ export class Cache implements CacheProvider {
     return usage;
   }
 
-  async getNamespaceItemCount(): Promise<number> {
-    const keys = await this.storage.keys();
-    const namespace = config.namespace;
-    const namespaceKeys = keys.filter((key) => key.startsWith(namespace));
-
-    return namespaceKeys.length;
-  }
-
-  async getAllItemCount(): Promise<number> {
-    const keys = await this.storage.keys();
-    return keys.length;
-  }
-
   private getItemSizeInBytes(key: string, value: unknown): number {
     const jsonString = JSON.stringify(value);
     return (

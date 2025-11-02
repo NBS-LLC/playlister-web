@@ -15,11 +15,6 @@ const cacheProvider = new Cache(new LocalStorageAdapter(localStorage));
 cacheProvider.prune().then(async () => {
   console.debug(
     log.namespace,
-    `Cache count: ${await cacheProvider.getNamespaceItemCount()} (namespaced) / ${await cacheProvider.getAllItemCount()} (total) items.`,
-  );
-
-  console.debug(
-    log.namespace,
     `Cache usage: ${await cacheProvider.getNamespaceUsageInBytes()} (namespaced) / ${await cacheProvider.getAllUsageInBytes()} (total) bytes.`,
   );
 });
