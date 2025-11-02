@@ -5,7 +5,15 @@ export class LocalStorageAdapter implements AsyncObjectStorage {
 
   async getItem<T>(key: string): Promise<T | null> {
     const result = this.storage.getItem(key);
-    return result && JSON.parse(result);
+    if (!result) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(result) as T;
+    } catch {
+      return result as unknown as T;
+    }
   }
 
   async setItem<T>(key: string, value: T): Promise<T> {

@@ -22,6 +22,15 @@ describe(LocalStorageAdapter.name, () => {
       expect(result).toEqual(data);
     });
 
+    it("returns raw string if it cannot be parsed as JSON", async () => {
+      const rawString = "this is not json";
+      localStorage.setItem("unittest", rawString);
+      const result: string | null = await storage.getItem("unittest");
+
+      expect(result).not.toBeNull();
+      expect(result).toBe(rawString);
+    });
+
     it("returns null for unknown keys", async () => {
       expect(await storage.getItem("bogus")).toBeNull();
     });
