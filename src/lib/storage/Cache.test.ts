@@ -40,19 +40,6 @@ describe(Cache.name, () => {
     config.appId = originalAppId;
   });
 
-  describe("namespace", () => {
-    it("returns an empty string if app id is not set in config", () => {
-      config.appId = "";
-      expect(Cache.namespace).toBe("");
-    });
-
-    it("returns a formatted namespace string if app id is set in config", () => {
-      const testAppId = "my-test-app";
-      config.appId = testAppId;
-      expect(Cache.namespace).toBe(`${testAppId}:`);
-    });
-  });
-
   describe(Cache.prototype.find.name, () => {
     it("returns null if item is not in cache", async () => {
       const result = await cache.find("non-existent-id");

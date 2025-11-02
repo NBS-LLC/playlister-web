@@ -13,12 +13,8 @@ export class SpotifyWebPage {
 
   readonly trackLink = 'a[href^="/track/"]';
 
-  static get namespace(): string {
-    return config.appId ? `${config.appId}:` : "";
-  }
-
   private get enrichedClassName() {
-    return `${SpotifyWebPage.namespace}enriched`;
+    return `${config.namespace}enriched`;
   }
 
   getNowPlayingTrackId() {
