@@ -39,7 +39,7 @@ export class Cache implements CacheProvider {
     const cacheItem: CacheItem<T> = {
       data,
       expirationDateUtc,
-      lastAccessedUtc: "", // todo: new Date().toISOString()
+      lastAccessedDateUtc: new Date().toISOString(),
     };
 
     await this.storage.setItem(this.getKey(id), cacheItem);

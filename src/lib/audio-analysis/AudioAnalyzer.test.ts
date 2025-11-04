@@ -35,7 +35,7 @@ describe(AudioAnalyzer.name, () => {
       cacheProvider.find.mockResolvedValue({
         data: trackDetails,
         expirationDateUtc: "",
-        lastAccessedUtc: "",
+        lastAccessedDateUtc: "",
       });
 
       const result = await audioAnalyzer.getTrackDetails("abcd1234");
@@ -99,7 +99,7 @@ describe(AudioAnalyzer.name, () => {
       cacheProvider.find.mockResolvedValue({
         data: null,
         expirationDateUtc: "",
-        lastAccessedUtc: "",
+        lastAccessedDateUtc: "",
       });
 
       await expect(async () => {
@@ -116,7 +116,7 @@ describe(AudioAnalyzer.name, () => {
       cacheProvider.find.mockResolvedValue({
         data: trackFeatures,
         expirationDateUtc: "",
-        lastAccessedUtc: "",
+        lastAccessedDateUtc: "",
       });
 
       const result = await audioAnalyzer.getTrackFeatures("abcd1234");
@@ -182,7 +182,7 @@ describe(AudioAnalyzer.name, () => {
       cacheProvider.find.mockResolvedValue({
         data: null,
         expirationDateUtc: "",
-        lastAccessedUtc: "",
+        lastAccessedDateUtc: "",
       });
 
       await expect(async () => {
