@@ -53,6 +53,7 @@ describe(Cache.name, () => {
       const cacheItem: CacheItem<typeof data> = {
         data,
         expirationDateUtc,
+        lastAccessedUtc: "",
       };
 
       await storage.setItem(id, cacheItem);
@@ -67,6 +68,7 @@ describe(Cache.name, () => {
       const cacheItem: CacheItem<typeof data> = {
         data,
         expirationDateUtc,
+        lastAccessedUtc: "",
       };
 
       await storage.setItem(id, cacheItem);
@@ -84,6 +86,7 @@ describe(Cache.name, () => {
       const cacheItem: CacheItem<typeof data> = {
         data,
         expirationDateUtc,
+        lastAccessedUtc: "",
       };
 
       await storage.setItem(id, cacheItem);
@@ -149,18 +152,22 @@ describe(Cache.name, () => {
       const expiredItem1: CacheItem<string> = {
         data: "expired-data-1",
         expirationDateUtc: "2024-01-01T00:00:00.000Z",
+        lastAccessedUtc: "",
       };
       const expiredItem2: CacheItem<string> = {
         data: "expired-data-2",
         expirationDateUtc: "2024-01-02T00:00:00.000Z",
+        lastAccessedUtc: "",
       };
       const validItem1: CacheItem<string> = {
         data: "valid-data-1",
         expirationDateUtc: new Date(Date.now() + 100000).toISOString(),
+        lastAccessedUtc: "",
       };
       const validItem2: CacheItem<string> = {
         data: "valid-data-2",
         expirationDateUtc: new Date(Date.now() + 200000).toISOString(),
+        lastAccessedUtc: "",
       };
 
       await storage.setItem(expiredId1, expiredItem1);
@@ -191,10 +198,12 @@ describe(Cache.name, () => {
       const validItem1: CacheItem<string> = {
         data: "valid-data-1",
         expirationDateUtc: new Date(Date.now() + 100000).toISOString(),
+        lastAccessedUtc: "",
       };
       const validItem2: CacheItem<string> = {
         data: "valid-data-2",
         expirationDateUtc: new Date(Date.now() + 200000).toISOString(),
+        lastAccessedUtc: "",
       };
 
       await storage.setItem(validId1, validItem1);
@@ -216,10 +225,12 @@ describe(Cache.name, () => {
       const expiredItem1: CacheItem<string> = {
         data: "expired-data-1",
         expirationDateUtc: "2024-01-01T00:00:00.000Z",
+        lastAccessedUtc: "",
       };
       const expiredItem2: CacheItem<string> = {
         data: "expired-data-2",
         expirationDateUtc: "2024-01-02T00:00:00.000Z",
+        lastAccessedUtc: "",
       };
 
       await storage.setItem(expiredId1, expiredItem1);
@@ -284,11 +295,13 @@ describe(Cache.name, () => {
       const expiredItem: CacheItem<string> = {
         data: "expired-data",
         expirationDateUtc: "2024-01-01T00:00:00.000Z",
+        lastAccessedUtc: "",
       };
 
       const validItem: CacheItem<string> = {
         data: "valid-data",
         expirationDateUtc: new Date(Date.now() + 100000).toISOString(),
+        lastAccessedUtc: "",
       };
 
       await storage.setItem(keyApp1, expiredItem);
