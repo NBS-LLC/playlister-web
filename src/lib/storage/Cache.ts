@@ -24,6 +24,8 @@ export class Cache implements CacheProvider {
       return null;
     }
 
+    result.lastAccessedDateUtc = new Date().toISOString();
+    await this.storage.setItem(this.getKey(id), result);
     return result;
   }
 

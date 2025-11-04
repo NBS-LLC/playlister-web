@@ -93,6 +93,27 @@ describe(Cache.name, () => {
       const result = await cache.find(id);
       expect(result).toEqual(cacheItem);
     });
+
+    it("updates the last accessed date", async () => {
+      const id = "valid-id";
+      const lastAccessedDateUtc = new Date(Date.now() - 50000).toISOString();
+
+      const cacheItem: CacheItem<unknown> = {
+        data: { value: "some-data" },
+        expirationDateUtc: new Date(Date.now() + 100000).toISOString(),
+        lastAccessedDateUtc,
+      };
+
+      storage.setItem(id, cacheItem);
+      const result = await cache.find(id);
+      const updatedItem = await storage.getItem<CacheItem<unknown>>(id);
+
+      expect(
+        new Date(updatedItem?.lastAccessedDateUtc ?? "").getTime(),
+      ).toBeGreaterThan(new Date(lastAccessedDateUtc).getTime());
+
+      expect(result).toEqual(updatedItem);
+    });
   });
 
   describe(Cache.prototype.store.name, () => {
