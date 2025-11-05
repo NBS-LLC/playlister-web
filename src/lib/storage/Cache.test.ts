@@ -470,4 +470,10 @@ describe(Cache.name, () => {
       expect(count).toBe(2);
     });
   });
+
+  describe("quota", () => {
+    it.todo("prunes to recover storage space");
+    it.todo("prunes then removes least accessed items");
+    it.todo("does nothing if quota is not reached");
+  });
 });
