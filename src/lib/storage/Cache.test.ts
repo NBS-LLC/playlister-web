@@ -24,11 +24,84 @@ class MockAsyncObjectStorage implements AsyncObjectStorage {
   }
 }
 
+class CacheItemBuilder<T> {
+  private _data: T | null = null;
+  private _expirationDateUtc: string = new Date(
+    Date.now() + 100000,
+  ).toISOString();
+  private _lastAccessedDateUtc: string = new Date().toISOString();
+
+  withData(data: T): this {
+    this._data = data;
+    return this;
+  }
+
+  withExpirationDate(date: Date): this {
+    this._expirationDateUtc = date.toISOString();
+    return this;
+  }
+
+  expired(offset: number = 1000): this {
+    this._expirationDateUtc = new Date(Date.now() - offset).toISOString();
+    return this;
+  }
+
+  valid(offset: number = 100000): this {
+    this._expirationDateUtc = new Date(Date.now() + offset).toISOString();
+    return this;
+  }
+
+  withLastAccessedDate(date: Date): this {
+    this._lastAccessedDateUtc = date.toISOString();
+    return this;
+  }
+
+  build(): CacheItem<T> {
+    return {
+      data: this._data as T,
+      expirationDateUtc: this._expirationDateUtc,
+      lastAccessedDateUtc: this._lastAccessedDateUtc,
+    };
+  }
+}
+
 describe(Cache.name, () => {
   const originalAppId = config.appId;
 
   let cache: Cache;
   let storage: MockAsyncObjectStorage;
+
+  async function givenExpiredItem<T>(
+    id: string,
+    data: T,
+    lastAccessedDate?: Date,
+  ) {
+    const builder = new CacheItemBuilder<T>().withData(data).expired();
+    if (lastAccessedDate) {
+      builder.withLastAccessedDate(lastAccessedDate);
+    }
+
+    const cacheItem = builder.build();
+    const key = config.appId ? `${config.appId}:${id}` : id;
+    await storage.setItem(key, cacheItem);
+    return cacheItem;
+  }
+
+  async function givenValidItem<T>(
+    id: string,
+    data: T,
+    lastAccessedDate?: Date,
+  ) {
+    const builder = new CacheItemBuilder<T>().withData(data).valid();
+    if (lastAccessedDate) {
+      builder.withLastAccessedDate(lastAccessedDate);
+    }
+
+    const cacheItem = builder.build();
+    const key = config.appId ? `${config.appId}:${id}` : id;
+    await storage.setItem(key, cacheItem);
+    return cacheItem;
+  }
 
   beforeEach(() => {
     config.appId = "";
@@ -48,13 +121,10 @@ describe(Cache.name, () => {
 
     it("returns null if item is expired", async () => {
       const id = "expired-id";
-      const data = { value: "some-data" };
-      const expirationDateUtc = new Date(Date.now() - 1000).toISOString();
-      const cacheItem: CacheItem<typeof data> = {
-        data,
-        expirationDateUtc,
-        lastAccessedDateUtc: "",
-      };
+      const cacheItem = new CacheItemBuilder()
+        .withData({ value: "some-data" })
+        .expired()
+        .build();
 
       await storage.setItem(id, cacheItem);
       const result = await cache.find(id);
@@ -63,13 +133,10 @@ describe(Cache.name, () => {
 
     it("removes the item if it is expired", async () => {
       const id = "expired-id";
-      const data = { value: "some-data" };
-      const expirationDateUtc = new Date(Date.now() - 1000).toISOString();
-      const cacheItem: CacheItem<typeof data> = {
-        data,
-        expirationDateUtc,
-        lastAccessedDateUtc: "",
-      };
+      const cacheItem = new CacheItemBuilder()
+        .withData({ value: "some-data" })
+        .expired()
+        .build();
 
       await storage.setItem(id, cacheItem);
       expect(await storage.getItem(id)).not.toBeNull();
@@ -81,13 +148,10 @@ describe(Cache.name, () => {
 
     it("returns the item if it is not expired", async () => {
       const id = "valid-id";
-      const data = { value: "some-data" };
-      const expirationDateUtc = new Date(Date.now() + 100000).toISOString();
-      const cacheItem: CacheItem<typeof data> = {
-        data,
-        expirationDateUtc,
-        lastAccessedDateUtc: "",
-      };
+      const cacheItem = new CacheItemBuilder()
+        .withData({ value: "some-data" })
+        .valid()
+        .build();
 
       await storage.setItem(id, cacheItem);
       const result = await cache.find(id);
@@ -96,13 +160,13 @@ describe(Cache.name, () => {
 
     it("updates the last accessed date", async () => {
       const id = "valid-id";
-      const lastAccessedDateUtc = new Date(Date.now() - 50000).toISOString();
+      const lastAccessedDate = new Date(Date.now() - 50000);
 
-      const cacheItem: CacheItem<unknown> = {
-        data: { value: "some-data" },
-        expirationDateUtc: new Date(Date.now() + 100000).toISOString(),
-        lastAccessedDateUtc,
-      };
+      const cacheItem = new CacheItemBuilder()
+        .withData({ value: "some-data" })
+        .withLastAccessedDate(lastAccessedDate)
+        .valid()
+        .build();
 
       storage.setItem(id, cacheItem);
       const result = await cache.find(id);
@@ -110,7 +174,7 @@ describe(Cache.name, () => {
 
       expect(
         new Date(updatedItem?.lastAccessedDateUtc ?? "").getTime(),
-      ).toBeGreaterThan(new Date(lastAccessedDateUtc).getTime());
+      ).toBeGreaterThan(lastAccessedDate.getTime());
 
       expect(result).toEqual(updatedItem);
     });
@@ -176,49 +240,17 @@ describe(Cache.name, () => {
 
   describe(Cache.prototype.prune.name, () => {
     it("removes all expired items and keeps valid ones", async () => {
-      const expiredId1 = "expired-id-1";
-      const expiredId2 = "expired-id-2";
       const validId1 = "valid-id-1";
       const validId2 = "valid-id-2";
 
-      const expiredItem1: CacheItem<string> = {
-        data: "expired-data-1",
-        expirationDateUtc: "2024-01-01T00:00:00.000Z",
-        lastAccessedDateUtc: "",
-      };
-      const expiredItem2: CacheItem<string> = {
-        data: "expired-data-2",
-        expirationDateUtc: "2024-01-02T00:00:00.000Z",
-        lastAccessedDateUtc: "",
-      };
-      const validItem1: CacheItem<string> = {
-        data: "valid-data-1",
-        expirationDateUtc: new Date(Date.now() + 100000).toISOString(),
-        lastAccessedDateUtc: "",
-      };
-      const validItem2: CacheItem<string> = {
-        data: "valid-data-2",
-        expirationDateUtc: new Date(Date.now() + 200000).toISOString(),
-        lastAccessedDateUtc: "",
-      };
-
-      await storage.setItem(expiredId1, expiredItem1);
-      await storage.setItem(expiredId2, expiredItem2);
-      await storage.setItem(validId1, validItem1);
-      await storage.setItem(validId2, validItem2);
-
-      expect(await storage.keys()).toEqual([
-        expiredId1,
-        expiredId2,
-        validId1,
-        validId2,
-      ]);
+      await givenExpiredItem("expired-id-1", "expired-data-1");
+      await givenExpiredItem("expired-id-2", "expired-data-2");
+      const validItem1 = await givenValidItem(validId1, "valid-data-1");
+      const validItem2 = await givenValidItem(validId2, "valid-data-2");
 
       await cache.prune();
 
       expect(await storage.keys()).toEqual([validId1, validId2]);
-      expect(await storage.getItem(expiredId1)).toBeNull();
-      expect(await storage.getItem(expiredId2)).toBeNull();
       expect(await storage.getItem(validId1)).toEqual(validItem1);
       expect(await storage.getItem(validId2)).toEqual(validItem2);
     });
@@ -227,21 +259,8 @@ describe(Cache.name, () => {
       const validId1 = "valid-id-1";
       const validId2 = "valid-id-2";
 
-      const validItem1: CacheItem<string> = {
-        data: "valid-data-1",
-        expirationDateUtc: new Date(Date.now() + 100000).toISOString(),
-        lastAccessedDateUtc: "",
-      };
-      const validItem2: CacheItem<string> = {
-        data: "valid-data-2",
-        expirationDateUtc: new Date(Date.now() + 200000).toISOString(),
-        lastAccessedDateUtc: "",
-      };
-
-      await storage.setItem(validId1, validItem1);
-      await storage.setItem(validId2, validItem2);
-
-      expect(await storage.keys()).toEqual([validId1, validId2]);
+      const validItem1 = await givenValidItem(validId1, "valid-data-1");
+      const validItem2 = await givenValidItem(validId2, "valid-data-2");
 
       await cache.prune();
 
@@ -251,34 +270,15 @@ describe(Cache.name, () => {
     });
 
     it("removes all items if all are expired", async () => {
-      const expiredId1 = "expired-id-1";
-      const expiredId2 = "expired-id-2";
-
-      const expiredItem1: CacheItem<string> = {
-        data: "expired-data-1",
-        expirationDateUtc: "2024-01-01T00:00:00.000Z",
-        lastAccessedDateUtc: "",
-      };
-      const expiredItem2: CacheItem<string> = {
-        data: "expired-data-2",
-        expirationDateUtc: "2024-01-02T00:00:00.000Z",
-        lastAccessedDateUtc: "",
-      };
-
-      await storage.setItem(expiredId1, expiredItem1);
-      await storage.setItem(expiredId2, expiredItem2);
-
-      expect(await storage.keys()).toEqual([expiredId1, expiredId2]);
+      await givenExpiredItem("expired-id-1", "expired-data-1");
+      await givenExpiredItem("expired-id-2", "expired-data-2");
 
       await cache.prune();
 
       expect(await storage.keys()).toEqual([]);
-      expect(await storage.getItem(expiredId1)).toBeNull();
-      expect(await storage.getItem(expiredId2)).toBeNull();
     });
 
     it("does nothing if cache is empty", async () => {
-      expect(await storage.keys()).toEqual([]);
       await cache.prune();
       expect(await storage.keys()).toEqual([]);
     });
@@ -288,8 +288,6 @@ describe(Cache.name, () => {
       const malformedItem = { some: "data" }; // Not a CacheItem
 
       await storage.setItem(malformedId, malformedItem);
-
-      expect(await storage.keys()).toEqual([malformedId]);
 
       await cache.prune();
 
@@ -320,38 +318,25 @@ describe(Cache.name, () => {
     });
 
     it("prunes by namespace", async () => {
-      const keyApp1 = "app1:expired-app1";
-      const keyApp2 = "app2:expired-app2";
-      const keyValidApp2 = "app2:valid-app2";
-
-      const expiredItem: CacheItem<string> = {
-        data: "expired-data",
-        expirationDateUtc: "2024-01-01T00:00:00.000Z",
-        lastAccessedDateUtc: "",
-      };
-
-      const validItem: CacheItem<string> = {
-        data: "valid-data",
-        expirationDateUtc: new Date(Date.now() + 100000).toISOString(),
-        lastAccessedDateUtc: "",
-      };
-
-      await storage.setItem(keyApp1, expiredItem);
-      await storage.setItem(keyApp2, expiredItem);
-      await storage.setItem(keyValidApp2, validItem);
+      config.appId = "app1";
+      const exItemApp1 = await givenExpiredItem("expired-app1", "expired-data");
 
       config.appId = "app2";
+      await givenExpiredItem("expired-app2", "expired-data");
+      const validItemApp2 = await givenValidItem("valid-app2", "valid-data");
+
+      // appId = "app2"
       await cache.prune();
 
-      expect(await storage.getItem(keyApp1)).toEqual(expiredItem); // app1 item should remain
-      expect(await storage.getItem(keyApp2)).toBeNull(); // app2 expired item should be removed
-      expect(await storage.getItem(keyValidApp2)).toEqual(validItem); // app2 valid item should remain
+      expect(await storage.getItem("app1:expired-app1")).toEqual(exItemApp1);
+      expect(await storage.getItem("app2:expired-app2")).toBeNull();
+      expect(await storage.getItem("app2:valid-app2")).toEqual(validItemApp2);
 
       config.appId = "app1";
       await cache.prune();
 
-      expect(await storage.getItem(keyApp1)).toBeNull(); // app1 item should now be removed
-      expect(await storage.getItem(keyValidApp2)).toEqual(validItem); // app2 valid item should remain
+      expect(await storage.getItem("app1:expired-app1")).toBeNull();
+      expect(await storage.getItem("app2:valid-app2")).toEqual(validItemApp2);
     });
   });
 
