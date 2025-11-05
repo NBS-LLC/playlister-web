@@ -121,24 +121,16 @@ describe(Cache.name, () => {
 
     it("returns null if item is expired", async () => {
       const id = "expired-id";
-      const cacheItem = new CacheItemBuilder()
-        .withData({ value: "some-data" })
-        .expired()
-        .build();
+      await givenExpiredItem(id, { value: "some-data" });
 
-      await storage.setItem(id, cacheItem);
       const result = await cache.find(id);
       expect(result).toBeNull();
     });
 
     it("removes the item if it is expired", async () => {
       const id = "expired-id";
-      const cacheItem = new CacheItemBuilder()
-        .withData({ value: "some-data" })
-        .expired()
-        .build();
+      await givenExpiredItem(id, { value: "some-data" });
 
-      await storage.setItem(id, cacheItem);
       expect(await storage.getItem(id)).not.toBeNull();
 
       const result = await cache.find(id);
@@ -148,12 +140,8 @@ describe(Cache.name, () => {
 
     it("returns the item if it is not expired", async () => {
       const id = "valid-id";
-      const cacheItem = new CacheItemBuilder()
-        .withData({ value: "some-data" })
-        .valid()
-        .build();
+      const cacheItem = await givenValidItem(id, { value: "some-data" });
 
-      await storage.setItem(id, cacheItem);
       const result = await cache.find(id);
       expect(result).toEqual(cacheItem);
     });
@@ -162,13 +150,7 @@ describe(Cache.name, () => {
       const id = "valid-id";
       const lastAccessedDate = new Date(Date.now() - 50000);
 
-      const cacheItem = new CacheItemBuilder()
-        .withData({ value: "some-data" })
-        .withLastAccessedDate(lastAccessedDate)
-        .valid()
-        .build();
-
-      storage.setItem(id, cacheItem);
+      await givenValidItem(id, { value: "some-data" }, lastAccessedDate);
       const result = await cache.find(id);
       const updatedItem = await storage.getItem<CacheItem<unknown>>(id);
 
