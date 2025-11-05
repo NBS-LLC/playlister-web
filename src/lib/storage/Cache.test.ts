@@ -121,7 +121,7 @@ describe(Cache.name, () => {
 
     it("returns null if item is expired", async () => {
       const id = "expired-id";
-      await givenExpiredItem(id, { value: "some-data" });
+      await givenExpiredItem(id, "");
 
       const result = await cache.find(id);
       expect(result).toBeNull();
@@ -129,7 +129,7 @@ describe(Cache.name, () => {
 
     it("removes the item if it is expired", async () => {
       const id = "expired-id";
-      await givenExpiredItem(id, { value: "some-data" });
+      await givenExpiredItem(id, "");
 
       expect(await storage.getItem(id)).not.toBeNull();
 
@@ -140,7 +140,7 @@ describe(Cache.name, () => {
 
     it("returns the item if it is not expired", async () => {
       const id = "valid-id";
-      const cacheItem = await givenValidItem(id, { value: "some-data" });
+      const cacheItem = await givenValidItem(id, "");
 
       const result = await cache.find(id);
       expect(result).toEqual(cacheItem);
@@ -150,7 +150,7 @@ describe(Cache.name, () => {
       const id = "valid-id";
       const lastAccessedDate = new Date(Date.now() - 50000);
 
-      await givenValidItem(id, { value: "some-data" }, lastAccessedDate);
+      await givenValidItem(id, "", lastAccessedDate);
       const result = await cache.find(id);
       const updatedItem = await storage.getItem<CacheItem<unknown>>(id);
 
