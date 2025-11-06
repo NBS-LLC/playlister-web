@@ -5,6 +5,7 @@ import {
   MockAsyncObjectStorage,
   TestCacheItem,
 } from "./Cache.test-data";
+import { CacheStats } from "./CacheStats";
 
 describe(Cache.name, () => {
   let cache: Cache;
@@ -247,18 +248,108 @@ describe(Cache.name, () => {
   });
 
   describe("quota", () => {
+    beforeEach(() => {
+      config.cacheQuotaMaxBytes = 1024;
+      config.cacheQuotaTargetBytes = 500;
+    });
+
     it.todo("prunes to recover storage space");
-    it.todo("prunes then removes least accessed items");
-    // Steps:
-    // 1) fill up storage to quota max:
-    // 1a) a mix of valid recent and least accessed items
-    // 1b) a few expired recently accessed items
-    // 1c) a mix of valid recent and least accessed items
-    // 2) add one more item
-    // 3) expect expired items to have been removed
-    // 4) expect a few of the least accessed items to have been removed
-    // 5) expect namespaced usage to be <= quota target
-    // 6) expect additional item to have been stored
+    it("prunes then removes least accessed items", async () => {
+      const id1 = "valid-recent-1";
+      const validRecent1 = await t.givenValidItem(
+        id1,
+        "data-1",
+        new Date(Date.now()),
+      );
+
+      const id2 = "valid-old-2";
+      const validOld2 = await t.givenValidItem(
+        id2,
+        "data-2",
+        new Date(Date.now() - 100000),
+      );
+
+      const id3 = "valid-recent-3";
+      const validRecent3 = await t.givenValidItem(
+        id3,
+        "data-3",
+        new Date(Date.now() - 50000),
+      );
+
+      const id4 = "expired-recent-4";
+      const expiredRecent4 = await t.givenExpiredItem(
+        id4,
+        "data-4",
+        new Date(Date.now()),
+      );
+
+      const id5 = "expired-old-5";
+      const expiredOld5 = await t.givenExpiredItem(
+        id5,
+        "data-5",
+        new Date(Date.now() - 80000),
+      );
+
+      const id6 = "valid-recent-6";
+      const validRecent6 = await t.givenValidItem(
+        id6,
+        "data-6",
+        new Date(Date.now() - 2000),
+      );
+
+      const id7 = "valid-old-7";
+      const validOld7 = await t.givenValidItem(
+        id7,
+        "data-7",
+        new Date(Date.now() - 75000),
+      );
+
+      const id8 = "valid-recent-8";
+      const validRecent8 = await t.givenValidItem(
+        id8,
+        "data-8",
+        new Date(Date.now()),
+      );
+
+      config.cacheQuotaMaxBytes =
+        CacheStats.getItemSizeInBytes(id1, validRecent1) +
+        CacheStats.getItemSizeInBytes(id2, validOld2) +
+        CacheStats.getItemSizeInBytes(id3, validRecent3) +
+        CacheStats.getItemSizeInBytes(id4, expiredRecent4) +
+        CacheStats.getItemSizeInBytes(id5, expiredOld5) +
+        CacheStats.getItemSizeInBytes(id6, validRecent6) +
+        CacheStats.getItemSizeInBytes(id7, validOld7) +
+        CacheStats.getItemSizeInBytes(id8, validRecent8);
+
+      config.cacheQuotaTargetBytes =
+        config.cacheQuotaMaxBytes -
+        (CacheStats.getItemSizeInBytes(id2, validOld2) +
+          CacheStats.getItemSizeInBytes(id4, expiredRecent4) +
+          CacheStats.getItemSizeInBytes(id5, expiredOld5) +
+          CacheStats.getItemSizeInBytes(id7, validOld7));
+
+      const additionalItemId = "additional-item";
+      await cache.store(additionalItemId, "additional-data");
+
+      expect((await cache.find(additionalItemId))?.data).toEqual(
+        "additional-data",
+      );
+
+      expect(await cache.find(id1)).toEqual(validRecent1);
+      expect(await cache.find(id3)).toEqual(validRecent3);
+      expect(await cache.find(id6)).toEqual(validRecent6);
+      expect(await cache.find(id8)).toEqual(validRecent8);
+
+      expect(await cache.find(id2)).toBeNull();
+      expect(await cache.find(id4)).toBeNull();
+      expect(await cache.find(id5)).toBeNull();
+      expect(await cache.find(id7)).toBeNull();
+
+      const cacheStats = new CacheStats(storage);
+      expect(await cacheStats.getNamespaceUsageInBytes()).toBeLessThanOrEqual(
+        config.cacheQuotaTargetBytes,
+      );
+    });
     it.todo("does nothing if quota is not reached");
   });
 });
