@@ -81,7 +81,7 @@ export class CacheTestManager {
     }
 
     const cacheItem = builder.build();
-    const key = this.config.appId ? `${this.config.appId}:${id}` : id;
+    const key = `${this.config.appId}:${id}`;
     await this.storage.setItem(key, cacheItem);
     return cacheItem;
   }
@@ -97,7 +97,7 @@ export class CacheTestManager {
     }
 
     const cacheItem = builder.build();
-    const key = this.config.appId ? `${this.config.appId}:${id}` : id;
+    const key = `${this.config.appId}:${id}`;
     await this.storage.setItem(key, cacheItem);
     return cacheItem;
   }

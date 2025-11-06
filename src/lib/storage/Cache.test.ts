@@ -7,21 +7,17 @@ import {
 } from "./Cache.test-data";
 
 describe(Cache.name, () => {
-  const originalAppId = config.appId;
-
   let cache: Cache;
   let storage: MockAsyncObjectStorage;
   let t: CacheTestManager;
 
+  const getKey = (id: string) => `${config.namespace}${id}`;
+
   beforeEach(() => {
-    config.appId = "";
+    config.appId = "test-app";
     storage = new MockAsyncObjectStorage();
     cache = new Cache(storage);
     t = new CacheTestManager(storage, config);
-  });
-
-  afterEach(() => {
-    config.appId = originalAppId;
   });
 
   describe(Cache.prototype.find.name, () => {
@@ -57,11 +53,11 @@ describe(Cache.name, () => {
       const id = "expired-id";
       await t.givenExpiredItem(id, "");
 
-      expect(await storage.getItem(id)).not.toBeNull();
+      expect(await storage.getItem(getKey(id))).not.toBeNull();
 
       const result = await cache.find(id);
       expect(result).toBeNull();
-      expect(await storage.getItem(id)).toBeNull();
+      expect(await storage.getItem(getKey(id))).toBeNull();
     });
 
     it("returns the item if it is not expired", async () => {
@@ -78,7 +74,7 @@ describe(Cache.name, () => {
 
       await t.givenValidItem(id, "", lastAccessedDate);
       const result = await cache.find(id);
-      const updatedItem = await storage.getItem<TestCacheItem>(id);
+      const updatedItem = await storage.getItem<TestCacheItem>(getKey(id));
 
       expect(
         new Date(updatedItem?.lastAccessedDateUtc ?? "").getTime(),
@@ -103,7 +99,7 @@ describe(Cache.name, () => {
       const data = { value: "some-data" };
       await cache.store(id, data);
 
-      const storedItem = await storage.getItem<TestCacheItem>(id);
+      const storedItem = await storage.getItem<TestCacheItem>(getKey(id));
 
       expect(storedItem).toBeDefined();
       expect(storedItem?.data).toEqual(data);
@@ -118,7 +114,7 @@ describe(Cache.name, () => {
       const data = null;
       await cache.store(id, data);
 
-      const storedItem = await storage.getItem<TestCacheItem>(id);
+      const storedItem = await storage.getItem<TestCacheItem>(getKey(id));
 
       expect(storedItem).toBeDefined();
       expect(storedItem?.data).toBeNull();
@@ -133,7 +129,7 @@ describe(Cache.name, () => {
       const data = { value: "some-data" };
       await cache.store(id, data);
 
-      const storedItem = await storage.getItem<TestCacheItem>(id);
+      const storedItem = await storage.getItem<TestCacheItem>(getKey(id));
 
       expect(storedItem).toBeDefined();
       expect(storedItem?.lastAccessedDateUtc).toEqual(new Date().toISOString());
@@ -152,9 +148,13 @@ describe(Cache.name, () => {
 
       await cache.prune();
 
-      expect(await storage.keys()).toEqual([validId1, validId2]);
-      expect(await storage.getItem(validId1)).toEqual(validItem1);
-      expect(await storage.getItem(validId2)).toEqual(validItem2);
+      expect(await storage.keys()).toEqual([
+        getKey(validId1),
+        getKey(validId2),
+      ]);
+
+      expect(await storage.getItem(getKey(validId1))).toEqual(validItem1);
+      expect(await storage.getItem(getKey(validId2))).toEqual(validItem2);
     });
 
     it("does nothing if there are no expired items", async () => {
@@ -166,9 +166,13 @@ describe(Cache.name, () => {
 
       await cache.prune();
 
-      expect(await storage.keys()).toEqual([validId1, validId2]);
-      expect(await storage.getItem(validId1)).toEqual(validItem1);
-      expect(await storage.getItem(validId2)).toEqual(validItem2);
+      expect(await storage.keys()).toEqual([
+        getKey(validId1),
+        getKey(validId2),
+      ]);
+
+      expect(await storage.getItem(getKey(validId1))).toEqual(validItem1);
+      expect(await storage.getItem(getKey(validId2))).toEqual(validItem2);
     });
 
     it("removes all items if all are expired", async () => {

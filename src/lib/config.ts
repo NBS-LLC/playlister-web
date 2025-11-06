@@ -8,6 +8,6 @@ export const config = {
   cacheQuotaTargetBytes: 2.5 * MB,
 
   get namespace() {
-    return config.appId ? `${config.appId}:` : "";
+    return `${config.appId}:`;
   },
 };

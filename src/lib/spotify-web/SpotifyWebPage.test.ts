@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 
+import { config } from "../config";
 import {
   ElementNotFoundError,
   ParseTrackIdError,
@@ -10,6 +11,7 @@ import {
 
 describe(SpotifyWebPage.name, () => {
   beforeEach(() => {
+    config.appId = "test-app";
     document.body.innerHTML = "";
   });
 
@@ -114,7 +116,7 @@ describe(SpotifyWebPage.name, () => {
       const titleElem = document.createElement("div");
       titleElem.textContent = "Example Track (168 | Dbm | 12A)";
       trackElem.append(titleElem);
-      trackElem.className = "enriched";
+      trackElem.className = `${config.namespace}enriched`;
 
       const spotifyWebPage = new SpotifyWebPage();
       spotifyWebPage.insertTrackStats(trackElem, "168 | Dbm | 12A");
