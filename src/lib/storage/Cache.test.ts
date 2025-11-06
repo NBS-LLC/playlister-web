@@ -25,6 +25,21 @@ describe(Cache.name, () => {
   });
 
   describe(Cache.prototype.find.name, () => {
+    it("stores and retrieves a complex object", async () => {
+      const id = "complex-object-id";
+      const data = {
+        a: 1,
+        b: "hello",
+        c: {
+          d: true,
+          e: [1, 2, 3],
+        },
+      };
+      await cache.store(id, data);
+      const result = await cache.find(id);
+      expect(result?.data).toEqual(data);
+    });
+
     it("returns null if item is not in cache", async () => {
       const result = await cache.find("non-existent-id");
       expect(result).toBeNull();
