@@ -1,114 +1,23 @@
 import { config } from "../config";
-import { AsyncObjectStorage } from "./AsyncObjectStorage";
 import { Cache } from "./Cache";
-import { CacheItem } from "./CacheItem";
-
-type TestCacheItem = CacheItem<unknown>;
-
-class MockAsyncObjectStorage implements AsyncObjectStorage {
-  private readonly storage = new Map<string, unknown>();
-
-  async getItem<T>(key: string): Promise<T | null> {
-    return (this.storage.get(key) as T) ?? null;
-  }
-
-  async setItem<T>(key: string, value: T): Promise<T> {
-    this.storage.set(key, value);
-    return value;
-  }
-
-  async removeItem(key: string): Promise<void> {
-    this.storage.delete(key);
-  }
-
-  async keys(): Promise<string[]> {
-    return Array.from(this.storage.keys());
-  }
-}
-
-class CacheItemBuilder<T> {
-  private _data: T | null = null;
-  private _expirationDateUtc: string = new Date(
-    Date.now() + 100000,
-  ).toISOString();
-  private _lastAccessedDateUtc: string = new Date().toISOString();
-
-  withData(data: T): this {
-    this._data = data;
-    return this;
-  }
-
-  withExpirationDate(date: Date): this {
-    this._expirationDateUtc = date.toISOString();
-    return this;
-  }
-
-  expired(offset: number = 1000): this {
-    this._expirationDateUtc = new Date(Date.now() - offset).toISOString();
-    return this;
-  }
-
-  valid(offset: number = 100000): this {
-    this._expirationDateUtc = new Date(Date.now() + offset).toISOString();
-    return this;
-  }
-
-  withLastAccessedDate(date: Date): this {
-    this._lastAccessedDateUtc = date.toISOString();
-    return this;
-  }
-
-  build(): CacheItem<T> {
-    return {
-      data: this._data as T,
-      expirationDateUtc: this._expirationDateUtc,
-      lastAccessedDateUtc: this._lastAccessedDateUtc,
-    };
-  }
-}
+import {
+  CacheTestManager,
+  MockAsyncObjectStorage,
+  TestCacheItem,
+} from "./Cache.test-data";
 
 describe(Cache.name, () => {
   const originalAppId = config.appId;
 
   let cache: Cache;
   let storage: MockAsyncObjectStorage;
-
-  async function givenExpiredItem<T>(
-    id: string,
-    data: T,
-    lastAccessedDate?: Date,
-  ) {
-    const builder = new CacheItemBuilder<T>().withData(data).expired();
-    if (lastAccessedDate) {
-      builder.withLastAccessedDate(lastAccessedDate);
-    }
-
-    const cacheItem = builder.build();
-    const key = config.appId ? `${config.appId}:${id}` : id;
-    await storage.setItem(key, cacheItem);
-    return cacheItem;
-  }
-
-  async function givenValidItem<T>(
-    id: string,
-    data: T,
-    lastAccessedDate?: Date,
-  ) {
-    const builder = new CacheItemBuilder<T>().withData(data).valid();
-    if (lastAccessedDate) {
-      builder.withLastAccessedDate(lastAccessedDate);
-    }
-
-    const cacheItem = builder.build();
-    const key = config.appId ? `${config.appId}:${id}` : id;
-    await storage.setItem(key, cacheItem);
-    return cacheItem;
-  }
+  let t: CacheTestManager;
 
   beforeEach(() => {
     config.appId = "";
     storage = new MockAsyncObjectStorage();
     cache = new Cache(storage);
+    t = new CacheTestManager(storage, config);
   });
 
   afterEach(() => {
@@ -123,7 +32,7 @@ describe(Cache.name, () => {
 
     it("returns null if item is expired", async () => {
       const id = "expired-id";
-      await givenExpiredItem(id, "");
+      await t.givenExpiredItem(id, "");
 
       const result = await cache.find(id);
       expect(result).toBeNull();
@@ -131,7 +40,7 @@ describe(Cache.name, () => {
 
     it("removes the item if it is expired", async () => {
       const id = "expired-id";
-      await givenExpiredItem(id, "");
+      await t.givenExpiredItem(id, "");
 
       expect(await storage.getItem(id)).not.toBeNull();
 
@@ -142,7 +51,7 @@ describe(Cache.name, () => {
 
     it("returns the item if it is not expired", async () => {
       const id = "valid-id";
-      const cacheItem = await givenValidItem(id, "");
+      const cacheItem = await t.givenValidItem(id, "");
 
       const result = await cache.find(id);
       expect(result).toEqual(cacheItem);
@@ -152,7 +61,7 @@ describe(Cache.name, () => {
       const id = "valid-id";
       const lastAccessedDate = new Date(Date.now() - 50000);
 
-      await givenValidItem(id, "", lastAccessedDate);
+      await t.givenValidItem(id, "", lastAccessedDate);
       const result = await cache.find(id);
       const updatedItem = await storage.getItem<TestCacheItem>(id);
 
@@ -221,10 +130,10 @@ describe(Cache.name, () => {
       const validId1 = "valid-id-1";
       const validId2 = "valid-id-2";
 
-      await givenExpiredItem("expired-id-1", "expired-data-1");
-      await givenExpiredItem("expired-id-2", "expired-data-2");
-      const validItem1 = await givenValidItem(validId1, "valid-data-1");
-      const validItem2 = await givenValidItem(validId2, "valid-data-2");
+      await t.givenExpiredItem("expired-id-1", "expired-data-1");
+      await t.givenExpiredItem("expired-id-2", "expired-data-2");
+      const validItem1 = await t.givenValidItem(validId1, "valid-data-1");
+      const validItem2 = await t.givenValidItem(validId2, "valid-data-2");
 
       await cache.prune();
 
@@ -237,8 +146,8 @@ describe(Cache.name, () => {
       const validId1 = "valid-id-1";
       const validId2 = "valid-id-2";
 
-      const validItem1 = await givenValidItem(validId1, "valid-data-1");
-      const validItem2 = await givenValidItem(validId2, "valid-data-2");
+      const validItem1 = await t.givenValidItem(validId1, "valid-data-1");
+      const validItem2 = await t.givenValidItem(validId2, "valid-data-2");
 
       await cache.prune();
 
@@ -248,8 +157,8 @@ describe(Cache.name, () => {
     });
 
     it("removes all items if all are expired", async () => {
-      await givenExpiredItem("expired-id-1", "expired-data-1");
-      await givenExpiredItem("expired-id-2", "expired-data-2");
+      await t.givenExpiredItem("expired-id-1", "expired-data-1");
+      await t.givenExpiredItem("expired-id-2", "expired-data-2");
 
       await cache.prune();
 
@@ -297,11 +206,11 @@ describe(Cache.name, () => {
 
     it("prunes by namespace", async () => {
       config.appId = "app1";
-      const exItemApp1 = await givenExpiredItem("expired-app1", "expired-data");
+      const exItemApp1 = await t.givenExpiredItem("expired-app1", "");
 
       config.appId = "app2";
-      await givenExpiredItem("expired-app2", "expired-data");
-      const validItemApp2 = await givenValidItem("valid-app2", "valid-data");
+      await t.givenExpiredItem("expired-app2", "");
+      const validItemApp2 = await t.givenValidItem("valid-app2", "");
 
       // appId = "app2"
       await cache.prune();
@@ -330,7 +239,6 @@ describe(Cache.name, () => {
       await cache.store("item1", { msg: "a" });
       await cache.store("item2", { msg: "b" });
 
-      // Manually calculate expected size
       const key1 = "app1:item1";
       const item1 = await storage.getItem(key1);
       const size1 = key1.length + JSON.stringify(item1).length;
