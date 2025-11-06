@@ -249,6 +249,16 @@ describe(Cache.name, () => {
   describe("quota", () => {
     it.todo("prunes to recover storage space");
     it.todo("prunes then removes least accessed items");
+    // Steps:
+    // 1) fill up storage to quota max:
+    // 1a) a mix of valid recent and least accessed items
+    // 1b) a few expired recently accessed items
+    // 1c) a mix of valid recent and least accessed items
+    // 2) add one more item
+    // 3) expect expired items to have been removed
+    // 4) expect a few of the least accessed items to have been removed
+    // 5) expect namespaced usage to be <= quota target
+    // 6) expect additional item to have been stored
     it.todo("does nothing if quota is not reached");
   });
 });
