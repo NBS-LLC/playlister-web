@@ -4,6 +4,14 @@ import { AsyncObjectStorage } from "./AsyncObjectStorage";
 export class CacheStats {
   constructor(private readonly storage: AsyncObjectStorage) {}
 
+  static getItemSizeInBytes(key: string, value: unknown): number {
+    const jsonString = JSON.stringify(value);
+    return (
+      new TextEncoder().encode(key).length +
+      new TextEncoder().encode(jsonString).length
+    );
+  }
+
   async getNamespaceUsageInBytes(): Promise<number> {
     const keys = await this.storage.keys();
     const namespace = config.namespace;
@@ -12,7 +20,7 @@ export class CacheStats {
     let usage = 0;
     for (const key of namespaceKeys) {
       const item = await this.storage.getItem(key);
-      usage += this.getItemSizeInBytes(key, item);
+      usage += CacheStats.getItemSizeInBytes(key, item);
     }
 
     return usage;
@@ -24,7 +32,7 @@ export class CacheStats {
     let usage = 0;
     for (const key of keys) {
       const item = await this.storage.getItem(key);
-      usage += this.getItemSizeInBytes(key, item);
+      usage += CacheStats.getItemSizeInBytes(key, item);
     }
 
     return usage;
@@ -41,13 +49,5 @@ export class CacheStats {
   async getAllItemCount(): Promise<number> {
     const keys = await this.storage.keys();
     return keys.length;
-  }
-
-  private getItemSizeInBytes(key: string, value: unknown): number {
-    const jsonString = JSON.stringify(value);
-    return (
-      new TextEncoder().encode(key).length +
-      new TextEncoder().encode(jsonString).length
-    );
   }
 }
