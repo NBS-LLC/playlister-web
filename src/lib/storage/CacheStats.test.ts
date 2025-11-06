@@ -129,4 +129,17 @@ describe(CacheStats.name, () => {
       expect(count).toBe(2);
     });
   });
+
+  describe(CacheStats.getItemSizeInBytes.name, () => {
+    it("calculates the size of an item in bytes", () => {
+      const key = "some-key";
+      const value = { a: 1, b: "hello" };
+      const expectedSize =
+        new TextEncoder().encode(key).length +
+        new TextEncoder().encode(JSON.stringify(value)).length;
+
+      const size = CacheStats.getItemSizeInBytes(key, value);
+      expect(size).toBe(expectedSize);
+    });
+  });
 });
