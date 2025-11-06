@@ -1,5 +1,6 @@
 import { config } from "../config";
 import { AsyncObjectStorage } from "./AsyncObjectStorage";
+import { CachedItem } from "./CacheItem";
 
 export class CacheStats {
   constructor(private readonly storage: AsyncObjectStorage) {}
@@ -10,6 +11,11 @@ export class CacheStats {
       new TextEncoder().encode(key).length +
       new TextEncoder().encode(jsonString).length
     );
+  }
+
+  static getCachedItemSizeInBytes(cachedItem: CachedItem<unknown>): number {
+    const { key, ...item } = cachedItem;
+    return CacheStats.getItemSizeInBytes(key, item);
   }
 
   async getNamespaceUsageInBytes(): Promise<number> {

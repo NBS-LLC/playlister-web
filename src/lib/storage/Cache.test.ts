@@ -328,8 +328,15 @@ describe(Cache.name, () => {
           CacheStats.getItemSizeInBytes(id5, expiredOld5) +
           CacheStats.getItemSizeInBytes(id7, validOld7));
 
+      console.log(config.cacheQuotaMaxBytes);
+      console.log(config.cacheQuotaTargetBytes);
+
       const additionalItemId = "additional-item";
       await cache.store(additionalItemId, "additional-data");
+      const additionalItem = await cache.find(additionalItemId);
+      console.log(
+        CacheStats.getItemSizeInBytes(additionalItemId, additionalItem),
+      );
 
       expect((await cache.find(additionalItemId))?.data).toEqual(
         "additional-data",
