@@ -335,6 +335,8 @@ describe(Cache.name, () => {
         "additional-data",
       );
 
+      expect(await storage.keys()).toHaveLength(5);
+
       expect(await cache.find(id1)).toEqual(validRecent1);
       expect(await cache.find(id3)).toEqual(validRecent3);
       expect(await cache.find(id6)).toEqual(validRecent6);
