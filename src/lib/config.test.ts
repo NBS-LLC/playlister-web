@@ -50,5 +50,13 @@ describe("Config", () => {
     it("should have default cacheQuotaTargetBytes", () => {
       expect(config.cacheQuotaTargetBytes).toBe(2.5 * 1024 * 1024);
     });
+
+    it("should allow overrides", () => {
+      config.cacheQuotaMaxBytes = 100;
+      config.cacheQuotaTargetBytes = 50;
+
+      expect(config.cacheQuotaMaxBytes).toBe(100);
+      expect(config.cacheQuotaTargetBytes).toBe(50);
+    });
   });
 });

@@ -4,8 +4,8 @@ class Config {
   private _appName = "";
   private _appId = "";
 
-  readonly cacheQuotaMaxBytes = 5 * MB;
-  readonly cacheQuotaTargetBytes = 2.5 * MB;
+  private _cacheQuotaMaxBytes = 5 * MB;
+  private _cacheQuotaTargetBytes = 2.5 * MB;
 
   get appName() {
     if (!this._appName) {
@@ -33,6 +33,22 @@ class Config {
 
   get namespace() {
     return `${this.appId}:`;
+  }
+
+  get cacheQuotaMaxBytes() {
+    return this._cacheQuotaMaxBytes;
+  }
+
+  set cacheQuotaMaxBytes(value: number) {
+    this._cacheQuotaMaxBytes = value;
+  }
+
+  get cacheQuotaTargetBytes() {
+    return this._cacheQuotaTargetBytes;
+  }
+
+  set cacheQuotaTargetBytes(value: number) {
+    this._cacheQuotaTargetBytes = value;
   }
 }
 
