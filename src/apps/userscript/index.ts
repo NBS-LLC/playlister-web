@@ -6,21 +6,25 @@ import { log } from "#lib/log";
 import { SequentialProcessor } from "#lib/queue/SequentialProcessor";
 import { SpotifyWebPage } from "#lib/spotify-web/SpotifyWebPage";
 import { Cache } from "#lib/storage/Cache";
+import { CacheStats } from "#lib/storage/CacheStats";
 import { LocalStorageAdapter } from "#lib/storage/LocalStorageAdapter";
 
 config.appName = "SpotAVibe Lite";
 config.appId = "spotavibe-lite";
 
-const cacheProvider = new Cache(new LocalStorageAdapter(localStorage));
+const storage = new LocalStorageAdapter(localStorage);
+const cacheProvider = new Cache(storage);
+const cacheStats = new CacheStats(storage);
+
 cacheProvider.prune().then(async () => {
   console.debug(
     log.namespace,
-    `Cache count: ${await cacheProvider.getNamespaceItemCount()} (namespaced) / ${await cacheProvider.getAllItemCount()} (total) items.`,
+    `Cache count: ${await cacheStats.getNamespaceItemCount()} (namespaced) / ${await cacheStats.getAllItemCount()} (total) items.`,
   );
 
   console.debug(
     log.namespace,
-    `Cache usage: ${await cacheProvider.getNamespaceUsageInBytes()} (namespaced) / ${await cacheProvider.getAllUsageInBytes()} (total) bytes.`,
+    `Cache usage: ${await cacheStats.getNamespaceUsageInBytes()} (namespaced) / ${await cacheStats.getAllUsageInBytes()} (total) bytes.`,
   );
 });
 
