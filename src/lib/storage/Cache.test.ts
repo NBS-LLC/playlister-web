@@ -3,6 +3,8 @@ import { AsyncObjectStorage } from "./AsyncObjectStorage";
 import { Cache } from "./Cache";
 import { CacheItem } from "./CacheItem";
 
+type TestCacheItem = CacheItem<unknown>;
+
 class MockAsyncObjectStorage implements AsyncObjectStorage {
   private readonly storage = new Map<string, unknown>();
 
@@ -152,7 +154,7 @@ describe(Cache.name, () => {
 
       await givenValidItem(id, "", lastAccessedDate);
       const result = await cache.find(id);
-      const updatedItem = await storage.getItem<CacheItem<unknown>>(id);
+      const updatedItem = await storage.getItem<TestCacheItem>(id);
 
       expect(
         new Date(updatedItem?.lastAccessedDateUtc ?? "").getTime(),
@@ -177,10 +179,7 @@ describe(Cache.name, () => {
       const data = { value: "some-data" };
       await cache.store(id, data);
 
-      const storedItem = await storage.getItem<{
-        data: unknown;
-        expirationDateUtc: string;
-      }>(id);
+      const storedItem = await storage.getItem<TestCacheItem>(id);
 
       expect(storedItem).toBeDefined();
       expect(storedItem?.data).toEqual(data);
@@ -195,10 +194,7 @@ describe(Cache.name, () => {
       const data = null;
       await cache.store(id, data);
 
-      const storedItem = await storage.getItem<{
-        data: unknown;
-        expirationDateUtc: string;
-      }>(id);
+      const storedItem = await storage.getItem<TestCacheItem>(id);
 
       expect(storedItem).toBeDefined();
       expect(storedItem?.data).toBeNull();
@@ -213,7 +209,7 @@ describe(Cache.name, () => {
       const data = { value: "some-data" };
       await cache.store(id, data);
 
-      const storedItem = await storage.getItem<CacheItem<unknown>>(id);
+      const storedItem = await storage.getItem<TestCacheItem>(id);
 
       expect(storedItem).toBeDefined();
       expect(storedItem?.lastAccessedDateUtc).toEqual(new Date().toISOString());
