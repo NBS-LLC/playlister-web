@@ -1,3 +1,4 @@
+import { config } from "../config";
 import { CacheProvider } from "../storage/CacheProvider";
 import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
 import {
@@ -26,6 +27,7 @@ describe(AudioAnalyzer.name, () => {
   let audioAnalyzer: AudioAnalyzer;
 
   beforeEach(() => {
+    config.appId = "test-app";
     jest.clearAllMocks();
     audioAnalyzer = new AudioAnalyzer(primaryProvider, cacheProvider);
   });
