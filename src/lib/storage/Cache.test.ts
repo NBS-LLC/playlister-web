@@ -326,6 +326,8 @@ describe(Cache.name, () => {
       config.cacheQuotaTargetBytes =
         config.cacheQuotaMaxBytes -
         (CacheStats.getItemSizeInBytes(getKey(id2), validOld2) +
+          CacheStats.getItemSizeInBytes(getKey(id4), expiredRecent4) +
+          CacheStats.getItemSizeInBytes(getKey(id5), expiredOld5) +
           CacheStats.getItemSizeInBytes(getKey(id7), validOld7));
 
       const additionalItemId = "additional-item";
