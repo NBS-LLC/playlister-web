@@ -255,6 +255,8 @@ describe(Cache.name, () => {
 
     it.todo("prunes to recover storage space");
     it("prunes then removes least accessed items", async () => {
+      const cacheStats = new CacheStats(storage);
+
       const id1 = "valid-recent-1";
       const validRecent1 = await t.givenValidItem(
         id1,
@@ -312,31 +314,22 @@ describe(Cache.name, () => {
       );
 
       config.cacheQuotaMaxBytes =
-        CacheStats.getItemSizeInBytes(id1, validRecent1) +
-        CacheStats.getItemSizeInBytes(id2, validOld2) +
-        CacheStats.getItemSizeInBytes(id3, validRecent3) +
-        CacheStats.getItemSizeInBytes(id4, expiredRecent4) +
-        CacheStats.getItemSizeInBytes(id5, expiredOld5) +
-        CacheStats.getItemSizeInBytes(id6, validRecent6) +
-        CacheStats.getItemSizeInBytes(id7, validOld7) +
-        CacheStats.getItemSizeInBytes(id8, validRecent8);
+        CacheStats.getItemSizeInBytes(getKey(id1), validRecent1) +
+        CacheStats.getItemSizeInBytes(getKey(id2), validOld2) +
+        CacheStats.getItemSizeInBytes(getKey(id3), validRecent3) +
+        CacheStats.getItemSizeInBytes(getKey(id4), expiredRecent4) +
+        CacheStats.getItemSizeInBytes(getKey(id5), expiredOld5) +
+        CacheStats.getItemSizeInBytes(getKey(id6), validRecent6) +
+        CacheStats.getItemSizeInBytes(getKey(id7), validOld7) +
+        CacheStats.getItemSizeInBytes(getKey(id8), validRecent8);
 
       config.cacheQuotaTargetBytes =
         config.cacheQuotaMaxBytes -
-        (CacheStats.getItemSizeInBytes(id2, validOld2) +
-          CacheStats.getItemSizeInBytes(id4, expiredRecent4) +
-          CacheStats.getItemSizeInBytes(id5, expiredOld5) +
-          CacheStats.getItemSizeInBytes(id7, validOld7));
-
-      console.log(config.cacheQuotaMaxBytes);
-      console.log(config.cacheQuotaTargetBytes);
+        (CacheStats.getItemSizeInBytes(getKey(id2), validOld2) +
+          CacheStats.getItemSizeInBytes(getKey(id7), validOld7));
 
       const additionalItemId = "additional-item";
       await cache.store(additionalItemId, "additional-data");
-      const additionalItem = await cache.find(additionalItemId);
-      console.log(
-        CacheStats.getItemSizeInBytes(additionalItemId, additionalItem),
-      );
 
       expect((await cache.find(additionalItemId))?.data).toEqual(
         "additional-data",
@@ -354,7 +347,6 @@ describe(Cache.name, () => {
       expect(await cache.find(id5)).toBeNull();
       expect(await cache.find(id7)).toBeNull();
 
-      const cacheStats = new CacheStats(storage);
       expect(await cacheStats.getNamespaceUsageInBytes()).toBeLessThanOrEqual(
         config.cacheQuotaTargetBytes,
       );
