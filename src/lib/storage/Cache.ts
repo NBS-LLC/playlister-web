@@ -59,8 +59,8 @@ export class Cache implements CacheProvider {
 
       const cacheItem = await this.storage.getItem<CacheItem<unknown>>(key);
       if (cacheItem && new Date() >= new Date(cacheItem.expirationDateUtc)) {
-        console.debug(log.namespace, `Pruned: ${key} from cache.`);
         await this.storage.removeItem(key);
+        console.debug(log.namespace, `Pruned: ${key} from cache.`);
       }
     });
 
@@ -126,6 +126,7 @@ export class Cache implements CacheProvider {
       }
 
       await this.storage.removeItem(cachedItem.key);
+      console.debug(log.namespace, `Evicted: ${cachedItem.key} from cache.`);
       bytesRecovered += CacheStats.getCachedItemSizeInBytes(cachedItem);
     }
   }
