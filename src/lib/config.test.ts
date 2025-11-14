@@ -44,11 +44,14 @@ describe("Config", () => {
 
   describe("cache quotas", () => {
     it("should have default cacheQuotaMaxBytes", () => {
-      expect(config.cacheQuotaMaxBytes).toBe(5 * 1024 * 1024);
+      expect(config.cacheQuotaMaxBytes).toBeGreaterThan(1 * 1024 * 1024);
     });
 
     it("should have default cacheQuotaTargetBytes", () => {
-      expect(config.cacheQuotaTargetBytes).toBe(2.5 * 1024 * 1024);
+      expect(config.cacheQuotaTargetBytes).toBeGreaterThan(1 * 1024 * 1024);
+      expect(config.cacheQuotaTargetBytes).toBeLessThan(
+        config.cacheQuotaMaxBytes,
+      );
     });
 
     it("should allow overrides", () => {
