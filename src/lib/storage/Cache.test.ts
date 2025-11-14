@@ -5,6 +5,7 @@ import {
   MockAsyncObjectStorage,
   TestCacheItem,
 } from "./Cache.test-data";
+import { CacheItem } from "./CacheItem";
 import { CacheStats } from "./CacheStats";
 
 describe(Cache.name, () => {
@@ -248,71 +249,79 @@ describe(Cache.name, () => {
   });
 
   describe("quota", () => {
-    beforeEach(() => {
-      config.cacheQuotaMaxBytes = 1024;
-      config.cacheQuotaTargetBytes = 500;
-    });
+    const id1 = "valid-recent-1";
+    const id2 = "valid-old-2";
+    const id3 = "valid-recent-3";
+    const id4 = "expired-recent-4";
+    const id5 = "expired-old-5";
+    const id6 = "valid-recent-6";
+    const id7 = "valid-old-7";
+    const id8 = "valid-recent-8";
 
-    it.todo("prunes to recover storage space");
-    it("prunes then removes least accessed items", async () => {
-      const cacheStats = new CacheStats(storage);
+    let validRecent1: CacheItem<string>;
+    let _validOld2: CacheItem<string>;
+    let validRecent3: CacheItem<string>;
+    let _expiredRecent4: CacheItem<string>;
+    let _expiredOld5: CacheItem<string>;
+    let validRecent6: CacheItem<string>;
+    let _validOld7: CacheItem<string>;
+    let validRecent8: CacheItem<string>;
 
-      const id1 = "valid-recent-1";
-      const validRecent1 = await t.givenValidItem(
+    beforeEach(async () => {
+      config.cacheQuotaMaxBytes = 5000;
+      config.cacheQuotaTargetBytes = 3000;
+
+      validRecent1 = await t.givenValidItem(
         id1,
         "data-1",
         new Date(Date.now()),
       );
 
-      const id2 = "valid-old-2";
-      const _validOld2 = await t.givenValidItem(
+      _validOld2 = await t.givenValidItem(
         id2,
         "data-2",
         new Date(Date.now() - 100000),
       );
 
-      const id3 = "valid-recent-3";
-      const validRecent3 = await t.givenValidItem(
+      validRecent3 = await t.givenValidItem(
         id3,
         "data-3",
         new Date(Date.now() - 50000),
       );
 
-      const id4 = "expired-recent-4";
-      const _expiredRecent4 = await t.givenExpiredItem(
+      _expiredRecent4 = await t.givenExpiredItem(
         id4,
         "data-4",
         new Date(Date.now()),
       );
 
-      const id5 = "expired-old-5";
-      const _expiredOld5 = await t.givenExpiredItem(
+      _expiredOld5 = await t.givenExpiredItem(
         id5,
         "data-5",
         new Date(Date.now() - 80000),
       );
 
-      const id6 = "valid-recent-6";
-      const validRecent6 = await t.givenValidItem(
+      validRecent6 = await t.givenValidItem(
         id6,
         "data-6",
         new Date(Date.now() - 2000),
       );
 
-      const id7 = "valid-old-7";
-      const _validOld7 = await t.givenValidItem(
+      _validOld7 = await t.givenValidItem(
         id7,
         "data-7",
         new Date(Date.now() - 75000),
       );
 
-      const id8 = "valid-recent-8";
-      const validRecent8 = await t.givenValidItem(
+      validRecent8 = await t.givenValidItem(
         id8,
         "data-8",
         new Date(Date.now()),
       );
+    });
 
+    it.todo("prunes to recover storage space");
+    it("prunes then removes least accessed items", async () => {
       // sum(id1, id8) = 1083 bytes
       config.cacheQuotaMaxBytes = 1083;
 
@@ -321,7 +330,6 @@ describe(Cache.name, () => {
 
       const additionalItemId = "additional-item";
       await cache.store(additionalItemId, "additional-data");
-
       expect((await cache.find(additionalItemId))?.data).toEqual(
         "additional-data",
       );
@@ -333,11 +341,12 @@ describe(Cache.name, () => {
       expect(await cache.find(id6)).toEqual(validRecent6);
       expect(await cache.find(id8)).toEqual(validRecent8);
 
-      expect(await cache.find(id2)).toBeNull();
-      expect(await cache.find(id4)).toBeNull();
-      expect(await cache.find(id5)).toBeNull();
-      expect(await cache.find(id7)).toBeNull();
+      expect(await cache.find(id2)).toBeNull(); // old
+      expect(await cache.find(id4)).toBeNull(); // expired
+      expect(await cache.find(id5)).toBeNull(); // expired
+      expect(await cache.find(id7)).toBeNull(); // old
 
+      const cacheStats = new CacheStats(storage);
       expect(await cacheStats.getNamespaceUsageInBytes()).toBeLessThanOrEqual(
         config.cacheQuotaTargetBytes,
       );
