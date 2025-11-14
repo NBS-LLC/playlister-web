@@ -4,8 +4,8 @@ class Config {
   private _appName = "";
   private _appId = "";
 
-  private _cacheQuotaMaxBytes = 5 * MB;
-  private _cacheQuotaTargetBytes = 2.5 * MB;
+  private _cacheQuotaMaxBytes = 4 * MB;
+  private _cacheQuotaTargetBytes = 3 * MB;
 
   get appName() {
     if (!this._appName) {
