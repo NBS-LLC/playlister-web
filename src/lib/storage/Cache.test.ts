@@ -5,7 +5,6 @@ import {
   MockAsyncObjectStorage,
   TestCacheItem,
 } from "./Cache.test-data";
-import { CacheItem } from "./CacheItem";
 import { CacheStats } from "./CacheStats";
 
 describe(Cache.name, () => {
@@ -258,14 +257,14 @@ describe(Cache.name, () => {
     const id7 = "valid-old-7";
     const id8 = "valid-recent-8";
 
-    let validRecent1: CacheItem<string>;
-    let validOld2: CacheItem<string>;
-    let validRecent3: CacheItem<string>;
-    let _expiredRecent4: CacheItem<string>;
-    let _expiredOld5: CacheItem<string>;
-    let validRecent6: CacheItem<string>;
-    let validOld7: CacheItem<string>;
-    let validRecent8: CacheItem<string>;
+    let validRecent1: TestCacheItem;
+    let validOld2: TestCacheItem;
+    let validRecent3: TestCacheItem;
+    let _expiredRecent4: TestCacheItem;
+    let _expiredOld5: TestCacheItem;
+    let validRecent6: TestCacheItem;
+    let validOld7: TestCacheItem;
+    let validRecent8: TestCacheItem;
 
     beforeEach(async () => {
       config.cacheQuotaMaxBytes = 5000;
