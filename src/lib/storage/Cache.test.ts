@@ -265,7 +265,7 @@ describe(Cache.name, () => {
       );
 
       const id2 = "valid-old-2";
-      const validOld2 = await t.givenValidItem(
+      const _validOld2 = await t.givenValidItem(
         id2,
         "data-2",
         new Date(Date.now() - 100000),
@@ -279,14 +279,14 @@ describe(Cache.name, () => {
       );
 
       const id4 = "expired-recent-4";
-      const expiredRecent4 = await t.givenExpiredItem(
+      const _expiredRecent4 = await t.givenExpiredItem(
         id4,
         "data-4",
         new Date(Date.now()),
       );
 
       const id5 = "expired-old-5";
-      const expiredOld5 = await t.givenExpiredItem(
+      const _expiredOld5 = await t.givenExpiredItem(
         id5,
         "data-5",
         new Date(Date.now() - 80000),
@@ -300,7 +300,7 @@ describe(Cache.name, () => {
       );
 
       const id7 = "valid-old-7";
-      const validOld7 = await t.givenValidItem(
+      const _validOld7 = await t.givenValidItem(
         id7,
         "data-7",
         new Date(Date.now() - 75000),
@@ -313,22 +313,11 @@ describe(Cache.name, () => {
         new Date(Date.now()),
       );
 
-      config.cacheQuotaMaxBytes =
-        CacheStats.getItemSizeInBytes(getKey(id1), validRecent1) +
-        CacheStats.getItemSizeInBytes(getKey(id2), validOld2) +
-        CacheStats.getItemSizeInBytes(getKey(id3), validRecent3) +
-        CacheStats.getItemSizeInBytes(getKey(id4), expiredRecent4) +
-        CacheStats.getItemSizeInBytes(getKey(id5), expiredOld5) +
-        CacheStats.getItemSizeInBytes(getKey(id6), validRecent6) +
-        CacheStats.getItemSizeInBytes(getKey(id7), validOld7) +
-        CacheStats.getItemSizeInBytes(getKey(id8), validRecent8);
+      // sum(id1, id8) = 1083 bytes
+      config.cacheQuotaMaxBytes = 1083;
 
-      config.cacheQuotaTargetBytes =
-        config.cacheQuotaMaxBytes -
-        (CacheStats.getItemSizeInBytes(getKey(id2), validOld2) +
-          CacheStats.getItemSizeInBytes(getKey(id4), expiredRecent4) +
-          CacheStats.getItemSizeInBytes(getKey(id5), expiredOld5) +
-          CacheStats.getItemSizeInBytes(getKey(id7), validOld7));
+      // (1083 + "additional-item") - (id2 + id4 + id5 + id7) = 690 bytes
+      config.cacheQuotaTargetBytes = 690;
 
       const additionalItemId = "additional-item";
       await cache.store(additionalItemId, "additional-data");
