@@ -329,11 +329,12 @@ describe(Cache.name, () => {
 
       const additionalItemId = "additional-item";
       await cache.store(additionalItemId, "additional-data");
+
+      expect(await storage.keys()).toHaveLength(7);
+
       expect((await cache.find(additionalItemId))?.data).toEqual(
         "additional-data",
       );
-
-      expect(await storage.keys()).toHaveLength(7);
 
       expect(await cache.find(id1)).toEqual(validRecent1);
       expect(await cache.find(id2)).toEqual(validOld2);
@@ -342,8 +343,8 @@ describe(Cache.name, () => {
       expect(await cache.find(id7)).toEqual(validOld7);
       expect(await cache.find(id8)).toEqual(validRecent8);
 
-      expect(await cache.find(id4)).toBeNull(); // expired
-      expect(await cache.find(id5)).toBeNull(); // expired
+      expect(await storage.getItem(getKey(id4))).toBeNull(); // expired
+      expect(await storage.getItem(getKey(id5))).toBeNull(); // expired
 
       const cacheStats = new CacheStats(storage);
       expect(await cacheStats.getNamespaceUsageInBytes()).toBeLessThanOrEqual(
@@ -359,27 +360,52 @@ describe(Cache.name, () => {
 
       const additionalItemId = "additional-item";
       await cache.store(additionalItemId, "additional-data");
+
+      expect(await storage.keys()).toHaveLength(5);
+
       expect((await cache.find(additionalItemId))?.data).toEqual(
         "additional-data",
       );
-
-      expect(await storage.keys()).toHaveLength(5);
 
       expect(await cache.find(id1)).toEqual(validRecent1);
       expect(await cache.find(id3)).toEqual(validRecent3);
       expect(await cache.find(id6)).toEqual(validRecent6);
       expect(await cache.find(id8)).toEqual(validRecent8);
 
-      expect(await cache.find(id2)).toBeNull(); // old
-      expect(await cache.find(id4)).toBeNull(); // expired
-      expect(await cache.find(id5)).toBeNull(); // expired
-      expect(await cache.find(id7)).toBeNull(); // old
+      expect(await storage.getItem(getKey(id2))).toBeNull(); // old
+      expect(await storage.getItem(getKey(id4))).toBeNull(); // expired
+      expect(await storage.getItem(getKey(id5))).toBeNull(); // expired
+      expect(await storage.getItem(getKey(id7))).toBeNull(); // old
 
       const cacheStats = new CacheStats(storage);
       expect(await cacheStats.getNamespaceUsageInBytes()).toBeLessThanOrEqual(
         config.cacheQuotaTargetBytes,
       );
     });
-    it.todo("does nothing if quota is not reached");
+    it("does nothing if quota is not reached", async () => {
+      // sum(id1, id8) + "additional-item" = 1229 bytes
+      config.cacheQuotaMaxBytes = 1229;
+
+      // can be anything...
+      config.cacheQuotaTargetBytes = 600;
+
+      const additionalItemId = "additional-item";
+      await cache.store(additionalItemId, "additional-data");
+
+      expect(await storage.keys()).toHaveLength(9);
+
+      expect((await cache.find(additionalItemId))?.data).toEqual(
+        "additional-data",
+      );
+
+      expect(await storage.getItem(getKey(id1))).toBeDefined();
+      expect(await storage.getItem(getKey(id2))).toBeDefined();
+      expect(await storage.getItem(getKey(id3))).toBeDefined();
+      expect(await storage.getItem(getKey(id4))).toBeDefined();
+      expect(await storage.getItem(getKey(id5))).toBeDefined();
+      expect(await storage.getItem(getKey(id6))).toBeDefined();
+      expect(await storage.getItem(getKey(id7))).toBeDefined();
+      expect(await storage.getItem(getKey(id8))).toBeDefined();
+    });
   });
 });
