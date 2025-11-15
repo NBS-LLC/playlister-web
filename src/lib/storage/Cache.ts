@@ -9,6 +9,8 @@ const SHORT_EXPIRATION_MS = 1 * 24 * 60 * 60 * 1000;
 const LONG_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 
 export class Cache implements CacheProvider {
+  private enforcingQuota = false;
+
   constructor(private readonly storage: AsyncObjectStorage) {}
 
   async find<T>(id: string): Promise<CacheItem<T> | null> {
@@ -54,33 +56,43 @@ export class Cache implements CacheProvider {
   }
 
   async enforceQuota() {
-    const cacheStats = new CacheStats(this.storage);
-    let usage = await cacheStats.getNamespaceUsageInBytes();
-
-    if (usage <= config.cacheQuotaMaxBytes) {
+    if (this.enforcingQuota) {
       return;
     }
 
-    await this.prune();
-    usage = await cacheStats.getNamespaceUsageInBytes();
-    const bytesToRecover = usage - config.cacheQuotaTargetBytes;
+    try {
+      this.enforcingQuota = true;
 
-    if (bytesToRecover <= 0) {
-      return;
-    }
+      const cacheStats = new CacheStats(this.storage);
+      let usage = await cacheStats.getNamespaceUsageInBytes();
 
-    const cachedItems = await this.getCachedItems();
-    this.sortCachedItems(cachedItems);
-
-    let bytesRecovered = 0;
-    for (const cachedItem of cachedItems) {
-      if (bytesRecovered >= bytesToRecover) {
-        break;
+      if (usage <= config.cacheQuotaMaxBytes) {
+        return;
       }
 
-      await this.storage.removeItem(cachedItem.key);
-      console.debug(log.namespace, `Evicted: ${cachedItem.key} from cache.`);
-      bytesRecovered += CacheStats.getCachedItemSizeInBytes(cachedItem);
+      await this.prune();
+      usage = await cacheStats.getNamespaceUsageInBytes();
+      const bytesToRecover = usage - config.cacheQuotaTargetBytes;
+
+      if (bytesToRecover <= 0) {
+        return;
+      }
+
+      const cachedItems = await this.getCachedItems();
+      this.sortCachedItems(cachedItems);
+
+      let bytesRecovered = 0;
+      for (const cachedItem of cachedItems) {
+        if (bytesRecovered >= bytesToRecover) {
+          break;
+        }
+
+        await this.storage.removeItem(cachedItem.key);
+        console.debug(log.namespace, `Evicted: ${cachedItem.key} from cache.`);
+        bytesRecovered += CacheStats.getCachedItemSizeInBytes(cachedItem);
+      }
+    } finally {
+      this.enforcingQuota = false;
     }
   }
 
