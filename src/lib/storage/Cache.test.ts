@@ -266,6 +266,7 @@ describe(Cache.name, () => {
     const id6 = "valid-recent-6";
     const id7 = "valid-old-7";
     const id8 = "valid-recent-8";
+    const additionalItemId = "additional-item";
 
     let validRecent1: TestCacheItem;
     let validOld2: TestCacheItem;
@@ -275,6 +276,7 @@ describe(Cache.name, () => {
     let validRecent6: TestCacheItem;
     let validOld7: TestCacheItem;
     let validRecent8: TestCacheItem;
+    let _additionalItem: TestCacheItem;
 
     beforeEach(async () => {
       config.cacheQuotaMaxBytes = 5000;
@@ -327,6 +329,12 @@ describe(Cache.name, () => {
         "data-8",
         new Date(Date.now()),
       );
+
+      _additionalItem = await t.givenValidItem(
+        additionalItemId,
+        "additional-data",
+        new Date(Date.now()),
+      );
     });
 
     it("prunes to recover storage space", async () => {
@@ -336,8 +344,7 @@ describe(Cache.name, () => {
       // (1083 + "additional-item") - (id4 + id5) = 956 bytes
       config.cacheQuotaTargetBytes = 956;
 
-      const additionalItemId = "additional-item";
-      await cache.store(additionalItemId, "additional-data");
+      await cache.enforceQuota();
 
       expect(await storage.keys()).toHaveLength(7);
 
@@ -367,8 +374,7 @@ describe(Cache.name, () => {
       // (1083 + "additional-item") - (id2 + id4 + id5 + id7) = 690 bytes
       config.cacheQuotaTargetBytes = 690;
 
-      const additionalItemId = "additional-item";
-      await cache.store(additionalItemId, "additional-data");
+      await cache.enforceQuota();
 
       expect(await storage.keys()).toHaveLength(5);
 
@@ -398,8 +404,7 @@ describe(Cache.name, () => {
       // can be anything...
       config.cacheQuotaTargetBytes = 600;
 
-      const additionalItemId = "additional-item";
-      await cache.store(additionalItemId, "additional-data");
+      await cache.enforceQuota();
 
       expect(await storage.keys()).toHaveLength(9);
 
