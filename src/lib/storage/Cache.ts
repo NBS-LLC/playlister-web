@@ -50,8 +50,8 @@ export class Cache implements CacheProvider {
     try {
       await this.storage.setItem(this.getKey(id), cacheItem);
     } catch (error) {
-      console.debug(log.namespace, error);
-      console.debug(
+      console.warn(log.namespace, error);
+      console.warn(
         log.namespace,
         `An error occurred while storing: ${id}.`,
         "Enforcing quota and trying one more time.",

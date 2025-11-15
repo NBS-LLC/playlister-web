@@ -137,6 +137,7 @@ describe(Cache.name, () => {
     });
 
     it("enforces quota and retries when error is thrown", async () => {
+      jest.spyOn(console, "warn").mockImplementation();
       const setItem = jest.spyOn(storage, "setItem");
       setItem.mockRejectedValueOnce(new DOMException("", "QuotaExceededError"));
 
@@ -151,6 +152,7 @@ describe(Cache.name, () => {
     });
 
     it("bubbles up the error after enforcing quota and retry fails", async () => {
+      jest.spyOn(console, "warn").mockImplementation();
       const setItem = jest.spyOn(storage, "setItem");
       setItem.mockRejectedValue(new DOMException("", "QuotaExceededError"));
 
