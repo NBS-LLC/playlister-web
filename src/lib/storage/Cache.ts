@@ -49,6 +49,37 @@ export class Cache implements CacheProvider {
     await this.enforceQuota();
   }
 
+  async enforceQuota() {
+    const cacheStats = new CacheStats(this.storage);
+    let usage = await cacheStats.getNamespaceUsageInBytes();
+
+    if (usage <= config.cacheQuotaMaxBytes) {
+      return;
+    }
+
+    await this.prune();
+    usage = await cacheStats.getNamespaceUsageInBytes();
+    const bytesToRecover = usage - config.cacheQuotaTargetBytes;
+
+    if (bytesToRecover <= 0) {
+      return;
+    }
+
+    const cachedItems = await this.getCachedItems();
+    this.sortCachedItems(cachedItems);
+
+    let bytesRecovered = 0;
+    for (const cachedItem of cachedItems) {
+      if (bytesRecovered >= bytesToRecover) {
+        break;
+      }
+
+      await this.storage.removeItem(cachedItem.key);
+      console.debug(log.namespace, `Evicted: ${cachedItem.key} from cache.`);
+      bytesRecovered += CacheStats.getCachedItemSizeInBytes(cachedItem);
+    }
+  }
+
   async prune(): Promise<void> {
     const keys = await this.storage.keys();
 
@@ -98,36 +129,5 @@ export class Cache implements CacheProvider {
         new Date(b.lastAccessedDateUtc).getTime()
       );
     });
-  }
-
-  private async enforceQuota() {
-    const cacheStats = new CacheStats(this.storage);
-    let usage = await cacheStats.getNamespaceUsageInBytes();
-
-    if (usage <= config.cacheQuotaMaxBytes) {
-      return;
-    }
-
-    await this.prune();
-    usage = await cacheStats.getNamespaceUsageInBytes();
-    const bytesToRecover = usage - config.cacheQuotaTargetBytes;
-
-    if (bytesToRecover <= 0) {
-      return;
-    }
-
-    const cachedItems = await this.getCachedItems();
-    this.sortCachedItems(cachedItems);
-
-    let bytesRecovered = 0;
-    for (const cachedItem of cachedItems) {
-      if (bytesRecovered >= bytesToRecover) {
-        break;
-      }
-
-      await this.storage.removeItem(cachedItem.key);
-      console.debug(log.namespace, `Evicted: ${cachedItem.key} from cache.`);
-      bytesRecovered += CacheStats.getCachedItemSizeInBytes(cachedItem);
-    }
   }
 }

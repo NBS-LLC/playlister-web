@@ -135,6 +135,16 @@ describe(Cache.name, () => {
       expect(storedItem).toBeDefined();
       expect(storedItem?.lastAccessedDateUtc).toEqual(new Date().toISOString());
     });
+
+    it("enforces quota", async () => {
+      const enforceQuotaSpy = jest.spyOn(cache, "enforceQuota");
+
+      const id = "some-id";
+      const data = { value: "some-data" };
+      await cache.store(id, data);
+
+      expect(enforceQuotaSpy).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe(Cache.prototype.prune.name, () => {
@@ -247,7 +257,7 @@ describe(Cache.name, () => {
     });
   });
 
-  describe("quota", () => {
+  describe(Cache.prototype.enforceQuota.name, () => {
     const id1 = "valid-recent-1";
     const id2 = "valid-old-2";
     const id3 = "valid-recent-3";
