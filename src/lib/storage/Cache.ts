@@ -9,7 +9,7 @@ const SHORT_EXPIRATION_MS = 1 * 24 * 60 * 60 * 1000;
 const LONG_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 
 export class Cache implements CacheProvider {
-  private enforcingQuota = false;
+  protected enforcingQuota = false;
 
   constructor(private readonly storage: AsyncObjectStorage) {}
 

@@ -424,5 +424,25 @@ describe(Cache.name, () => {
       expect(await storage.getItem(getKey(id7))).toBeDefined();
       expect(await storage.getItem(getKey(id8))).toBeDefined();
     });
+
+    it("does nothing if its already running", async () => {
+      class TestCache extends Cache {
+        setEnforcingQuotaFlag(value: boolean) {
+          this.enforcingQuota = value;
+        }
+      }
+
+      const testCache = new TestCache(storage);
+      testCache.setEnforcingQuotaFlag(true);
+
+      config.cacheQuotaMaxBytes = 1083;
+      config.cacheQuotaTargetBytes = 690;
+
+      expect(await storage.keys()).toHaveLength(9);
+      await testCache.enforceQuota();
+      expect(await storage.keys()).toHaveLength(9);
+      await cache.enforceQuota();
+      expect(await storage.keys()).toHaveLength(5);
+    });
   });
 });
