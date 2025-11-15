@@ -45,8 +45,12 @@ export class Cache implements CacheProvider {
       lastAccessedDateUtc: new Date().toISOString(),
     };
 
-    await this.storage.setItem(this.getKey(id), cacheItem);
-    await this.enforceQuota();
+    try {
+      await this.storage.setItem(this.getKey(id), cacheItem);
+    } catch (error) {
+      console.debug(log.namespace, error);
+      await this.enforceQuota();
+    }
   }
 
   async enforceQuota() {

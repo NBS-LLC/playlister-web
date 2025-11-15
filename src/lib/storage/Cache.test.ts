@@ -136,7 +136,10 @@ describe(Cache.name, () => {
       expect(storedItem?.lastAccessedDateUtc).toEqual(new Date().toISOString());
     });
 
-    it("enforces quota", async () => {
+    it("enforces quota when error is thrown", async () => {
+      const setItem = jest.spyOn(storage, "setItem");
+      setItem.mockRejectedValue(new DOMException("", "QuotaExceededError"));
+
       const enforceQuotaSpy = jest.spyOn(cache, "enforceQuota");
 
       const id = "some-id";
