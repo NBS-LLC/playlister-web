@@ -136,9 +136,9 @@ describe(Cache.name, () => {
       expect(storedItem?.lastAccessedDateUtc).toEqual(new Date().toISOString());
     });
 
-    it("enforces quota when error is thrown", async () => {
+    it("enforces quota and retries when error is thrown", async () => {
       const setItem = jest.spyOn(storage, "setItem");
-      setItem.mockRejectedValue(new DOMException("", "QuotaExceededError"));
+      setItem.mockRejectedValueOnce(new DOMException("", "QuotaExceededError"));
 
       const enforceQuotaSpy = jest.spyOn(cache, "enforceQuota");
 
@@ -147,6 +147,16 @@ describe(Cache.name, () => {
       await cache.store(id, data);
 
       expect(enforceQuotaSpy).toHaveBeenCalledTimes(1);
+      expect(cache.find(id)).toBeDefined();
+    });
+
+    it("bubbles up the error after enforcing quota and retry fails", async () => {
+      const setItem = jest.spyOn(storage, "setItem");
+      setItem.mockRejectedValue(new DOMException("", "QuotaExceededError"));
+
+      const id = "some-id";
+      const data = { value: "some-data" };
+      await expect(cache.store(id, data)).rejects.toThrow(DOMException);
     });
   });
 
