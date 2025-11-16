@@ -28,12 +28,13 @@ describe(AudioAnalyzer.name, () => {
 
   beforeEach(() => {
     config.appId = "test-app";
-    jest.clearAllMocks();
     audioAnalyzer = new AudioAnalyzer(primaryProvider, cacheProvider);
   });
 
   describe(AudioAnalyzer.prototype.getTrackDetails.name, () => {
     it("returns cached track details", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
       cacheProvider.find.mockResolvedValue({
         data: trackDetails,
         expirationDateUtc: "",
@@ -115,6 +116,8 @@ describe(AudioAnalyzer.name, () => {
 
   describe(AudioAnalyzer.prototype.getTrackFeatures.name, () => {
     it("returns cached track features", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
       cacheProvider.find.mockResolvedValue({
         data: trackFeatures,
         expirationDateUtc: "",

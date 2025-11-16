@@ -86,13 +86,9 @@ describe(Cache.name, () => {
   });
 
   describe(Cache.prototype.store.name, () => {
-    beforeAll(() => {
+    beforeEach(() => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date("2024-01-01T00:00:00.000Z"));
-    });
-
-    afterAll(() => {
-      jest.useRealTimers();
     });
 
     it("stores item with long expiration for non-null data", async () => {
@@ -164,6 +160,8 @@ describe(Cache.name, () => {
 
   describe(Cache.prototype.prune.name, () => {
     it("removes all expired items and keeps valid ones", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
       const validId1 = "valid-id-1";
       const validId2 = "valid-id-2";
 
@@ -202,6 +200,8 @@ describe(Cache.name, () => {
     });
 
     it("removes all items if all are expired", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
       await t.givenExpiredItem("expired-id-1", "expired-data-1");
       await t.givenExpiredItem("expired-id-2", "expired-data-2");
 
@@ -250,6 +250,8 @@ describe(Cache.name, () => {
     });
 
     it("prunes by namespace", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
       config.appId = "app1";
       const exItemApp1 = await t.givenExpiredItem("expired-app1", "");
 
@@ -353,6 +355,8 @@ describe(Cache.name, () => {
     });
 
     it("prunes to recover storage space", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
       // sum(id1, id8) = 1083 bytes
       config.cacheQuotaMaxBytes = 1083;
 
@@ -383,6 +387,8 @@ describe(Cache.name, () => {
       );
     });
     it("prunes then removes least accessed items", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
       // sum(id1, id8) = 1083 bytes
       config.cacheQuotaMaxBytes = 1083;
 
@@ -438,6 +444,8 @@ describe(Cache.name, () => {
     });
 
     it("does nothing if its already running", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
       class TestCache extends Cache {
         setEnforcingQuotaFlag(value: boolean) {
           this.enforcingQuota = value;

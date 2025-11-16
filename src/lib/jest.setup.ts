@@ -1,5 +1,5 @@
-console.debug = () => {};
-
 beforeEach(() => {
+  jest.clearAllMocks();
   jest.restoreAllMocks();
+  jest.useRealTimers();
 });
