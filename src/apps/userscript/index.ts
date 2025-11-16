@@ -17,6 +17,8 @@ const cacheProvider = new Cache(storage);
 const cacheStats = new CacheStats(storage);
 
 cacheProvider.prune().then(async () => {
+  await cacheProvider.enforceQuota();
+
   console.debug(
     log.namespace,
     `Cache count: ${await cacheStats.getNamespaceItemCount()} (namespaced) / ${await cacheStats.getAllItemCount()} (total) items.`,
