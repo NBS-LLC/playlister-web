@@ -464,5 +464,28 @@ describe(Cache.name, () => {
       await cache.enforceQuota();
       expect(await storage.keys()).toHaveLength(5);
     });
+
+    it("toggles an enforcing quota flag", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
+      class TestCache extends Cache {
+        getEnforcingQuotaFlag() {
+          return this.enforcingQuota;
+        }
+
+        prune(): Promise<void> {
+          expect(this.getEnforcingQuotaFlag()).toBeTruthy();
+          return super.prune();
+        }
+      }
+
+      config.cacheQuotaMaxBytes = 1083;
+      config.cacheQuotaTargetBytes = 690;
+
+      const testCache = new TestCache(storage);
+      expect(testCache.getEnforcingQuotaFlag()).toBeFalsy();
+      await testCache.enforceQuota();
+      expect(testCache.getEnforcingQuotaFlag()).toBeFalsy();
+    });
   });
 });
