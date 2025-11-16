@@ -2,7 +2,6 @@ import { delay } from "../delay";
 import { SequentialProcessor } from "./SequentialProcessor";
 
 jest.mock("../delay");
-jest.useFakeTimers();
 
 describe(SequentialProcessor.name, () => {
   let processor: SequentialProcessor<string>;
@@ -10,9 +9,9 @@ describe(SequentialProcessor.name, () => {
   const MIN_DELAY_MS = 100;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     processFn = jest.fn().mockResolvedValue(undefined);
     processor = new SequentialProcessor(processFn, MIN_DELAY_MS);
-    (delay as jest.Mock).mockClear();
   });
 
   it("should process a single item", async () => {

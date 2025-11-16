@@ -1,3 +1,4 @@
+import { config } from "../config";
 import { CacheProvider } from "../storage/CacheProvider";
 import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
 import {
@@ -26,15 +27,18 @@ describe(AudioAnalyzer.name, () => {
   let audioAnalyzer: AudioAnalyzer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    config.appId = "test-app";
     audioAnalyzer = new AudioAnalyzer(primaryProvider, cacheProvider);
   });
 
   describe(AudioAnalyzer.prototype.getTrackDetails.name, () => {
     it("returns cached track details", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
       cacheProvider.find.mockResolvedValue({
         data: trackDetails,
         expirationDateUtc: "",
+        lastAccessedDateUtc: "",
       });
 
       const result = await audioAnalyzer.getTrackDetails("abcd1234");
@@ -98,6 +102,7 @@ describe(AudioAnalyzer.name, () => {
       cacheProvider.find.mockResolvedValue({
         data: null,
         expirationDateUtc: "",
+        lastAccessedDateUtc: "",
       });
 
       await expect(async () => {
@@ -111,9 +116,12 @@ describe(AudioAnalyzer.name, () => {
 
   describe(AudioAnalyzer.prototype.getTrackFeatures.name, () => {
     it("returns cached track features", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
       cacheProvider.find.mockResolvedValue({
         data: trackFeatures,
         expirationDateUtc: "",
+        lastAccessedDateUtc: "",
       });
 
       const result = await audioAnalyzer.getTrackFeatures("abcd1234");
@@ -179,6 +187,7 @@ describe(AudioAnalyzer.name, () => {
       cacheProvider.find.mockResolvedValue({
         data: null,
         expirationDateUtc: "",
+        lastAccessedDateUtc: "",
       });
 
       await expect(async () => {

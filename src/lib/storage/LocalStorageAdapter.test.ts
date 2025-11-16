@@ -85,6 +85,25 @@ describe(LocalStorageAdapter.name, () => {
       expect(result).not.toBeNull();
       expect(result).toEqual(JSON.stringify(replacement));
     });
+
+    it("bubbles up errors", async () => {
+      const mockLocalStorage = {
+        setItem: jest.fn(() => {
+          throw new DOMException();
+        }),
+        getItem: jest.fn(),
+        removeItem: jest.fn(),
+        clear: jest.fn(),
+        key: jest.fn(),
+        length: 0,
+      };
+
+      const adapter = new LocalStorageAdapter(mockLocalStorage);
+
+      await expect(adapter.setItem("key", "value")).rejects.toThrow(
+        DOMException,
+      );
+    });
   });
 
   describe(LocalStorageAdapter.prototype.keys.name, () => {

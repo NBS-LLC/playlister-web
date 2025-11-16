@@ -1,46 +1,42 @@
 import { config } from "../config";
-import { AsyncObjectStorage } from "./AsyncObjectStorage";
 import { Cache } from "./Cache";
-import { CacheItem } from "./CacheItem";
-
-class MockAsyncObjectStorage implements AsyncObjectStorage {
-  private readonly storage = new Map<string, unknown>();
-
-  async getItem<T>(key: string): Promise<T | null> {
-    return (this.storage.get(key) as T) ?? null;
-  }
-
-  async setItem<T>(key: string, value: T): Promise<T> {
-    this.storage.set(key, value);
-    return value;
-  }
-
-  async removeItem(key: string): Promise<void> {
-    this.storage.delete(key);
-  }
-
-  async keys(): Promise<string[]> {
-    return Array.from(this.storage.keys());
-  }
-}
+import {
+  CacheTestManager,
+  MockAsyncObjectStorage,
+  TestCacheItem,
+} from "./Cache.test-data";
+import { CacheStats } from "./CacheStats";
 
 describe(Cache.name, () => {
-  const originalAppId = config.appId;
-
   let cache: Cache;
   let storage: MockAsyncObjectStorage;
+  let t: CacheTestManager;
+
+  const getKey = (id: string) => `${config.namespace}${id}`;
 
   beforeEach(() => {
-    config.appId = "";
+    config.appId = "test-app";
     storage = new MockAsyncObjectStorage();
     cache = new Cache(storage);
-  });
-
-  afterEach(() => {
-    config.appId = originalAppId;
+    t = new CacheTestManager(storage, config);
   });
 
   describe(Cache.prototype.find.name, () => {
+    it("stores and retrieves a complex object", async () => {
+      const id = "complex-object-id";
+      const data = {
+        a: 1,
+        b: "hello",
+        c: {
+          d: true,
+          e: [1, 2, 3],
+        },
+      };
+      await cache.store(id, data);
+      const result = await cache.find(id);
+      expect(result?.data).toEqual(data);
+    });
+
     it("returns null if item is not in cache", async () => {
       const result = await cache.find("non-existent-id");
       expect(result).toBeNull();
@@ -48,58 +44,51 @@ describe(Cache.name, () => {
 
     it("returns null if item is expired", async () => {
       const id = "expired-id";
-      const data = { value: "some-data" };
-      const expirationDateUtc = new Date(Date.now() - 1000).toISOString();
-      const cacheItem: CacheItem<typeof data> = {
-        data,
-        expirationDateUtc,
-      };
+      await t.givenExpiredItem(id, "");
 
-      await storage.setItem(id, cacheItem);
       const result = await cache.find(id);
       expect(result).toBeNull();
     });
 
     it("removes the item if it is expired", async () => {
       const id = "expired-id";
-      const data = { value: "some-data" };
-      const expirationDateUtc = new Date(Date.now() - 1000).toISOString();
-      const cacheItem: CacheItem<typeof data> = {
-        data,
-        expirationDateUtc,
-      };
+      await t.givenExpiredItem(id, "");
 
-      await storage.setItem(id, cacheItem);
-      expect(await storage.getItem(id)).not.toBeNull();
+      expect(await storage.getItem(getKey(id))).not.toBeNull();
 
       const result = await cache.find(id);
       expect(result).toBeNull();
-      expect(await storage.getItem(id)).toBeNull();
+      expect(await storage.getItem(getKey(id))).toBeNull();
     });
 
     it("returns the item if it is not expired", async () => {
       const id = "valid-id";
-      const data = { value: "some-data" };
-      const expirationDateUtc = new Date(Date.now() + 100000).toISOString();
-      const cacheItem: CacheItem<typeof data> = {
-        data,
-        expirationDateUtc,
-      };
+      const cacheItem = await t.givenValidItem(id, "");
 
-      await storage.setItem(id, cacheItem);
       const result = await cache.find(id);
       expect(result).toEqual(cacheItem);
+    });
+
+    it("updates the last accessed date", async () => {
+      const id = "valid-id";
+      const lastAccessedDate = new Date(Date.now() - 50000);
+
+      await t.givenValidItem(id, "", lastAccessedDate);
+      const result = await cache.find(id);
+      const updatedItem = await storage.getItem<TestCacheItem>(getKey(id));
+
+      expect(
+        new Date(updatedItem?.lastAccessedDateUtc ?? "").getTime(),
+      ).toBeGreaterThan(lastAccessedDate.getTime());
+
+      expect(result).toEqual(updatedItem);
     });
   });
 
   describe(Cache.prototype.store.name, () => {
-    beforeAll(() => {
+    beforeEach(() => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date("2024-01-01T00:00:00.000Z"));
-    });
-
-    afterAll(() => {
-      jest.useRealTimers();
     });
 
     it("stores item with long expiration for non-null data", async () => {
@@ -107,10 +96,7 @@ describe(Cache.name, () => {
       const data = { value: "some-data" };
       await cache.store(id, data);
 
-      const storedItem = await storage.getItem<{
-        data: unknown;
-        expirationDateUtc: string;
-      }>(id);
+      const storedItem = await storage.getItem<TestCacheItem>(getKey(id));
 
       expect(storedItem).toBeDefined();
       expect(storedItem?.data).toEqual(data);
@@ -125,10 +111,7 @@ describe(Cache.name, () => {
       const data = null;
       await cache.store(id, data);
 
-      const storedItem = await storage.getItem<{
-        data: unknown;
-        expirationDateUtc: string;
-      }>(id);
+      const storedItem = await storage.getItem<TestCacheItem>(getKey(id));
 
       expect(storedItem).toBeDefined();
       expect(storedItem?.data).toBeNull();
@@ -137,105 +120,97 @@ describe(Cache.name, () => {
         new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
       );
     });
+
+    it("sets an initial last accessed date", async () => {
+      const id = "some-id";
+      const data = { value: "some-data" };
+      await cache.store(id, data);
+
+      const storedItem = await storage.getItem<TestCacheItem>(getKey(id));
+
+      expect(storedItem).toBeDefined();
+      expect(storedItem?.lastAccessedDateUtc).toEqual(new Date().toISOString());
+    });
+
+    it("enforces quota and retries when error is thrown", async () => {
+      jest.spyOn(console, "warn").mockImplementation();
+      const setItem = jest.spyOn(storage, "setItem");
+      setItem.mockRejectedValueOnce(new DOMException("", "QuotaExceededError"));
+
+      const enforceQuotaSpy = jest.spyOn(cache, "enforceQuota");
+
+      const id = "some-id";
+      const data = { value: "some-data" };
+      await cache.store(id, data);
+
+      expect(enforceQuotaSpy).toHaveBeenCalledTimes(1);
+      expect(cache.find(id)).toBeDefined();
+    });
+
+    it("bubbles up the error after enforcing quota and retry fails", async () => {
+      jest.spyOn(console, "warn").mockImplementation();
+      const setItem = jest.spyOn(storage, "setItem");
+      setItem.mockRejectedValue(new DOMException("", "QuotaExceededError"));
+
+      const id = "some-id";
+      const data = { value: "some-data" };
+      await expect(cache.store(id, data)).rejects.toThrow(DOMException);
+    });
   });
 
   describe(Cache.prototype.prune.name, () => {
     it("removes all expired items and keeps valid ones", async () => {
-      const expiredId1 = "expired-id-1";
-      const expiredId2 = "expired-id-2";
+      jest.spyOn(console, "debug").mockImplementation();
+
       const validId1 = "valid-id-1";
       const validId2 = "valid-id-2";
 
-      const expiredItem1: CacheItem<string> = {
-        data: "expired-data-1",
-        expirationDateUtc: "2024-01-01T00:00:00.000Z",
-      };
-      const expiredItem2: CacheItem<string> = {
-        data: "expired-data-2",
-        expirationDateUtc: "2024-01-02T00:00:00.000Z",
-      };
-      const validItem1: CacheItem<string> = {
-        data: "valid-data-1",
-        expirationDateUtc: new Date(Date.now() + 100000).toISOString(),
-      };
-      const validItem2: CacheItem<string> = {
-        data: "valid-data-2",
-        expirationDateUtc: new Date(Date.now() + 200000).toISOString(),
-      };
-
-      await storage.setItem(expiredId1, expiredItem1);
-      await storage.setItem(expiredId2, expiredItem2);
-      await storage.setItem(validId1, validItem1);
-      await storage.setItem(validId2, validItem2);
-
-      expect(await storage.keys()).toEqual([
-        expiredId1,
-        expiredId2,
-        validId1,
-        validId2,
-      ]);
+      await t.givenExpiredItem("expired-id-1", "expired-data-1");
+      await t.givenExpiredItem("expired-id-2", "expired-data-2");
+      const validItem1 = await t.givenValidItem(validId1, "valid-data-1");
+      const validItem2 = await t.givenValidItem(validId2, "valid-data-2");
 
       await cache.prune();
 
-      expect(await storage.keys()).toEqual([validId1, validId2]);
-      expect(await storage.getItem(expiredId1)).toBeNull();
-      expect(await storage.getItem(expiredId2)).toBeNull();
-      expect(await storage.getItem(validId1)).toEqual(validItem1);
-      expect(await storage.getItem(validId2)).toEqual(validItem2);
+      expect(await storage.keys()).toEqual([
+        getKey(validId1),
+        getKey(validId2),
+      ]);
+
+      expect(await storage.getItem(getKey(validId1))).toEqual(validItem1);
+      expect(await storage.getItem(getKey(validId2))).toEqual(validItem2);
     });
 
     it("does nothing if there are no expired items", async () => {
       const validId1 = "valid-id-1";
       const validId2 = "valid-id-2";
 
-      const validItem1: CacheItem<string> = {
-        data: "valid-data-1",
-        expirationDateUtc: new Date(Date.now() + 100000).toISOString(),
-      };
-      const validItem2: CacheItem<string> = {
-        data: "valid-data-2",
-        expirationDateUtc: new Date(Date.now() + 200000).toISOString(),
-      };
-
-      await storage.setItem(validId1, validItem1);
-      await storage.setItem(validId2, validItem2);
-
-      expect(await storage.keys()).toEqual([validId1, validId2]);
+      const validItem1 = await t.givenValidItem(validId1, "valid-data-1");
+      const validItem2 = await t.givenValidItem(validId2, "valid-data-2");
 
       await cache.prune();
 
-      expect(await storage.keys()).toEqual([validId1, validId2]);
-      expect(await storage.getItem(validId1)).toEqual(validItem1);
-      expect(await storage.getItem(validId2)).toEqual(validItem2);
+      expect(await storage.keys()).toEqual([
+        getKey(validId1),
+        getKey(validId2),
+      ]);
+
+      expect(await storage.getItem(getKey(validId1))).toEqual(validItem1);
+      expect(await storage.getItem(getKey(validId2))).toEqual(validItem2);
     });
 
     it("removes all items if all are expired", async () => {
-      const expiredId1 = "expired-id-1";
-      const expiredId2 = "expired-id-2";
+      jest.spyOn(console, "debug").mockImplementation();
 
-      const expiredItem1: CacheItem<string> = {
-        data: "expired-data-1",
-        expirationDateUtc: "2024-01-01T00:00:00.000Z",
-      };
-      const expiredItem2: CacheItem<string> = {
-        data: "expired-data-2",
-        expirationDateUtc: "2024-01-02T00:00:00.000Z",
-      };
-
-      await storage.setItem(expiredId1, expiredItem1);
-      await storage.setItem(expiredId2, expiredItem2);
-
-      expect(await storage.keys()).toEqual([expiredId1, expiredId2]);
+      await t.givenExpiredItem("expired-id-1", "expired-data-1");
+      await t.givenExpiredItem("expired-id-2", "expired-data-2");
 
       await cache.prune();
 
       expect(await storage.keys()).toEqual([]);
-      expect(await storage.getItem(expiredId1)).toBeNull();
-      expect(await storage.getItem(expiredId2)).toBeNull();
     });
 
     it("does nothing if cache is empty", async () => {
-      expect(await storage.keys()).toEqual([]);
       await cache.prune();
       expect(await storage.keys()).toEqual([]);
     });
@@ -245,8 +220,6 @@ describe(Cache.name, () => {
       const malformedItem = { some: "data" }; // Not a CacheItem
 
       await storage.setItem(malformedId, malformedItem);
-
-      expect(await storage.keys()).toEqual([malformedId]);
 
       await cache.prune();
 
@@ -277,105 +250,242 @@ describe(Cache.name, () => {
     });
 
     it("prunes by namespace", async () => {
-      const keyApp1 = "app1:expired-app1";
-      const keyApp2 = "app2:expired-app2";
-      const keyValidApp2 = "app2:valid-app2";
+      jest.spyOn(console, "debug").mockImplementation();
 
-      const expiredItem: CacheItem<string> = {
-        data: "expired-data",
-        expirationDateUtc: "2024-01-01T00:00:00.000Z",
-      };
-
-      const validItem: CacheItem<string> = {
-        data: "valid-data",
-        expirationDateUtc: new Date(Date.now() + 100000).toISOString(),
-      };
-
-      await storage.setItem(keyApp1, expiredItem);
-      await storage.setItem(keyApp2, expiredItem);
-      await storage.setItem(keyValidApp2, validItem);
+      config.appId = "app1";
+      const exItemApp1 = await t.givenExpiredItem("expired-app1", "");
 
       config.appId = "app2";
+      await t.givenExpiredItem("expired-app2", "");
+      const validItemApp2 = await t.givenValidItem("valid-app2", "");
+
+      // appId = "app2"
       await cache.prune();
 
-      expect(await storage.getItem(keyApp1)).toEqual(expiredItem); // app1 item should remain
-      expect(await storage.getItem(keyApp2)).toBeNull(); // app2 expired item should be removed
-      expect(await storage.getItem(keyValidApp2)).toEqual(validItem); // app2 valid item should remain
+      expect(await storage.getItem("app1:expired-app1")).toEqual(exItemApp1);
+      expect(await storage.getItem("app2:expired-app2")).toBeNull();
+      expect(await storage.getItem("app2:valid-app2")).toEqual(validItemApp2);
 
       config.appId = "app1";
       await cache.prune();
 
-      expect(await storage.getItem(keyApp1)).toBeNull(); // app1 item should now be removed
-      expect(await storage.getItem(keyValidApp2)).toEqual(validItem); // app2 valid item should remain
+      expect(await storage.getItem("app1:expired-app1")).toBeNull();
+      expect(await storage.getItem("app2:valid-app2")).toEqual(validItemApp2);
     });
   });
 
-  describe(Cache.prototype.getNamespaceUsageInBytes.name, () => {
-    it("returns 0 for an empty namespace", async () => {
-      config.appId = "app1";
-      const usage = await cache.getNamespaceUsageInBytes();
-      expect(usage).toBe(0);
+  describe(Cache.prototype.enforceQuota.name, () => {
+    const id1 = "valid-recent-1";
+    const id2 = "valid-old-2";
+    const id3 = "valid-recent-3";
+    const id4 = "expired-recent-4";
+    const id5 = "expired-old-5";
+    const id6 = "valid-recent-6";
+    const id7 = "valid-old-7";
+    const id8 = "valid-recent-8";
+    const additionalItemId = "additional-item";
+
+    let validRecent1: TestCacheItem;
+    let validOld2: TestCacheItem;
+    let validRecent3: TestCacheItem;
+    let _expiredRecent4: TestCacheItem;
+    let _expiredOld5: TestCacheItem;
+    let validRecent6: TestCacheItem;
+    let validOld7: TestCacheItem;
+    let validRecent8: TestCacheItem;
+    let _additionalItem: TestCacheItem;
+
+    beforeEach(async () => {
+      config.cacheQuotaMaxBytes = 5000;
+      config.cacheQuotaTargetBytes = 3000;
+
+      validRecent1 = await t.givenValidItem(
+        id1,
+        "data-1",
+        new Date(Date.now()),
+      );
+
+      validOld2 = await t.givenValidItem(
+        id2,
+        "data-2",
+        new Date(Date.now() - 100000),
+      );
+
+      validRecent3 = await t.givenValidItem(
+        id3,
+        "data-3",
+        new Date(Date.now() - 50000),
+      );
+
+      _expiredRecent4 = await t.givenExpiredItem(
+        id4,
+        "data-4",
+        new Date(Date.now()),
+      );
+
+      _expiredOld5 = await t.givenExpiredItem(
+        id5,
+        "data-5",
+        new Date(Date.now() - 80000),
+      );
+
+      validRecent6 = await t.givenValidItem(
+        id6,
+        "data-6",
+        new Date(Date.now() - 2000),
+      );
+
+      validOld7 = await t.givenValidItem(
+        id7,
+        "data-7",
+        new Date(Date.now() - 75000),
+      );
+
+      validRecent8 = await t.givenValidItem(
+        id8,
+        "data-8",
+        new Date(Date.now()),
+      );
+
+      _additionalItem = await t.givenValidItem(
+        additionalItemId,
+        "additional-data",
+        new Date(Date.now()),
+      );
     });
 
-    it("returns the correct usage for a namespace with items", async () => {
-      config.appId = "app1";
-      await cache.store("item1", { msg: "a" });
-      await cache.store("item2", { msg: "b" });
+    it("prunes to recover storage space", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
 
-      // Manually calculate expected size
-      const key1 = "app1:item1";
-      const item1 = await storage.getItem(key1);
-      const size1 = key1.length + JSON.stringify(item1).length;
+      // sum(id1, id8) = 1083 bytes
+      config.cacheQuotaMaxBytes = 1083;
 
-      const key2 = "app1:item2";
-      const item2 = await storage.getItem(key2);
-      const size2 = key2.length + JSON.stringify(item2).length;
+      // (1083 + "additional-item") - (id4 + id5) = 956 bytes
+      config.cacheQuotaTargetBytes = 956;
 
-      const usage = await cache.getNamespaceUsageInBytes();
-      expect(usage).toBe(size1 + size2);
+      await cache.enforceQuota();
+
+      expect(await storage.keys()).toHaveLength(7);
+
+      expect((await cache.find(additionalItemId))?.data).toEqual(
+        "additional-data",
+      );
+
+      expect(await cache.find(id1)).toEqual(validRecent1);
+      expect(await cache.find(id2)).toEqual(validOld2);
+      expect(await cache.find(id3)).toEqual(validRecent3);
+      expect(await cache.find(id6)).toEqual(validRecent6);
+      expect(await cache.find(id7)).toEqual(validOld7);
+      expect(await cache.find(id8)).toEqual(validRecent8);
+
+      expect(await storage.getItem(getKey(id4))).toBeNull(); // expired
+      expect(await storage.getItem(getKey(id5))).toBeNull(); // expired
+
+      const cacheStats = new CacheStats(storage);
+      expect(await cacheStats.getNamespaceUsageInBytes()).toBeLessThanOrEqual(
+        config.cacheQuotaTargetBytes,
+      );
+    });
+    it("prunes then removes least accessed items", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
+      // sum(id1, id8) = 1083 bytes
+      config.cacheQuotaMaxBytes = 1083;
+
+      // (1083 + "additional-item") - (id2 + id4 + id5 + id7) = 690 bytes
+      config.cacheQuotaTargetBytes = 690;
+
+      await cache.enforceQuota();
+
+      expect(await storage.keys()).toHaveLength(5);
+
+      expect((await cache.find(additionalItemId))?.data).toEqual(
+        "additional-data",
+      );
+
+      expect(await cache.find(id1)).toEqual(validRecent1);
+      expect(await cache.find(id3)).toEqual(validRecent3);
+      expect(await cache.find(id6)).toEqual(validRecent6);
+      expect(await cache.find(id8)).toEqual(validRecent8);
+
+      expect(await storage.getItem(getKey(id2))).toBeNull(); // old
+      expect(await storage.getItem(getKey(id4))).toBeNull(); // expired
+      expect(await storage.getItem(getKey(id5))).toBeNull(); // expired
+      expect(await storage.getItem(getKey(id7))).toBeNull(); // old
+
+      const cacheStats = new CacheStats(storage);
+      expect(await cacheStats.getNamespaceUsageInBytes()).toBeLessThanOrEqual(
+        config.cacheQuotaTargetBytes,
+      );
+    });
+    it("does nothing if quota is not reached", async () => {
+      // sum(id1, id8) + "additional-item" = 1229 bytes
+      config.cacheQuotaMaxBytes = 1229;
+
+      // can be anything...
+      config.cacheQuotaTargetBytes = 600;
+
+      await cache.enforceQuota();
+
+      expect(await storage.keys()).toHaveLength(9);
+
+      expect((await cache.find(additionalItemId))?.data).toEqual(
+        "additional-data",
+      );
+
+      expect(await storage.getItem(getKey(id1))).toBeDefined();
+      expect(await storage.getItem(getKey(id2))).toBeDefined();
+      expect(await storage.getItem(getKey(id3))).toBeDefined();
+      expect(await storage.getItem(getKey(id4))).toBeDefined();
+      expect(await storage.getItem(getKey(id5))).toBeDefined();
+      expect(await storage.getItem(getKey(id6))).toBeDefined();
+      expect(await storage.getItem(getKey(id7))).toBeDefined();
+      expect(await storage.getItem(getKey(id8))).toBeDefined();
     });
 
-    it("does not include usage from other namespaces", async () => {
-      config.appId = "app1";
-      await cache.store("item1", { msg: "a" });
+    it("does nothing if its already running", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
 
-      config.appId = "app2";
-      await cache.store("item2", { msg: "b" });
+      class TestCache extends Cache {
+        setEnforcingQuotaFlag(value: boolean) {
+          this.enforcingQuota = value;
+        }
+      }
 
-      config.appId = "app1";
+      const testCache = new TestCache(storage);
+      testCache.setEnforcingQuotaFlag(true);
 
-      const key1 = "app1:item1";
-      const item1 = await storage.getItem(key1);
-      const expectedUsage = key1.length + JSON.stringify(item1).length;
+      config.cacheQuotaMaxBytes = 1083;
+      config.cacheQuotaTargetBytes = 690;
 
-      const usage = await cache.getNamespaceUsageInBytes();
-      expect(usage).toBe(expectedUsage);
-    });
-  });
-
-  describe(Cache.prototype.getAllUsageInBytes.name, () => {
-    it("returns 0 for an empty cache", async () => {
-      const usage = await cache.getAllUsageInBytes();
-      expect(usage).toBe(0);
+      expect(await storage.keys()).toHaveLength(9);
+      await testCache.enforceQuota();
+      expect(await storage.keys()).toHaveLength(9);
+      await cache.enforceQuota();
+      expect(await storage.keys()).toHaveLength(5);
     });
 
-    it("returns the correct total usage for the entire cache", async () => {
-      config.appId = "app1";
-      await cache.store("item1", { msg: "a" });
+    it("toggles an enforcing quota flag", async () => {
+      jest.spyOn(console, "debug").mockImplementation();
 
-      config.appId = "app2";
-      await cache.store("item2", { msg: "b" });
+      class TestCache extends Cache {
+        getEnforcingQuotaFlag() {
+          return this.enforcingQuota;
+        }
 
-      const key1 = "app1:item1";
-      const item1 = await storage.getItem(key1);
-      const size1 = key1.length + JSON.stringify(item1).length;
+        prune(): Promise<void> {
+          expect(this.getEnforcingQuotaFlag()).toBeTruthy();
+          return super.prune();
+        }
+      }
 
-      const key2 = "app2:item2";
-      const item2 = await storage.getItem(key2);
-      const size2 = key2.length + JSON.stringify(item2).length;
+      config.cacheQuotaMaxBytes = 1083;
+      config.cacheQuotaTargetBytes = 690;
 
-      const usage = await cache.getAllUsageInBytes();
-      expect(usage).toBe(size1 + size2);
+      const testCache = new TestCache(storage);
+      expect(testCache.getEnforcingQuotaFlag()).toBeFalsy();
+      await testCache.enforceQuota();
+      expect(testCache.getEnforcingQuotaFlag()).toBeFalsy();
     });
   });
 });
