@@ -12,6 +12,22 @@ describe(LocalStorageAdapter.name, () => {
     storage = new LocalStorageAdapter(localStorage);
   });
 
+  describe("constructor", () => {
+    it("reads local storage into memory", async () => {
+      localStorage.setItem("a", "apple");
+      localStorage.setItem("b", "banana");
+      localStorage.setItem("c", "cherry");
+
+      const lsa = new LocalStorageAdapter(localStorage);
+      localStorage.clear();
+      
+      expect(await lsa.keys()).toHaveLength(3);
+      expect(await lsa.getItem("a")).toEqual("apple");
+      expect(await lsa.getItem("b")).toEqual("banana");
+      expect(await lsa.getItem("c")).toEqual("cherry");
+    });
+  });
+
   describe(LocalStorageAdapter.prototype.getItem.name, () => {
     it("returns a stored object with the correct type", async () => {
       const data = { person: "tester" };

@@ -1,10 +1,18 @@
 import { AsyncObjectStorage } from "./AsyncObjectStorage";
 
 export class LocalStorageAdapter implements AsyncObjectStorage {
-  constructor(private readonly storage: Storage) {}
+  private data: Map<string, string | null> = new Map();
+
+  constructor(private readonly storage: Storage) {
+    for (let i = 0; i < this.storage.length; i++) {
+      const key = this.storage.key(i)!;
+      const value = this.storage.getItem(key);
+      this.data.set(key, value);
+    }
+  }
 
   async getItem<T>(key: string): Promise<T | null> {
-    const result = this.storage.getItem(key);
+    const result = this.data.get(key);
     if (!result) {
       return null;
     }
@@ -26,10 +34,6 @@ export class LocalStorageAdapter implements AsyncObjectStorage {
   }
 
   async keys(): Promise<string[]> {
-    const keys: string[] = [];
-    for (let i = 0; i < this.storage.length; i++) {
-      keys.push(this.storage.key(i)!);
-    }
-    return keys;
+    return Array.from(this.data.keys());
   }
 }
