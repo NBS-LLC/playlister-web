@@ -12,16 +12,33 @@ describe(LocalStorageAdapter.name, () => {
     adapter = new LocalStorageAdapter(localStorage);
   });
 
-  describe("constructor", () => {
+  describe("create", () => {
+    it("initializes and returns a new adapter", async () => {
+      localStorage.setItem("a", "apple");
+      localStorage.setItem("b", "banana");
+      localStorage.setItem("c", "cherry");
+
+      const lsa = await LocalStorageAdapter.create();
+      localStorage.clear();
+
+      expect(await lsa.keys()).toHaveLength(3);
+    });
+  });
+
+  describe(LocalStorageAdapter.prototype.init.name, () => {
     it("reads local storage into memory", async () => {
       localStorage.setItem("a", "apple");
       localStorage.setItem("b", "banana");
       localStorage.setItem("c", "cherry");
 
       const lsa = new LocalStorageAdapter(localStorage);
+      expect(await lsa.keys()).toHaveLength(0);
+      await lsa.init();
+      expect(await lsa.keys()).toHaveLength(3);
+
       localStorage.clear();
 
-      expect(await lsa.keys()).toHaveLength(3);
+      // Items should remain in the adapter's memory.
       expect(await lsa.getItem("a")).toEqual("apple");
       expect(await lsa.getItem("b")).toEqual("banana");
       expect(await lsa.getItem("c")).toEqual("cherry");
