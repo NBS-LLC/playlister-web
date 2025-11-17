@@ -98,7 +98,7 @@ describe(LocalStorageAdapter.name, () => {
 
     it("overwrites an existing object with the same key", async () => {
       const data = { person: "tester" };
-      localStorage.setItem("unittest", JSON.stringify(data));
+      await adapter.setItem("unittest", data);
 
       const replacement = { address: "1234 test st" };
       await adapter.setItem("unittest", replacement);
