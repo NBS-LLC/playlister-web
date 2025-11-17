@@ -25,7 +25,9 @@ export class LocalStorageAdapter implements AsyncObjectStorage {
   }
 
   async setItem<T>(key: string, value: T): Promise<T> {
-    this.storage.setItem(key, JSON.stringify(value));
+    const jsonItem = JSON.stringify(value);
+    this.data.set(key, jsonItem);
+    this.storage.setItem(key, jsonItem);
     return value;
   }
 

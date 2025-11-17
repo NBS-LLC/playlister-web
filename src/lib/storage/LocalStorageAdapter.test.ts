@@ -31,19 +31,17 @@ describe(LocalStorageAdapter.name, () => {
   describe(LocalStorageAdapter.prototype.getItem.name, () => {
     it("returns a stored object with the correct type", async () => {
       const data = { person: "tester" };
-      localStorage.setItem("unittest", JSON.stringify(data));
-      const result: typeof data | null = await adapter.getItem("unittest");
+      adapter.setItem("unittest", data);
 
-      expect(result).not.toBeNull();
-      expect(result).toEqual(data);
+      const result = await adapter.getItem<typeof data>("unittest");
+      expect(result?.person).toEqual("tester");
     });
 
     it("returns raw string if it cannot be parsed as JSON", async () => {
       const rawString = "this is not json";
-      localStorage.setItem("unittest", rawString);
-      const result: string | null = await adapter.getItem("unittest");
+      adapter.setItem("unittest", rawString);
 
-      expect(result).not.toBeNull();
+      const result = await adapter.getItem<string>("unittest");
       expect(result).toBe(rawString);
     });
 
@@ -120,12 +118,26 @@ describe(LocalStorageAdapter.name, () => {
         DOMException,
       );
     });
+
+    it("keeps local storage and internal memory in sync", async () => {
+      const data = { person: "tester" };
+      await adapter.setItem("unittest", data);
+
+      const localItem = localStorage.getItem("unittest");
+      expect(localItem).not.toBeNull();
+      localStorage.clear();
+      expect(localStorage.getItem("unittest")).toBeNull();
+
+      const internalItem = await adapter.getItem("unittest");
+      expect(internalItem).not.toBeNull();
+      expect(internalItem).toEqual(JSON.parse(localItem!));
+    });
   });
 
   describe(LocalStorageAdapter.prototype.keys.name, () => {
     it("returns all keys in the storage", async () => {
-      localStorage.setItem("key1", "value1");
-      localStorage.setItem("key2", "value2");
+      adapter.setItem("key1", "value1");
+      adapter.setItem("key2", "value2");
 
       const keys = await adapter.keys();
       expect(keys).toHaveLength(2);
