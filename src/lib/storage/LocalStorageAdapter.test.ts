@@ -5,11 +5,11 @@
 import { LocalStorageAdapter } from "./LocalStorageAdapter";
 
 describe(LocalStorageAdapter.name, () => {
-  let storage: LocalStorageAdapter;
+  let adapter: LocalStorageAdapter;
 
   beforeEach(() => {
     localStorage.clear();
-    storage = new LocalStorageAdapter(localStorage);
+    adapter = new LocalStorageAdapter(localStorage);
   });
 
   describe("constructor", () => {
@@ -20,7 +20,7 @@ describe(LocalStorageAdapter.name, () => {
 
       const lsa = new LocalStorageAdapter(localStorage);
       localStorage.clear();
-      
+
       expect(await lsa.keys()).toHaveLength(3);
       expect(await lsa.getItem("a")).toEqual("apple");
       expect(await lsa.getItem("b")).toEqual("banana");
@@ -32,7 +32,7 @@ describe(LocalStorageAdapter.name, () => {
     it("returns a stored object with the correct type", async () => {
       const data = { person: "tester" };
       localStorage.setItem("unittest", JSON.stringify(data));
-      const result: typeof data | null = await storage.getItem("unittest");
+      const result: typeof data | null = await adapter.getItem("unittest");
 
       expect(result).not.toBeNull();
       expect(result).toEqual(data);
@@ -41,14 +41,14 @@ describe(LocalStorageAdapter.name, () => {
     it("returns raw string if it cannot be parsed as JSON", async () => {
       const rawString = "this is not json";
       localStorage.setItem("unittest", rawString);
-      const result: string | null = await storage.getItem("unittest");
+      const result: string | null = await adapter.getItem("unittest");
 
       expect(result).not.toBeNull();
       expect(result).toBe(rawString);
     });
 
     it("returns null for unknown keys", async () => {
-      expect(await storage.getItem("bogus")).toBeNull();
+      expect(await adapter.getItem("bogus")).toBeNull();
     });
   });
 
@@ -56,7 +56,7 @@ describe(LocalStorageAdapter.name, () => {
     it("removes a known object by key", async () => {
       const data = { person: "tester" };
       localStorage.setItem("unittest", JSON.stringify(data));
-      await storage.removeItem("unittest");
+      await adapter.removeItem("unittest");
 
       expect(localStorage.getItem("unittest")).toBeNull();
     });
@@ -64,7 +64,7 @@ describe(LocalStorageAdapter.name, () => {
     it("returns gracefully when trying to remove an unknown key", async () => {
       const data = { person: "tester" };
       localStorage.setItem("unittest", JSON.stringify(data));
-      await storage.removeItem("bogus");
+      await adapter.removeItem("bogus");
 
       // Exiting data should remain unaffected.
       const result = localStorage.getItem("unittest");
@@ -76,7 +76,7 @@ describe(LocalStorageAdapter.name, () => {
   describe(LocalStorageAdapter.prototype.setItem.name, () => {
     it("serializes and stores an object by key", async () => {
       const data = { person: "tester" };
-      await storage.setItem("unittest", data);
+      await adapter.setItem("unittest", data);
 
       const result = localStorage.getItem("unittest");
       expect(result).not.toBeNull();
@@ -85,7 +85,7 @@ describe(LocalStorageAdapter.name, () => {
 
     it("returns the object stored", async () => {
       const data = { person: "tester" };
-      const result = await storage.setItem("unittest", data);
+      const result = await adapter.setItem("unittest", data);
 
       expect(result).toEqual(data);
     });
@@ -95,7 +95,7 @@ describe(LocalStorageAdapter.name, () => {
       localStorage.setItem("unittest", JSON.stringify(data));
 
       const replacement = { address: "1234 test st" };
-      await storage.setItem("unittest", replacement);
+      await adapter.setItem("unittest", replacement);
 
       const result = localStorage.getItem("unittest");
       expect(result).not.toBeNull();
@@ -127,14 +127,14 @@ describe(LocalStorageAdapter.name, () => {
       localStorage.setItem("key1", "value1");
       localStorage.setItem("key2", "value2");
 
-      const keys = await storage.keys();
+      const keys = await adapter.keys();
       expect(keys).toHaveLength(2);
       expect(keys).toContain("key1");
       expect(keys).toContain("key2");
     });
 
     it("returns an empty array when storage is empty", async () => {
-      const keys = await storage.keys();
+      const keys = await adapter.keys();
       expect(keys).toHaveLength(0);
     });
   });
