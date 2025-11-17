@@ -53,21 +53,29 @@ describe(LocalStorageAdapter.name, () => {
   describe(LocalStorageAdapter.prototype.removeItem.name, () => {
     it("removes a known object by key", async () => {
       const data = { person: "tester" };
-      localStorage.setItem("unittest", JSON.stringify(data));
+      await adapter.setItem("unittest", data);
       await adapter.removeItem("unittest");
 
       expect(localStorage.getItem("unittest")).toBeNull();
     });
 
     it("returns gracefully when trying to remove an unknown key", async () => {
-      const data = { person: "tester" };
-      localStorage.setItem("unittest", JSON.stringify(data));
+      localStorage.setItem("unittest", "other data");
       await adapter.removeItem("bogus");
 
       // Exiting data should remain unaffected.
       const result = localStorage.getItem("unittest");
       expect(result).not.toBeNull();
-      expect(result).toEqual(JSON.stringify(data));
+      expect(result).toEqual("other data");
+    });
+
+    it("keeps local storage and internal memory in sync", async () => {
+      const data = { person: "tester" };
+      await adapter.setItem("unittest", data);
+      await adapter.removeItem("unittest");
+
+      expect(await adapter.getItem("unittest")).toBeNull();
+      expect(localStorage.getItem("unittest")).toBeNull();
     });
   });
 
