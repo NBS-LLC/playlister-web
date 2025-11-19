@@ -43,6 +43,27 @@ describe(LocalStorageAdapter.name, () => {
       expect(await lsa.getItem("b")).toEqual("banana");
       expect(await lsa.getItem("c")).toEqual("cherry");
     });
+
+    it("handles external changes gracefully", async () => {
+      localStorage.setItem("a", "apple");
+      localStorage.setItem("b", "banana");
+      localStorage.setItem("c", "cherry");
+      const lsa = new LocalStorageAdapter(localStorage);
+
+      jest.spyOn(Storage.prototype, "key").mockReturnValueOnce(null);
+      await lsa.init();
+
+      expect(await lsa.keys()).toHaveLength(2);
+      expect(await lsa.getItem("b")).toEqual("banana");
+      expect(await lsa.getItem("c")).toEqual("cherry");
+
+      jest.spyOn(Storage.prototype, "getItem").mockReturnValueOnce(null);
+      await lsa.init();
+
+      expect(await lsa.keys()).toHaveLength(2);
+      expect(await lsa.getItem("b")).toEqual("banana");
+      expect(await lsa.getItem("c")).toEqual("cherry");
+    });
   });
 
   describe(LocalStorageAdapter.prototype.getItem.name, () => {
