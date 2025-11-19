@@ -7,11 +7,11 @@ export class LocalStorageAdapter implements AsyncObjectStorage {
 
   static async create() {
     const lsa = new LocalStorageAdapter(localStorage);
-    await lsa.init();
+    await lsa.sync();
     return lsa;
   }
 
-  async init(): Promise<void> {
+  async sync(): Promise<void> {
     for (let i = 0; i < this.storage.length; i++) {
       const key = this.storage.key(i);
       if (!key) {
