@@ -19,7 +19,7 @@ describe(Cache.name, () => {
     beforeEach(async () => {
       localStorage.clear();
       await createTestData();
-      storage.sync();
+      storage.refresh();
     });
 
     it(Cache.prototype.prune.name, async () => {
