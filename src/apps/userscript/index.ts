@@ -16,19 +16,18 @@ const storage = await LocalStorageAdapter.create();
 const cacheProvider = new Cache(storage);
 const cacheStats = new CacheStats(storage);
 
-cacheProvider.prune().then(async () => {
-  await cacheProvider.enforceQuota();
+await cacheProvider.prune();
+await cacheProvider.enforceQuota();
 
-  console.debug(
-    log.namespace,
-    `Cache count: ${await cacheStats.getNamespaceItemCount()} (namespaced) / ${await cacheStats.getAllItemCount()} (total) items.`,
-  );
+console.debug(
+  log.namespace,
+  `Cache count: ${await cacheStats.getNamespaceItemCount()} (namespaced) / ${await cacheStats.getAllItemCount()} (total) items.`,
+);
 
-  console.debug(
-    log.namespace,
-    `Cache usage: ${await cacheStats.getNamespaceUsageInBytes()} (namespaced) / ${await cacheStats.getAllUsageInBytes()} (total) bytes.`,
-  );
-});
+console.debug(
+  log.namespace,
+  `Cache usage: ${await cacheStats.getNamespaceUsageInBytes()} (namespaced) / ${await cacheStats.getAllUsageInBytes()} (total) bytes.`,
+);
 
 const audioAnalyzer = new AudioAnalyzer(
   new ReccoBeatsAnalyzer(fetch),
