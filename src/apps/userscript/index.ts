@@ -41,12 +41,14 @@ const spotifyWebPage = new SpotifyWebPage();
 
 async function enrichNowPlaying() {
   const trackId = spotifyWebPage.getNowPlayingTrackId();
-  console.log(log.namespace, `Now playing track id: ${trackId}.`);
-
   const enrichedTrack = await audioAnalyzer.getEnrichedTrack(trackId);
-  console.log(log.namespace, enrichedTrack.getHumanReadableString());
+  console.log(
+    log.namespace,
+    "Now playing track:",
+    enrichedTrack.getHumanReadableString(),
+  );
 
-  console.groupCollapsed(log.namespace, "Enriched Track Data");
+  console.groupCollapsed(log.namespace, "Now Playing - Enriched Track Data");
   console.log(enrichedTrack.details);
   console.log(enrichedTrack.features);
   console.groupEnd();
