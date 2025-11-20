@@ -12,7 +12,7 @@ export default {
   output: {
     banner: readFileSync("banner.js", "utf8"),
     file: "dist/playlister.user.js",
-    format: "cjs",
+    format: "es",
   },
   plugins: [
     alias({

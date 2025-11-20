@@ -12,7 +12,7 @@ import { LocalStorageAdapter } from "#lib/storage/LocalStorageAdapter";
 config.appName = "SpotAVibe Lite";
 config.appId = "spotavibe-lite";
 
-const storage = new LocalStorageAdapter(localStorage);
+const storage = await LocalStorageAdapter.create();
 const cacheProvider = new Cache(storage);
 const cacheStats = new CacheStats(storage);
 

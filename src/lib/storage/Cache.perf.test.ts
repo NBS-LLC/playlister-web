@@ -11,14 +11,17 @@ import { CacheStats } from "./CacheStats";
 import { LocalStorageAdapter } from "./LocalStorageAdapter";
 
 config.appId = "perf-test";
-const storage = new LocalStorageAdapter(localStorage);
-const cache = new Cache(storage);
 
 describe(Cache.name, () => {
+  let storage: LocalStorageAdapter;
+  let cache: Cache;
+
   describe.skip("performance", () => {
     beforeEach(async () => {
       localStorage.clear();
-      await createTestData();
+      storage = await LocalStorageAdapter.create();
+      cache = new Cache(storage);
+      await createTestData(cache, storage);
       storage.refresh();
     });
 
@@ -44,7 +47,10 @@ describe(Cache.name, () => {
   });
 });
 
-async function createTestData(): Promise<void> {
+async function createTestData(
+  cache: Cache,
+  storage: LocalStorageAdapter,
+): Promise<void> {
   for (let n = 0; n < 5000; n++) {
     cache.store(n.toString(), "a".repeat(750));
   }

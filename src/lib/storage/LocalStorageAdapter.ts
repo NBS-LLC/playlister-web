@@ -3,7 +3,7 @@ import { AsyncObjectStorage } from "./AsyncObjectStorage";
 export class LocalStorageAdapter implements AsyncObjectStorage {
   private data: Map<string, string> = new Map();
 
-  constructor(private readonly storage: Storage) {}
+  private constructor(private readonly storage: Storage) {}
 
   static async create() {
     const lsa = new LocalStorageAdapter(localStorage);

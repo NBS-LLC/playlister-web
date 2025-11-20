@@ -7,9 +7,9 @@ import { LocalStorageAdapter } from "./LocalStorageAdapter";
 describe(LocalStorageAdapter.name, () => {
   let adapter: LocalStorageAdapter;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     localStorage.clear();
-    adapter = new LocalStorageAdapter(localStorage);
+    adapter = await LocalStorageAdapter.create();
   });
 
   describe("create", () => {
@@ -27,28 +27,28 @@ describe(LocalStorageAdapter.name, () => {
 
   describe(LocalStorageAdapter.prototype.refresh.name, () => {
     it("reads local storage into memory", async () => {
+      const lsa = await LocalStorageAdapter.create();
+      expect(await lsa.keys()).toHaveLength(0);
+
       localStorage.setItem("a", "apple");
       localStorage.setItem("b", "banana");
       localStorage.setItem("c", "cherry");
-
-      const lsa = new LocalStorageAdapter(localStorage);
-      expect(await lsa.keys()).toHaveLength(0);
       await lsa.refresh();
       expect(await lsa.keys()).toHaveLength(3);
 
-      localStorage.clear();
-
       // Items should remain in the adapter's memory.
+      localStorage.clear();
       expect(await lsa.getItem("a")).toEqual("apple");
       expect(await lsa.getItem("b")).toEqual("banana");
       expect(await lsa.getItem("c")).toEqual("cherry");
     });
 
     it("handles external changes gracefully", async () => {
+      const lsa = await LocalStorageAdapter.create();
+
       localStorage.setItem("a", "apple");
       localStorage.setItem("b", "banana");
       localStorage.setItem("c", "cherry");
-      const lsa = new LocalStorageAdapter(localStorage);
 
       jest.spyOn(Storage.prototype, "key").mockReturnValueOnce(null);
       await lsa.refresh();
@@ -147,18 +147,11 @@ describe(LocalStorageAdapter.name, () => {
     });
 
     it("bubbles up errors", async () => {
-      const mockLocalStorage = {
-        setItem: jest.fn(() => {
-          throw new DOMException();
-        }),
-        getItem: jest.fn(),
-        removeItem: jest.fn(),
-        clear: jest.fn(),
-        key: jest.fn(),
-        length: 0,
-      };
+      const adapter = await LocalStorageAdapter.create();
 
-      const adapter = new LocalStorageAdapter(mockLocalStorage);
+      jest.spyOn(Storage.prototype, "setItem").mockImplementationOnce(() => {
+        throw new DOMException();
+      });
 
       await expect(adapter.setItem("key", "value")).rejects.toThrow(
         DOMException,
