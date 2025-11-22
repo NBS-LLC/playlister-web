@@ -1,6 +1,6 @@
 {
-  "name": "spotavibe-lite",
-  "description": "A Userscript that overlays basic DJ information on the Spotify web player.",
+  "name": "spotavibe-lite-userscript",
+  "description": "The SpotAVibe Lite Userscript",
   "author": "Nick Derevjanik",
   "license": "GPL-3.0-only",
   "version": "0.0.0",
@@ -12,7 +12,7 @@
     "compile": "tsc",
     "test": "echo 'warn: no tests defined' && exit 0",
     "dist": "rollup --config",
-    "version": "perl -pi -e s,\\{version\\},${SEMVER:-Development-$(date +%Y%m%d%H%M%S)},g dist/playlister.user.js",
+    "version": "perl -pi -e s,\\{version\\},${SEMVER:-Development-$(date +%Y%m%d%H%M%S)},g dist/spotavibe-lite.user.js",
     "build": "npm-run-all clean format lint compile test dist version"
   }
 }

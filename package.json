@@ -1,9 +1,9 @@
 {
-  "name": "playlister-web",
-  "description": "The Usescript Version of Playlister",
+  "name": "spotavibe-lite",
+  "description": "A Userscript that overlays basic DJ information on the Spotify web player.",
   "author": "Nick Derevjanik",
   "license": "GPL-3.0-only",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "clean": "rimraf dist/",
@@ -12,7 +12,7 @@
     "build:userscript": "npm run --workspace=src/apps/userscript build",
     "dist:userscript": "mkdir -p dist/userscript && cp -r src/apps/userscript/dist/* dist/userscript",
     "package:userscript": "npm-run-all clean:userscript build:userscript dist:userscript",
-    "serve:userscript": "npm run package:userscript && http-server dist/userscript -o /playlister.user.js"
+    "serve:userscript": "npm run package:userscript && http-server dist/userscript -o /spotavibe-lite.user.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
