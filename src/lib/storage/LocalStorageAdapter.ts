@@ -1,10 +1,34 @@
 import { AsyncObjectStorage } from "./AsyncObjectStorage";
 
 export class LocalStorageAdapter implements AsyncObjectStorage {
-  constructor(private readonly storage: Storage) {}
+  private data: Map<string, string> = new Map();
+
+  private constructor(private readonly storage: Storage) {}
+
+  static async create() {
+    const lsa = new LocalStorageAdapter(localStorage);
+    await lsa.refresh();
+    return lsa;
+  }
+
+  async refresh(): Promise<void> {
+    for (let i = 0; i < this.storage.length; i++) {
+      const key = this.storage.key(i);
+      if (!key) {
+        continue;
+      }
+
+      const value = this.storage.getItem(key);
+      if (!value) {
+        continue;
+      }
+
+      this.data.set(key, value);
+    }
+  }
 
   async getItem<T>(key: string): Promise<T | null> {
-    const result = this.storage.getItem(key);
+    const result = this.data.get(key);
     if (!result) {
       return null;
     }
@@ -17,19 +41,18 @@ export class LocalStorageAdapter implements AsyncObjectStorage {
   }
 
   async setItem<T>(key: string, value: T): Promise<T> {
-    this.storage.setItem(key, JSON.stringify(value));
+    const jsonItem = JSON.stringify(value);
+    this.data.set(key, jsonItem);
+    this.storage.setItem(key, jsonItem);
     return value;
   }
 
   async removeItem(key: string): Promise<void> {
+    this.data.delete(key);
     this.storage.removeItem(key);
   }
 
   async keys(): Promise<string[]> {
-    const keys: string[] = [];
-    for (let i = 0; i < this.storage.length; i++) {
-      keys.push(this.storage.key(i)!);
-    }
-    return keys;
+    return Array.from(this.data.keys());
   }
 }
