@@ -34,6 +34,6 @@ jobs:
         run: npm run package:userscript
 
       - name: Release
-        run: gh release create v${{ env.SEMVER }} --generate-notes dist/userscript/playlister.user.js
+        run: gh release create v${{ env.SEMVER }} --generate-notes dist/userscript/spotavibe-lite.user.js
         env:
           GH_TOKEN: ${{ github.token }}

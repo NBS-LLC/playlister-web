@@ -1,6 +1,6 @@
-# Playlister Web
+# SpotAVibe Lite
 
-A Userscript Version of Playlister
+A [Userscript](https://share.google/aimode/9SnOg0rhvgdQ2t5O2) that overlays basic DJ information (bpm, key, camelot notation, etc) on the Spotify web player.
 
 ## Prerequisites
 

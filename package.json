@@ -1,9 +1,9 @@
 {
-  "name": "playlister-web",
-  "description": "The Usescript Version of Playlister",
+  "name": "spotavibe-lite",
+  "description": "A Userscript that overlays basic DJ information on the Spotify web player.",
   "author": "Nick Derevjanik",
   "license": "GPL-3.0-only",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "clean": "rimraf dist/",
@@ -12,25 +12,25 @@
     "build:userscript": "npm run --workspace=src/apps/userscript build",
     "dist:userscript": "mkdir -p dist/userscript && cp -r src/apps/userscript/dist/* dist/userscript",
     "package:userscript": "npm-run-all clean:userscript build:userscript dist:userscript",
-    "serve:userscript": "npm run package:userscript && http-server dist/userscript -o /playlister.user.js"
+    "serve:userscript": "npm run package:userscript && http-server dist/userscript -o /spotavibe-lite.user.js"
   },
   "devDependencies": {
-    "@eslint/js": "^9.34.0",
-    "@jest/globals": "^30.1.2",
-    "@rollup/plugin-alias": "^5.1.1",
-    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@eslint/js": "^9.39.1",
+    "@jest/globals": "^30.2.0",
+    "@rollup/plugin-alias": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@types/jest": "^30.0.0",
-    "eslint": "^9.34.0",
+    "eslint": "^9.39.1",
     "http-server": "^14.1.1",
-    "jest": "^30.1.3",
-    "jest-environment-jsdom": "^30.1.2",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.6.2",
-    "rimraf": "^6.0.1",
-    "rollup": "^4.50.0",
-    "ts-jest": "^29.4.1",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.42.0"
+    "rimraf": "^6.1.2",
+    "rollup": "^4.53.3",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.47.0"
   },
   "workspaces": [
     "src/lib",
