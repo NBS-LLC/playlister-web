@@ -27,9 +27,10 @@ export class Cache implements CacheProvider {
       return null;
     }
 
-    result.lastAccessedDateUtc = new Date().toISOString();
-    await this.storage.setItem(this.getKey(id), result);
-    return result;
+    const copy = structuredClone(result);
+    copy.lastAccessedDateUtc = new Date().toISOString();
+    await this.storage.setItem(this.getKey(id), copy);
+    return structuredClone(copy);
   }
 
   async store<T>(id: string, data: T): Promise<void> {
