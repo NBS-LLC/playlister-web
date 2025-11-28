@@ -83,6 +83,18 @@ describe(Cache.name, () => {
 
       expect(result).toEqual(updatedItem);
     });
+
+    it("returns a copy", async () => {
+      const id = "valid-id";
+      await t.givenValidItem(id, "original");
+
+      const result1 = await cache.find(id);
+      result1!.data = "updated";
+
+      const result2 = await cache.find(id);
+      expect(result2?.data).toEqual("original");
+      expect(result2).not.toBe(result1);
+    });
   });
 
   describe(Cache.prototype.store.name, () => {
@@ -371,12 +383,12 @@ describe(Cache.name, () => {
         "additional-data",
       );
 
-      expect(await cache.find(id1)).toEqual(validRecent1);
-      expect(await cache.find(id2)).toEqual(validOld2);
-      expect(await cache.find(id3)).toEqual(validRecent3);
-      expect(await cache.find(id6)).toEqual(validRecent6);
-      expect(await cache.find(id7)).toEqual(validOld7);
-      expect(await cache.find(id8)).toEqual(validRecent8);
+      expect((await cache.find(id1))?.data).toEqual(validRecent1.data);
+      expect((await cache.find(id2))?.data).toEqual(validOld2.data);
+      expect((await cache.find(id3))?.data).toEqual(validRecent3.data);
+      expect((await cache.find(id6))?.data).toEqual(validRecent6.data);
+      expect((await cache.find(id7))?.data).toEqual(validOld7.data);
+      expect((await cache.find(id8))?.data).toEqual(validRecent8.data);
 
       expect(await storage.getItem(getKey(id4))).toBeNull(); // expired
       expect(await storage.getItem(getKey(id5))).toBeNull(); // expired
@@ -403,10 +415,10 @@ describe(Cache.name, () => {
         "additional-data",
       );
 
-      expect(await cache.find(id1)).toEqual(validRecent1);
-      expect(await cache.find(id3)).toEqual(validRecent3);
-      expect(await cache.find(id6)).toEqual(validRecent6);
-      expect(await cache.find(id8)).toEqual(validRecent8);
+      expect((await cache.find(id1))?.data).toEqual(validRecent1.data);
+      expect((await cache.find(id3))?.data).toEqual(validRecent3.data);
+      expect((await cache.find(id6))?.data).toEqual(validRecent6.data);
+      expect((await cache.find(id8))?.data).toEqual(validRecent8.data);
 
       expect(await storage.getItem(getKey(id2))).toBeNull(); // old
       expect(await storage.getItem(getKey(id4))).toBeNull(); // expired
