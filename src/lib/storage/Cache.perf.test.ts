@@ -33,23 +33,31 @@ describe(Cache.name, () => {
     it(Cache.prototype.prune.name, async () => {
       jest.spyOn(console, "debug").mockImplementation();
 
+      const startMem = process.memoryUsage();
       const startTime = performance.now();
       await cache.prune();
       const endTime = performance.now();
+      const endMem = process.memoryUsage();
 
       const duration = endTime - startTime;
-      console.log(duration);
+      const memory = endMem.heapUsed - startMem.heapUsed;
+      console.log("duration:", duration, "ms");
+      console.log("memory:", memory / 1024 / 1024, "MB");
     });
 
     it(Cache.prototype.enforceQuota.name, async () => {
       jest.spyOn(console, "debug").mockImplementation();
 
+      const startMem = process.memoryUsage();
       const startTime = performance.now();
       await cache.enforceQuota();
       const endTime = performance.now();
+      const endMem = process.memoryUsage();
 
       const duration = endTime - startTime;
-      console.log(duration);
+      const memory = endMem.heapUsed - startMem.heapUsed;
+      console.log("duration:", duration, "ms");
+      console.log("memory:", memory / 1024 / 1024, "MB");
     });
   });
 });
