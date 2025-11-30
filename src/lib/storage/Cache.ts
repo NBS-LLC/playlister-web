@@ -104,6 +104,8 @@ export class Cache implements CacheProvider {
   }
 
   async prune(): Promise<void> {
+    const MAX_CONCURRENCY = 10;
+
     const toBePruned: string[] = [];
     const cachedItems = await this.getCachedItems();
     for (const cachedItem of cachedItems) {
@@ -112,10 +114,26 @@ export class Cache implements CacheProvider {
       }
     }
 
-    const promises = toBePruned.map(async (key) => {
-      await this.storage.removeItem(key);
-      console.debug(log.namespace, `Pruned: ${key} from cache.`);
+    const batches: string[][] = Array.from(
+      { length: MAX_CONCURRENCY },
+      () => [],
+    );
+
+    for (let i = 0; i < toBePruned.length; i++) {
+      batches[i % MAX_CONCURRENCY].push(toBePruned[i]);
+    }
+
+    const promises = batches.map(async (batch) => {
+      for (const key of batch) {
+        await this.storage.removeItem(key);
+        console.debug(log.namespace, `Pruned: ${key} from cache.`);
+      }
     });
+
+    // const promises = toBePruned.map(async (key) => {
+    //   await this.storage.removeItem(key);
+    //   console.debug(log.namespace, `Pruned: ${key} from cache.`);
+    // });
 
     await Promise.allSettled(promises);
   }
