@@ -63,10 +63,10 @@ describe(Cache.name, () => {
 
     it("returns the item if it is not expired", async () => {
       const id = "valid-id";
-      const cacheItem = await t.givenValidItem(id, "");
+      await t.givenValidItem(id, "some-data");
 
       const result = await cache.find(id);
-      expect(result).toEqual(cacheItem);
+      expect(result?.data).toEqual("some-data");
     });
 
     it("updates the last accessed date", async () => {

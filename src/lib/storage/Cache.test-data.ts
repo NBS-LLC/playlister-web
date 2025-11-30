@@ -1,8 +1,9 @@
+import { AsyncObjectStorage } from "./AsyncObjectStorage";
 import { CacheItem } from "./CacheItem";
 
 export type TestCacheItem = CacheItem<unknown>;
 
-export class MockAsyncObjectStorage {
+export class MockAsyncObjectStorage implements AsyncObjectStorage {
   private readonly storage = new Map<string, unknown>();
 
   async getItem<T>(key: string): Promise<T | null> {
@@ -66,7 +67,7 @@ export class CacheItemBuilder<T> {
 
 export class CacheTestManager {
   constructor(
-    private readonly storage: MockAsyncObjectStorage,
+    private readonly storage: AsyncObjectStorage,
     private readonly config: { appId: string },
   ) {}
 

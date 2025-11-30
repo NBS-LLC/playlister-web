@@ -104,21 +104,20 @@ export class Cache implements CacheProvider {
   }
 
   async prune(): Promise<void> {
-    const keys = await this.storage.keys();
-
-    const promises = keys.map(async (key) => {
-      if (!key.startsWith(config.namespace)) {
-        return;
+    const toBePruned: string[] = [];
+    const cachedItems = await this.getCachedItems();
+    for (const cachedItem of cachedItems) {
+      if (new Date() >= new Date(cachedItem.expirationDateUtc)) {
+        toBePruned.push(cachedItem.key);
       }
+    }
 
-      const cacheItem = await this.storage.getItem<CacheItem<unknown>>(key);
-      if (cacheItem && new Date() >= new Date(cacheItem.expirationDateUtc)) {
-        await this.storage.removeItem(key);
-        console.debug(log.namespace, `Pruned: ${key} from cache.`);
-      }
+    const promises = toBePruned.map(async (key) => {
+      await this.storage.removeItem(key);
+      console.debug(log.namespace, `Pruned: ${key} from cache.`);
     });
 
-    await Promise.all(promises);
+    await Promise.allSettled(promises);
   }
 
   private getExpirationDateUtc(offsetInMs: number): string {
