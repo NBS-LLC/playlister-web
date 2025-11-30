@@ -5,8 +5,10 @@
 import { TextDecoder, TextEncoder } from "util";
 Object.assign(global, { TextDecoder, TextEncoder });
 
+import { randomInt } from "crypto";
 import { config } from "../config";
 import { Cache } from "./Cache";
+import { CacheTestManager } from "./Cache.test-data";
 import { CacheStats } from "./CacheStats";
 import { LocalStorageAdapter } from "./LocalStorageAdapter";
 
@@ -21,11 +23,16 @@ describe(Cache.name, () => {
       localStorage.clear();
       storage = await LocalStorageAdapter.create();
       cache = new Cache(storage);
-      await createTestData(cache, storage);
-      storage.refresh();
+
+      await createTestData(storage, 80);
+
+      const cacheStats = new CacheStats(storage);
+      console.debug(await cacheStats.getAllUsageInBytes());
     });
 
     it(Cache.prototype.prune.name, async () => {
+      jest.spyOn(console, "debug").mockImplementation();
+
       const startTime = performance.now();
       await cache.prune();
       const endTime = performance.now();
@@ -48,13 +55,18 @@ describe(Cache.name, () => {
 });
 
 async function createTestData(
-  cache: Cache,
   storage: LocalStorageAdapter,
+  percentExpired = 100,
 ): Promise<void> {
+  const t = new CacheTestManager(storage, config);
+
   for (let n = 0; n < 5000; n++) {
-    cache.store(n.toString(), "a".repeat(750));
+    if (randomInt(100) <= percentExpired) {
+      t.givenExpiredItem(n.toString(), "a".repeat(750));
+    } else {
+      t.givenValidItem(n.toString(), "a".repeat(750));
+    }
   }
 
-  const cacheStats = new CacheStats(storage);
-  console.debug(await cacheStats.getAllUsageInBytes());
+  storage.refresh();
 }
