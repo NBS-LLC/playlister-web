@@ -1,3 +1,4 @@
+import { LibError } from "../error";
 import { log } from "../log";
 import { CacheProvider } from "../storage/CacheProvider";
 import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
@@ -5,9 +6,9 @@ import { EnrichedTrack } from "./EnrichedTrack";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
 
-export class GetTrackDetailsError extends Error {}
-export class GetTrackFeaturesError extends Error {}
-export class GetEnrichedTrackError extends Error {}
+export class GetTrackDetailsError extends LibError {}
+export class GetTrackFeaturesError extends LibError {}
+export class GetEnrichedTrackError extends LibError {}
 
 export class AudioAnalyzer {
   constructor(
