@@ -1,5 +1,7 @@
 const MB = 1024 * 1024;
 
+export class ConfigError extends Error {}
+
 class Config {
   private _appName = "";
   private _appId = "";
@@ -9,7 +11,7 @@ class Config {
 
   get appName() {
     if (!this._appName) {
-      throw new Error("appName not set");
+      throw new ConfigError("appName not set");
     }
 
     return this._appName;
@@ -21,7 +23,7 @@ class Config {
 
   get appId() {
     if (!this._appId) {
-      throw new Error("appId not set");
+      throw new ConfigError("appId not set");
     }
 
     return this._appId;
