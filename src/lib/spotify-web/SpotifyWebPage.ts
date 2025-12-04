@@ -1,7 +1,8 @@
 import { config } from "../config";
+import { LibError } from "../error";
 
-export class ElementNotFoundError extends Error {}
-export class ParseTrackIdError extends Error {}
+export class ElementNotFoundError extends LibError {}
+export class ParseTrackIdError extends LibError {}
 
 export class SpotifyWebPage {
   readonly nowPlayingTrack =
