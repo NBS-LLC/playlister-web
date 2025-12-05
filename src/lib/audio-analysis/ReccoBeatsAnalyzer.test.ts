@@ -1,14 +1,41 @@
+import { config } from "../config";
 import { _createMockEnrichedTracks } from "./EnrichedTrack.test-data";
-import { ReccoBeatsAnalyzer } from "./ReccoBeatsAnalyzer";
+import {
+  FetchMultipleTrackDetailsError,
+  FetchMultipleTrackFeaturesError,
+  ReccoBeatsAnalyzer,
+} from "./ReccoBeatsAnalyzer";
+
+type MockHttpClient = (
+  input: RequestInfo,
+  init?: RequestInit,
+) => Promise<Response>;
+
+function createMockHttpErrorResponse(
+  status: number,
+  statusText: string,
+): Response {
+  return {
+    ok: false,
+    status,
+    statusText,
+    json: jest.fn().mockResolvedValue({}),
+  } as unknown as Response;
+}
 
 describe(ReccoBeatsAnalyzer.name, () => {
+  beforeEach(() => {
+    config.appId = "test-app";
+    config.appName = "TestApp";
+  });
+
   describe(ReccoBeatsAnalyzer.prototype.findTrackDetails.name, () => {
     it("returns the details of a known track", async () => {
       const mockEnrichedTrack = _createMockEnrichedTracks()[0];
       const mockId = mockEnrichedTrack.id;
       const mockDetails = mockEnrichedTrack.details;
 
-      const mockHttpClient = jest
+      const mockHttpClient: MockHttpClient = jest
         .fn()
         .mockResolvedValue(Response.json({ content: [mockDetails] }));
 
@@ -23,13 +50,24 @@ describe(ReccoBeatsAnalyzer.name, () => {
     });
 
     it("returns null when the track is not found", async () => {
-      const mockHttpClient = jest
+      const mockHttpClient: MockHttpClient = jest
         .fn()
         .mockResolvedValue(Response.json({ content: [] }));
 
       const audioAnalysis = new ReccoBeatsAnalyzer(mockHttpClient);
       const result = await audioAnalysis.findTrackDetails("abcd1234");
       expect(result).toBeNull();
+    });
+
+    it("throws when a server error is encountered", async () => {
+      const mockHttpClient: MockHttpClient = jest
+        .fn()
+        .mockResolvedValue(createMockHttpErrorResponse(500, "Server Error"));
+
+      const audioAnalysis = new ReccoBeatsAnalyzer(mockHttpClient);
+      await expect(async () => {
+        await audioAnalysis.findTrackDetails("abcd1234");
+      }).rejects.toThrow(FetchMultipleTrackDetailsError);
     });
   });
 
@@ -39,7 +77,7 @@ describe(ReccoBeatsAnalyzer.name, () => {
       const mockId = mockEnrichedTrack.id;
       const mockFeatures = mockEnrichedTrack.features;
 
-      const mockHttpClient = jest
+      const mockHttpClient: MockHttpClient = jest
         .fn()
         .mockResolvedValue(Response.json({ content: [mockFeatures] }));
 
@@ -54,13 +92,24 @@ describe(ReccoBeatsAnalyzer.name, () => {
     });
 
     it("returns null when the track is not found", async () => {
-      const mockHttpClient = jest
+      const mockHttpClient: MockHttpClient = jest
         .fn()
         .mockResolvedValue(Response.json({ content: [] }));
 
       const audioAnalysis = new ReccoBeatsAnalyzer(mockHttpClient);
       const result = await audioAnalysis.findTrackFeatures("abcd1234");
       expect(result).toBeNull();
+    });
+
+    it("throws when a server error is encountered", async () => {
+      const mockHttpClient: MockHttpClient = jest
+        .fn()
+        .mockResolvedValue(createMockHttpErrorResponse(500, "Server Error"));
+
+      const audioAnalysis = new ReccoBeatsAnalyzer(mockHttpClient);
+      await expect(async () => {
+        await audioAnalysis.findTrackFeatures("abcd1234");
+      }).rejects.toThrow(FetchMultipleTrackFeaturesError);
     });
   });
 });

@@ -1,7 +1,10 @@
-import { log } from "../log";
+import { LibError } from "../error";
 import { AudioAnalysisProvider } from "./AudioAnalysisProvider";
 import { TrackDetails } from "./TrackDetails";
 import { TrackFeatures } from "./TrackFeatures";
+
+export class FetchMultipleTrackDetailsError extends LibError {}
+export class FetchMultipleTrackFeaturesError extends LibError {}
 
 export class ReccoBeatsAnalyzer implements AudioAnalysisProvider {
   private readonly baseUrl = "https://api.reccobeats.com/v1";
@@ -29,9 +32,9 @@ export class ReccoBeatsAnalyzer implements AudioAnalysisProvider {
     const response = await this.httpClient(url);
 
     if (!response.ok) {
-      console.error(log.namespace, response);
-      throw new Error(
+      throw new FetchMultipleTrackDetailsError(
         "An error occurred trying to fetch multiple track details.",
+        { cause: response },
       );
     }
 
@@ -46,9 +49,9 @@ export class ReccoBeatsAnalyzer implements AudioAnalysisProvider {
     const response = await this.httpClient(url);
 
     if (!response.ok) {
-      console.error(log.namespace, response);
-      throw new Error(
+      throw new FetchMultipleTrackFeaturesError(
         "An error occurred trying to fetch multiple track features.",
+        { cause: response },
       );
     }
 
